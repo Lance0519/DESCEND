@@ -115,13 +115,21 @@ Add **each** row (Environment: Production and Preview is fine):
 |------------------|-------------------------|
 | `SECRET_KEY` | Make one up: long random string (e.g. password generator, 32+ chars) |
 | `FLASK_ENV` | `production` |
-| `FRONTEND_ORIGIN` | After Netlify exists: `https://YOUR-SITE.netlify.app` — for first deploy you can use `http://localhost:5173` and update later |
+| `FRONTEND_ORIGIN` | `https://descendt2dm.netlify.app` (no trailing slash) |
 | `SUPABASE_URL` | Supabase **Project URL** (`https://xxxx.supabase.co`) |
 | `SUPABASE_JWT_SECRET` | Supabase **JWT Secret** |
 | `SUPABASE_SERVICE_ROLE_KEY` | Supabase **service_role** key (optional) |
 | `SQLALCHEMY_DATABASE_URI` | Supabase Database **URI** (with your DB password filled in). If deploy fails on DB, you can omit this for a temporary SQLite fallback only on local machines — production should use Postgres. |
 
 **Do not add:** `GOOGLE_TTS_API_KEY`, Google OAuth Client ID/Secret.
+
+**Live URLs for this project**
+
+| Piece | URL |
+|-------|-----|
+| Frontend (Netlify) | https://descendt2dm.netlify.app |
+| Backend (Vercel) | https://descendt2dm.vercel.app |
+| Health check | https://descendt2dm.vercel.app/api/health |
 
 ### B3. Deploy and **what to copy** from Vercel
 
@@ -168,7 +176,7 @@ Site settings → **Environment variables** → Add:
 
 | Key (exact name) | Value — where to get it |
 |------------------|-------------------------|
-| `VITE_API_BASE_URL` | Vercel URL from B3, e.g. `https://descend-xxxxx.vercel.app` (**no** `/` at the end) |
+| `VITE_API_BASE_URL` | `https://descendt2dm.vercel.app` (**no** `/` at the end) |
 | `VITE_SUPABASE_URL` | Supabase **Project URL** |
 | `VITE_SUPABASE_ANON_KEY` | Supabase **anon public** key only |
 | `VITE_ENABLE_GOOGLE_SIGNIN` | Leave unset until Section G; then set `true` |
