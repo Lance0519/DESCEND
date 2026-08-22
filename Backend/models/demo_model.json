@@ -1,0 +1,961 @@
+{
+  "modelAlgorithm": "extra_trees",
+  "modelType": "extra_trees_classifier",
+  "modelConfig": {
+    "n_estimators": 400,
+    "max_depth": 6,
+    "min_samples_leaf": 3,
+    "class_weight": "balanced",
+    "random_state": 42
+  },
+  "featureColumnsUsed": [
+    "age",
+    "user_is_male",
+    "bmi",
+    "hypertension_status",
+    "physical_activity_score",
+    "parent_has_t2dm",
+    "siblings_diabetes_count",
+    "aunts_uncles_score",
+    "weightedFamilyScore",
+    "lineageRiskIndex",
+    "propagationProbability",
+    "metabolic_risk_index",
+    "hereditary_load_index",
+    "activity_metabolic_index"
+  ],
+  "featureImportances": {
+    "age": 0.023898,
+    "user_is_male": 0.007574,
+    "bmi": 0.014917,
+    "hypertension_status": 0.030833,
+    "physical_activity_score": 0.010023,
+    "parent_has_t2dm": 0.284584,
+    "siblings_diabetes_count": 0.061581,
+    "aunts_uncles_score": 0.053893,
+    "weightedFamilyScore": 0.111925,
+    "lineageRiskIndex": 0.099806,
+    "propagationProbability": 0.131913,
+    "metabolic_risk_index": 0.022415,
+    "hereditary_load_index": 0.138909,
+    "activity_metabolic_index": 0.007729
+  },
+  "preprocessing": {
+    "means": {
+      "age": 45.106667,
+      "user_is_male": 0.52,
+      "bmi": 23.574427,
+      "hypertension_status": 0.378933,
+      "physical_activity_score": 0.589333,
+      "parent_has_t2dm": 0.509733,
+      "siblings_diabetes_count": 0.885333,
+      "aunts_uncles_score": 0.613333,
+      "weightedFamilyScore": 1.436027,
+      "lineageRiskIndex": 1.162747,
+      "propagationProbability": 0.265297,
+      "metabolic_risk_index": 44.982976,
+      "hereditary_load_index": 0.905484,
+      "activity_metabolic_index": 0.772
+    },
+    "stds": {
+      "age": 15.364178,
+      "user_is_male": 0.4996,
+      "bmi": 4.443282,
+      "hypertension_status": 0.468582,
+      "physical_activity_score": 0.62983,
+      "parent_has_t2dm": 0.494414,
+      "siblings_diabetes_count": 1.230793,
+      "aunts_uncles_score": 0.486986,
+      "weightedFamilyScore": 1.234185,
+      "lineageRiskIndex": 0.985959,
+      "propagationProbability": 0.204716,
+      "metabolic_risk_index": 19.475987,
+      "hereditary_load_index": 0.94862,
+      "activity_metabolic_index": 0.921927
+    }
+  },
+  "trainingConfig": {
+    "classWeightMode": "balanced",
+    "rowBalanceMode": "none",
+    "pipelineSteps": [
+      "StandardScaler",
+      "ExtraTreesClassifier"
+    ],
+    "preprocessing": "StandardScaler fit on training data only (fold-local fit_transform)",
+    "crossFoldLeakageControl": "fold-local fit_transform on train only; grouped splits when multi-row groups exist",
+    "algorithmNote": "Tree ensemble captures nonlinearities; monitor fold variability on small datasets."
+  },
+  "metadata": {
+    "source": "extra-trees-refactored",
+    "modelAlgorithm": "extra_trees",
+    "modelType": "extra_trees_classifier",
+    "modelConfig": {
+      "n_estimators": 400,
+      "max_depth": 6,
+      "min_samples_leaf": 3,
+      "class_weight": "balanced",
+      "random_state": 42
+    },
+    "hyperparameterTuning": {
+      "enabled": false,
+      "innerCvFolds": null,
+      "selectedOverrides": {},
+      "scoring": "average_precision",
+      "note": null
+    },
+    "trainedAt": "2026-05-22T00:53:42.234581+00:00",
+    "datasetRows": 375,
+    "cvTrainRows": 300,
+    "cvTestRows": 75,
+    "holdoutTestSize": 0.2,
+    "evaluationMethod": "5-fold_stratifiedkfold_shuffle",
+    "splitStrategy": "stratified-group-kfold-random-seed-42",
+    "evaluationStatus": "evaluated_with_cv_and_holdout",
+    "trainingBalanceMode": "none",
+    "thresholdStrategy": "f1",
+    "minRecallFloor": 0.65,
+    "minPrecisionFloor": 0.25,
+    "cvRepeats": 1,
+    "requiredColumns": [
+      "age",
+      "user_is_male",
+      "bmi",
+      "hypertension_status",
+      "physical_activity_score",
+      "parent_has_t2dm",
+      "siblings_diabetes_count",
+      "aunts_uncles_score",
+      "weightedFamilyScore",
+      "lineageRiskIndex",
+      "propagationProbability",
+      "metabolic_risk_index",
+      "hereditary_load_index",
+      "activity_metabolic_index"
+    ],
+    "targetColumn": "outcome",
+    "cvMetrics": {
+      "accuracy": 0.832,
+      "precision": 0.7519,
+      "recall": 0.8204,
+      "f1Score": 0.7822,
+      "specificity": 0.839,
+      "rocAuc": 0.913,
+      "prAuc": 0.8378,
+      "brierScore": 0.1189
+    },
+    "cvMetricsStd": {
+      "accuracy": 0.0181,
+      "precision": 0.0256,
+      "recall": 0.0744,
+      "f1Score": 0.033,
+      "specificity": 0.0317,
+      "rocAuc": 0.0059,
+      "prAuc": 0.0526,
+      "brierScore": 0.0069
+    },
+    "cvMetricsTraining": {
+      "accuracy": 0.91,
+      "precision": 0.846,
+      "recall": 0.9263,
+      "f1Score": 0.8841,
+      "specificity": 0.9004,
+      "rocAuc": 0.9651,
+      "prAuc": 0.9427,
+      "brierScore": 0.0851
+    },
+    "cvOverfitGap": {
+      "accuracy": 0.078,
+      "precision": 0.0941,
+      "recall": 0.1059,
+      "f1Score": 0.1019,
+      "specificity": 0.0614,
+      "rocAuc": 0.0521,
+      "prAuc": 0.1049,
+      "brierScore": -0.0338
+    },
+    "cvFoldDetails": [
+      {
+        "repeat": 1,
+        "fold": 1,
+        "globalFold": 1,
+        "trainSize": 300,
+        "trainSizeBeforeBalance": 300,
+        "evalSize": 75,
+        "trainGroupCount": 300,
+        "evalGroupCount": 75,
+        "groupOverlapCount": 0,
+        "optimizedThreshold": 0.585,
+        "metrics": {
+          "accuracy": 0.84,
+          "precision": 0.7419,
+          "recall": 0.8519,
+          "f1Score": 0.7931,
+          "specificity": 0.8333,
+          "rocAuc": 0.9082,
+          "prAuc": 0.7479,
+          "brierScore": 0.1145,
+          "truePositives": 23,
+          "trueNegatives": 40,
+          "falsePositives": 8,
+          "falseNegatives": 4,
+          "positivesInSet": 27,
+          "negativesInSet": 48,
+          "threshold": 0.585
+        },
+        "trainMetrics": {
+          "accuracy": 0.9167,
+          "precision": 0.8655,
+          "recall": 0.9196,
+          "f1Score": 0.8918,
+          "specificity": 0.9149,
+          "rocAuc": 0.9701,
+          "prAuc": 0.9549,
+          "brierScore": 0.0812,
+          "truePositives": 103,
+          "trueNegatives": 172,
+          "falsePositives": 16,
+          "falseNegatives": 9,
+          "positivesInSet": 112,
+          "negativesInSet": 188,
+          "threshold": 0.585
+        },
+        "overfitGap": {
+          "accuracy": 0.0767,
+          "precision": 0.1236,
+          "recall": 0.0677,
+          "f1Score": 0.0987,
+          "rocAuc": 0.0619
+        },
+        "consistency": {
+          "f1FromFormula": 0.7931,
+          "f1Reported": 0.7931,
+          "f1Difference": 4e-06
+        }
+      },
+      {
+        "repeat": 1,
+        "fold": 2,
+        "globalFold": 2,
+        "trainSize": 300,
+        "trainSizeBeforeBalance": 300,
+        "evalSize": 75,
+        "trainGroupCount": 300,
+        "evalGroupCount": 75,
+        "groupOverlapCount": 0,
+        "optimizedThreshold": 0.61,
+        "metrics": {
+          "accuracy": 0.8267,
+          "precision": 0.7143,
+          "recall": 0.8929,
+          "f1Score": 0.7937,
+          "specificity": 0.7872,
+          "rocAuc": 0.9058,
+          "prAuc": 0.8185,
+          "brierScore": 0.1319,
+          "truePositives": 25,
+          "trueNegatives": 37,
+          "falsePositives": 10,
+          "falseNegatives": 3,
+          "positivesInSet": 28,
+          "negativesInSet": 47,
+          "threshold": 0.61
+        },
+        "trainMetrics": {
+          "accuracy": 0.9133,
+          "precision": 0.8455,
+          "recall": 0.9369,
+          "f1Score": 0.8889,
+          "specificity": 0.8995,
+          "rocAuc": 0.9666,
+          "prAuc": 0.9458,
+          "brierScore": 0.0839,
+          "truePositives": 104,
+          "trueNegatives": 170,
+          "falsePositives": 19,
+          "falseNegatives": 7,
+          "positivesInSet": 111,
+          "negativesInSet": 189,
+          "threshold": 0.61
+        },
+        "overfitGap": {
+          "accuracy": 0.0866,
+          "precision": 0.1312,
+          "recall": 0.044,
+          "f1Score": 0.0952,
+          "rocAuc": 0.0608
+        },
+        "consistency": {
+          "f1FromFormula": 0.7937,
+          "f1Reported": 0.7937,
+          "f1Difference": 2.3e-05
+        }
+      },
+      {
+        "repeat": 1,
+        "fold": 3,
+        "globalFold": 3,
+        "trainSize": 300,
+        "trainSizeBeforeBalance": 300,
+        "evalSize": 75,
+        "trainGroupCount": 300,
+        "evalGroupCount": 75,
+        "groupOverlapCount": 0,
+        "optimizedThreshold": 0.639532,
+        "metrics": {
+          "accuracy": 0.8,
+          "precision": 0.76,
+          "recall": 0.6786,
+          "f1Score": 0.717,
+          "specificity": 0.8723,
+          "rocAuc": 0.9195,
+          "prAuc": 0.8704,
+          "brierScore": 0.1161,
+          "truePositives": 19,
+          "trueNegatives": 41,
+          "falsePositives": 6,
+          "falseNegatives": 9,
+          "positivesInSet": 28,
+          "negativesInSet": 47,
+          "threshold": 0.639532
+        },
+        "trainMetrics": {
+          "accuracy": 0.9133,
+          "precision": 0.8632,
+          "recall": 0.9099,
+          "f1Score": 0.886,
+          "specificity": 0.9153,
+          "rocAuc": 0.9604,
+          "prAuc": 0.9346,
+          "brierScore": 0.0882,
+          "truePositives": 101,
+          "trueNegatives": 173,
+          "falsePositives": 16,
+          "falseNegatives": 10,
+          "positivesInSet": 111,
+          "negativesInSet": 189,
+          "threshold": 0.639532
+        },
+        "overfitGap": {
+          "accuracy": 0.1133,
+          "precision": 0.1032,
+          "recall": 0.2313,
+          "f1Score": 0.169,
+          "rocAuc": 0.0409
+        },
+        "consistency": {
+          "f1FromFormula": 0.717,
+          "f1Reported": 0.717,
+          "f1Difference": 3e-06
+        }
+      },
+      {
+        "repeat": 1,
+        "fold": 4,
+        "globalFold": 4,
+        "trainSize": 300,
+        "trainSizeBeforeBalance": 300,
+        "evalSize": 75,
+        "trainGroupCount": 300,
+        "evalGroupCount": 75,
+        "groupOverlapCount": 0,
+        "optimizedThreshold": 0.66,
+        "metrics": {
+          "accuracy": 0.84,
+          "precision": 0.75,
+          "recall": 0.8571,
+          "f1Score": 0.8,
+          "specificity": 0.8298,
+          "rocAuc": 0.9202,
+          "prAuc": 0.9025,
+          "brierScore": 0.1195,
+          "truePositives": 24,
+          "trueNegatives": 39,
+          "falsePositives": 8,
+          "falseNegatives": 4,
+          "positivesInSet": 28,
+          "negativesInSet": 47,
+          "threshold": 0.66
+        },
+        "trainMetrics": {
+          "accuracy": 0.8967,
+          "precision": 0.8279,
+          "recall": 0.9099,
+          "f1Score": 0.867,
+          "specificity": 0.8889,
+          "rocAuc": 0.9655,
+          "prAuc": 0.942,
+          "brierScore": 0.0876,
+          "truePositives": 101,
+          "trueNegatives": 168,
+          "falsePositives": 21,
+          "falseNegatives": 10,
+          "positivesInSet": 111,
+          "negativesInSet": 189,
+          "threshold": 0.66
+        },
+        "overfitGap": {
+          "accuracy": 0.0567,
+          "precision": 0.0779,
+          "recall": 0.0528,
+          "f1Score": 0.067,
+          "rocAuc": 0.0453
+        },
+        "consistency": {
+          "f1FromFormula": 0.8,
+          "f1Reported": 0.8,
+          "f1Difference": 1.9e-05
+        }
+      },
+      {
+        "repeat": 1,
+        "fold": 5,
+        "globalFold": 5,
+        "trainSize": 300,
+        "trainSizeBeforeBalance": 300,
+        "evalSize": 75,
+        "trainGroupCount": 300,
+        "evalGroupCount": 75,
+        "groupOverlapCount": 0,
+        "optimizedThreshold": 0.557296,
+        "metrics": {
+          "accuracy": 0.8533,
+          "precision": 0.7931,
+          "recall": 0.8214,
+          "f1Score": 0.807,
+          "specificity": 0.8723,
+          "rocAuc": 0.9111,
+          "prAuc": 0.8497,
+          "brierScore": 0.1124,
+          "truePositives": 23,
+          "trueNegatives": 41,
+          "falsePositives": 6,
+          "falseNegatives": 5,
+          "positivesInSet": 28,
+          "negativesInSet": 47,
+          "threshold": 0.557296
+        },
+        "trainMetrics": {
+          "accuracy": 0.91,
+          "precision": 0.8281,
+          "recall": 0.955,
+          "f1Score": 0.887,
+          "specificity": 0.8836,
+          "rocAuc": 0.963,
+          "prAuc": 0.9362,
+          "brierScore": 0.0846,
+          "truePositives": 106,
+          "trueNegatives": 167,
+          "falsePositives": 22,
+          "falseNegatives": 5,
+          "positivesInSet": 111,
+          "negativesInSet": 189,
+          "threshold": 0.557296
+        },
+        "overfitGap": {
+          "accuracy": 0.0567,
+          "precision": 0.035,
+          "recall": 0.1336,
+          "f1Score": 0.08,
+          "rocAuc": 0.0519
+        },
+        "consistency": {
+          "f1FromFormula": 0.807,
+          "f1Reported": 0.807,
+          "f1Difference": 2e-06
+        }
+      }
+    ],
+    "cvMetricConfidenceIntervals95": {
+      "accuracy": {
+        "ci95Low": 0.8162,
+        "ci95High": 0.8478
+      },
+      "precision": {
+        "ci95Low": 0.7294,
+        "ci95High": 0.7743
+      },
+      "recall": {
+        "ci95Low": 0.7551,
+        "ci95High": 0.8856
+      },
+      "f1Score": {
+        "ci95Low": 0.7533,
+        "ci95High": 0.8111
+      },
+      "specificity": {
+        "ci95Low": 0.8112,
+        "ci95High": 0.8667
+      },
+      "rocAuc": {
+        "ci95Low": 0.9078,
+        "ci95High": 0.9181
+      },
+      "prAuc": {
+        "ci95Low": 0.7917,
+        "ci95High": 0.8839
+      },
+      "brierScore": {
+        "ci95Low": 0.1128,
+        "ci95High": 0.1249
+      }
+    },
+    "cvRepeatSummaries": [
+      {
+        "repeat": 1,
+        "mean_accuracy": 0.832,
+        "std_accuracy": 0.0181,
+        "mean_precision": 0.7519,
+        "std_precision": 0.0256,
+        "mean_recall": 0.8204,
+        "std_recall": 0.0744,
+        "mean_f1Score": 0.7822,
+        "std_f1Score": 0.033,
+        "mean_specificity": 0.839,
+        "std_specificity": 0.0317,
+        "mean_rocAuc": 0.913,
+        "std_rocAuc": 0.0059,
+        "mean_prAuc": 0.8378,
+        "std_prAuc": 0.0526,
+        "mean_brierScore": 0.1189,
+        "std_brierScore": 0.0069
+      }
+    ],
+    "cvAggregateEvalMetrics": {
+      "accuracy": 0.84,
+      "precision": 0.7365,
+      "recall": 0.8849,
+      "f1Score": 0.8039,
+      "specificity": 0.8136,
+      "rocAuc": 0.909,
+      "prAuc": 0.827,
+      "brierScore": 0.1189,
+      "truePositives": 123,
+      "trueNegatives": 192,
+      "falsePositives": 44,
+      "falseNegatives": 16,
+      "positivesInSet": 139,
+      "negativesInSet": 236,
+      "threshold": 0.550433
+    },
+    "cvAggregateConfusionMatrix": {
+      "labels": [
+        0,
+        1
+      ],
+      "matrix": [
+        [
+          192,
+          44
+        ],
+        [
+          16,
+          123
+        ]
+      ]
+    },
+    "cvClassificationReport": {
+      "labels": [
+        0,
+        1
+      ],
+      "average": {
+        "type": "binary",
+        "posLabel": 1
+      },
+      "class_0": {
+        "precision": 0.9231,
+        "recall": 0.8136,
+        "f1Score": 0.8649,
+        "support": 236
+      },
+      "class_1": {
+        "precision": 0.7365,
+        "recall": 0.8849,
+        "f1Score": 0.8039,
+        "support": 139
+      },
+      "macroAvg": {
+        "precision": 0.8298,
+        "recall": 0.8492,
+        "f1Score": 0.8344,
+        "support": 375
+      },
+      "weightedAvg": {
+        "precision": 0.8539,
+        "recall": 0.84,
+        "f1Score": 0.8423,
+        "support": 375
+      }
+    },
+    "cvScoringConfig": {
+      "optimalThreshold": 0.550433,
+      "thresholdStrategy": "f1",
+      "thresholdStrategyNote": "f1: maximize F1 on train fold within [THRESHOLD_RANGE_MIN, THRESHOLD_RANGE_MAX]. recall_constrained: require recall >= minRecallFloor (relaxing precision floor if needed), then maximize F1; search extends to lower probabilities for screening-oriented points.",
+      "minRecallFloor": 0.65,
+      "minPrecisionFloor": 0.25,
+      "f1SearchRange": "[0.2, 0.7]",
+      "recallSearchRange": "[0.06, 0.58]",
+      "perFoldThresholds": [
+        0.585,
+        0.61,
+        0.639532,
+        0.66,
+        0.557296
+      ],
+      "cvRepeats": 1,
+      "average": "binary",
+      "posLabel": 1
+    },
+    "holdoutMetrics": {
+      "trainSize": 300,
+      "trainSizeBeforeBalance": 300,
+      "balanceMode": "none",
+      "thresholdStrategy": "f1",
+      "minRecallFloor": 0.65,
+      "minPrecisionFloor": 0.25,
+      "testSize": 75,
+      "optimizedThreshold": 0.515,
+      "trainMetrics": {
+        "accuracy": 0.89,
+        "precision": 0.8145,
+        "recall": 0.9099,
+        "f1Score": 0.8596,
+        "specificity": 0.8783,
+        "rocAuc": 0.9613,
+        "prAuc": 0.9363,
+        "brierScore": 0.0828,
+        "truePositives": 101,
+        "trueNegatives": 166,
+        "falsePositives": 23,
+        "falseNegatives": 10,
+        "positivesInSet": 111,
+        "negativesInSet": 189,
+        "threshold": 0.515
+      },
+      "testMetrics": {
+        "accuracy": 0.7333,
+        "precision": 0.6111,
+        "recall": 0.7857,
+        "f1Score": 0.6875,
+        "specificity": 0.7021,
+        "rocAuc": 0.8746,
+        "prAuc": 0.8036,
+        "brierScore": 0.145,
+        "truePositives": 22,
+        "trueNegatives": 33,
+        "falsePositives": 14,
+        "falseNegatives": 6,
+        "positivesInSet": 28,
+        "negativesInSet": 47,
+        "threshold": 0.515
+      },
+      "testMetricsAtThreshold05": {
+        "accuracy": 0.7333,
+        "precision": 0.6111,
+        "recall": 0.7857,
+        "f1Score": 0.6875,
+        "specificity": 0.7021,
+        "rocAuc": 0.8746,
+        "prAuc": 0.8036,
+        "brierScore": 0.145,
+        "truePositives": 22,
+        "trueNegatives": 33,
+        "falsePositives": 14,
+        "falseNegatives": 6,
+        "positivesInSet": 28,
+        "negativesInSet": 47,
+        "threshold": 0.5
+      },
+      "calibration": "CalibratedClassifierCV(sigmoid, cv=3) on training split only; no calibration refit on hold-out.",
+      "overfitGap": {
+        "accuracy": 0.1567,
+        "precision": 0.2034,
+        "recall": 0.1242,
+        "f1Score": 0.1721,
+        "specificity": 0.1762,
+        "rocAuc": 0.0867,
+        "prAuc": 0.1327,
+        "brierScore": -0.0622
+      },
+      "testConfusionMatrix": {
+        "labels": [
+          0,
+          1
+        ],
+        "matrix": [
+          [
+            33,
+            14
+          ],
+          [
+            6,
+            22
+          ]
+        ]
+      },
+      "testClassificationReport": {
+        "labels": [
+          0,
+          1
+        ],
+        "average": {
+          "type": "binary",
+          "posLabel": 1
+        },
+        "class_0": {
+          "precision": 0.8462,
+          "recall": 0.7021,
+          "f1Score": 0.7674,
+          "support": 47
+        },
+        "class_1": {
+          "precision": 0.6111,
+          "recall": 0.7857,
+          "f1Score": 0.6875,
+          "support": 28
+        },
+        "macroAvg": {
+          "precision": 0.7286,
+          "recall": 0.7439,
+          "f1Score": 0.7275,
+          "support": 75
+        },
+        "weightedAvg": {
+          "precision": 0.7584,
+          "recall": 0.7333,
+          "f1Score": 0.7376,
+          "support": 75
+        }
+      },
+      "testBinomialWilsonCi95": {
+        "recallSensitivity": {
+          "estimate": 0.7857,
+          "ci95Low": 0.6046,
+          "ci95High": 0.8979,
+          "denominatorN": 28
+        },
+        "precisionPpv": {
+          "estimate": 0.6111,
+          "ci95Low": 0.4486,
+          "ci95High": 0.7522,
+          "denominatorN": 36
+        },
+        "specificity": {
+          "estimate": 0.7021,
+          "ci95Low": 0.5602,
+          "ci95High": 0.8135,
+          "denominatorN": 47
+        }
+      },
+      "referenceThresholdsOnHoldout": [
+        {
+          "threshold": 0.2,
+          "recall": 0.9643,
+          "precision": 0.5745,
+          "specificity": 0.5745,
+          "f1Score": 0.72
+        },
+        {
+          "threshold": 0.25,
+          "recall": 0.9286,
+          "precision": 0.5778,
+          "specificity": 0.5957,
+          "f1Score": 0.7123
+        },
+        {
+          "threshold": 0.3,
+          "recall": 0.9286,
+          "precision": 0.6047,
+          "specificity": 0.6383,
+          "f1Score": 0.7324
+        },
+        {
+          "threshold": 0.35,
+          "recall": 0.9286,
+          "precision": 0.619,
+          "specificity": 0.6596,
+          "f1Score": 0.7429
+        },
+        {
+          "threshold": 0.4,
+          "recall": 0.8929,
+          "precision": 0.625,
+          "specificity": 0.6809,
+          "f1Score": 0.7353
+        },
+        {
+          "threshold": 0.45,
+          "recall": 0.8571,
+          "precision": 0.6316,
+          "specificity": 0.7021,
+          "f1Score": 0.7273
+        },
+        {
+          "threshold": 0.5,
+          "recall": 0.7857,
+          "precision": 0.6111,
+          "specificity": 0.7021,
+          "f1Score": 0.6875
+        },
+        {
+          "threshold": 0.55,
+          "recall": 0.7857,
+          "precision": 0.6875,
+          "specificity": 0.7872,
+          "f1Score": 0.7333
+        },
+        {
+          "threshold": 0.6,
+          "recall": 0.75,
+          "precision": 0.7,
+          "specificity": 0.8085,
+          "f1Score": 0.7241
+        },
+        {
+          "threshold": 0.65,
+          "recall": 0.5714,
+          "precision": 0.6667,
+          "specificity": 0.8298,
+          "f1Score": 0.6154
+        },
+        {
+          "threshold": 0.7,
+          "recall": 0.5357,
+          "precision": 0.7895,
+          "specificity": 0.9149,
+          "f1Score": 0.6383
+        }
+      ]
+    },
+    "leakageChecks": {
+      "cvSplitterUsed": "StratifiedKFold",
+      "groupColumn": "family_id",
+      "groupOverlapAcrossFolds": "none-detected",
+      "crossGroupDuplicateFeatures": {
+        "duplicateSignaturesAcrossGroups": 5,
+        "rowsInCrossGroupDuplicateSignatures": 10
+      },
+      "labelShuffleCheck": {
+        "meanAccuracy": 0.4933,
+        "stdAccuracy": 0.0292,
+        "meanRocAuc": 0.4897,
+        "stdRocAuc": 0.048,
+        "status": "ok"
+      },
+      "preprocessingIsolation": "StandardScaler fit on each training fold only via Pipeline",
+      "thresholdLeakage": "avoided-threshold-optimized-on-train-fold-only"
+    },
+    "featureImportances": {
+      "age": 0.023898,
+      "user_is_male": 0.007574,
+      "bmi": 0.014917,
+      "hypertension_status": 0.030833,
+      "physical_activity_score": 0.010023,
+      "parent_has_t2dm": 0.284584,
+      "siblings_diabetes_count": 0.061581,
+      "aunts_uncles_score": 0.053893,
+      "weightedFamilyScore": 0.111925,
+      "lineageRiskIndex": 0.099806,
+      "propagationProbability": 0.131913,
+      "metabolic_risk_index": 0.022415,
+      "hereditary_load_index": 0.138909,
+      "activity_metabolic_index": 0.007729
+    },
+    "topFeaturesRanked": [
+      [
+        "parent_has_t2dm",
+        0.284584
+      ],
+      [
+        "hereditary_load_index",
+        0.138909
+      ],
+      [
+        "propagationProbability",
+        0.131913
+      ],
+      [
+        "weightedFamilyScore",
+        0.111925
+      ],
+      [
+        "lineageRiskIndex",
+        0.099806
+      ],
+      [
+        "siblings_diabetes_count",
+        0.061581
+      ],
+      [
+        "aunts_uncles_score",
+        0.053893
+      ],
+      [
+        "hypertension_status",
+        0.030833
+      ]
+    ],
+    "datasetProfile": {
+      "classCounts": {
+        "negative": 236,
+        "positive": 139
+      },
+      "positiveRate": 0.3707,
+      "uniqueSourceRecords": 375,
+      "balance": "imbalanced"
+    },
+    "trainingConfig": {
+      "classWeightMode": "balanced",
+      "rowBalanceMode": "none",
+      "pipelineSteps": [
+        "StandardScaler",
+        "ExtraTreesClassifier"
+      ],
+      "preprocessing": "StandardScaler fit on training data only (fold-local fit_transform)",
+      "crossFoldLeakageControl": "fold-local fit_transform on train only; grouped splits when multi-row groups exist",
+      "algorithmNote": "Tree ensemble captures nonlinearities; monitor fold variability on small datasets."
+    },
+    "targetDefinition": "Binary classification trained on respondent-level outcome: T2DM (1) vs not (0). Labels should reflect verified or clinically documented status when possible; proxy or manually assigned labels limit achievable accuracy and calibration.",
+    "targetScopeNote": "The deployed classifier is either ExtraTreesClassifier (interaction-friendly ranking) or HistGradientBoostingClassifier (boosted-tree tabular modeling). Displayed child/grandchild scenario values are heuristic projections from the respondent score, not separately trained targets. Grouped CV uses source_patient_id (or family_id / source_record_id, first present in the CSV) when multiple rows share a group id; if each row is its own group, folds approximate stratified splits rather than true family generalization.",
+    "performanceGoalsAssessment": {
+      "interpretationNote": "Single-number accuracy targets are not primary when labels are proxy-based and n is small. Report ROC-AUC, PR-AUC, Brier score, confusion matrix at an explicit threshold, and limitations.",
+      "primaryMetricsGuidance": "For imbalanced T2DM screening contexts, prioritize PR-AUC and Brier with ROC-AUC; report Wilson intervals at the train-chosen threshold for interpretability.",
+      "cvMeanRecallPct": 82.0,
+      "cvMeanRocAucPct": 91.3,
+      "cvMeanPrAuc": 0.8378,
+      "cvMeanBrier": 0.1189,
+      "cvF1Std": 0.033,
+      "holdoutBrier": 0.145
+    },
+    "metricsAnalysis": {
+      "wilsonScoreNote": "Hold-out 95% intervals use the Wilson score method for binomial proportions (sensitivity/recall, precision/PPV, specificity). They quantify sampling uncertainty for this fixed test partition, not guaranteed coverage on external cohorts.",
+      "imbalanceNote": "Observed positive prevalence in this corpus \u2248 37.1%. Under imbalance, accuracy alone is insufficient; report PR-AUC and calibration alongside ROC-AUC.",
+      "cvUncertaintyNote": "CV mean \u00b1 std reflects fold-to-fold variability. It is not a formal confidence interval for future performance unless paired with an explicit inferential framework.",
+      "thresholdPolicyNote": "Threshold strategy: f1. The cutoff is derived from training scores only; the hold-out set evaluates that fixed policy without re-tuning the threshold.",
+      "referenceGridNote": "referenceThresholdsOnHoldout is a descriptive trade-off grid on held-out scores. Only the train-optimized threshold is the declared operating point; other cutoffs are exploratory.",
+      "discriminationVsCalibrationNote": "ROC-AUC and PR-AUC measure discrimination (ranking); Brier score measures probability calibration. These address different questions and should be interpreted jointly for risk tools.",
+      "recommendedReportingOrder": [
+        "Discrimination: ROC-AUC, PR-AUC (prevalence-sensitive)",
+        "Calibration: Brier score",
+        "Threshold-based (train-optimized; strategy=f1): confusion matrix + Wilson 95% CIs",
+        "Exploratory: reference threshold grid on hold-out (not re-tuned)"
+      ]
+    },
+    "probabilityCalibration": {
+      "deploymentPipeline": "CalibratedClassifierCV(method=sigmoid, cv=3) wrapping StandardScaler+ExtraTreesClassifier",
+      "cvMetricsNote": "Fold models are uncalibrated ExtraTrees for stable CV benchmarks; deployed joblib uses calibration."
+    },
+    "datasetWarnings": [
+      "Each respondent row uses a distinct group id: CV uses StratifiedKFold (not clustered family holdout).",
+      "Model uses ExtraTreesClassifier with max_depth=6 for controlled complexity.",
+      "All feature engineering performed within each fold to prevent leakage.",
+      "Operating threshold chosen on training split / fold only (F1 or recall-constrained per config); no evaluation-set threshold tuning.",
+      "Label shuffle test confirms model does not overfit to label patterns.",
+      "Family grouping (source_patient_id, family_id, or source_record_id in CSV) required to prevent test contamination; if each row is a unique id, grouped CV does not measure family-level generalization."
+    ],
+    "groupSourceColumn": "source_patient_id",
+    "deploymentTrainRows": 375,
+    "deploymentTrainRowsBeforeBalance": 375,
+    "pipelinePath": "C:\\Users\\justi\\Desktop\\Justine\\THESIS DEVELOPMENT\\T2dm system version 2\\backend\\models\\demo_model.joblib"
+  }
+}

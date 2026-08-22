@@ -1,0 +1,268 @@
+{
+  "datasetRows": 375,
+  "cvMetrics": {
+    "accuracy": 0.832,
+    "precision": 0.7519,
+    "recall": 0.8204,
+    "f1Score": 0.7822,
+    "specificity": 0.839,
+    "rocAuc": 0.913,
+    "prAuc": 0.8378,
+    "brierScore": 0.1189
+  },
+  "holdoutMetrics": {
+    "trainSize": 300,
+    "trainSizeBeforeBalance": 300,
+    "balanceMode": "none",
+    "thresholdStrategy": "f1",
+    "minRecallFloor": 0.65,
+    "minPrecisionFloor": 0.25,
+    "testSize": 75,
+    "optimizedThreshold": 0.515,
+    "trainMetrics": {
+      "accuracy": 0.89,
+      "precision": 0.8145,
+      "recall": 0.9099,
+      "f1Score": 0.8596,
+      "specificity": 0.8783,
+      "rocAuc": 0.9613,
+      "prAuc": 0.9363,
+      "brierScore": 0.0828,
+      "truePositives": 101,
+      "trueNegatives": 166,
+      "falsePositives": 23,
+      "falseNegatives": 10,
+      "positivesInSet": 111,
+      "negativesInSet": 189,
+      "threshold": 0.515
+    },
+    "testMetrics": {
+      "accuracy": 0.7333,
+      "precision": 0.6111,
+      "recall": 0.7857,
+      "f1Score": 0.6875,
+      "specificity": 0.7021,
+      "rocAuc": 0.8746,
+      "prAuc": 0.8036,
+      "brierScore": 0.145,
+      "truePositives": 22,
+      "trueNegatives": 33,
+      "falsePositives": 14,
+      "falseNegatives": 6,
+      "positivesInSet": 28,
+      "negativesInSet": 47,
+      "threshold": 0.515
+    },
+    "testMetricsAtThreshold05": {
+      "accuracy": 0.7333,
+      "precision": 0.6111,
+      "recall": 0.7857,
+      "f1Score": 0.6875,
+      "specificity": 0.7021,
+      "rocAuc": 0.8746,
+      "prAuc": 0.8036,
+      "brierScore": 0.145,
+      "truePositives": 22,
+      "trueNegatives": 33,
+      "falsePositives": 14,
+      "falseNegatives": 6,
+      "positivesInSet": 28,
+      "negativesInSet": 47,
+      "threshold": 0.5
+    },
+    "calibration": "CalibratedClassifierCV(sigmoid, cv=3) on training split only; no calibration refit on hold-out.",
+    "overfitGap": {
+      "accuracy": 0.1567,
+      "precision": 0.2034,
+      "recall": 0.1242,
+      "f1Score": 0.1721,
+      "specificity": 0.1762,
+      "rocAuc": 0.0867,
+      "prAuc": 0.1327,
+      "brierScore": -0.0622
+    },
+    "testConfusionMatrix": {
+      "labels": [
+        0,
+        1
+      ],
+      "matrix": [
+        [
+          33,
+          14
+        ],
+        [
+          6,
+          22
+        ]
+      ]
+    },
+    "testClassificationReport": {
+      "labels": [
+        0,
+        1
+      ],
+      "average": {
+        "type": "binary",
+        "posLabel": 1
+      },
+      "class_0": {
+        "precision": 0.8462,
+        "recall": 0.7021,
+        "f1Score": 0.7674,
+        "support": 47
+      },
+      "class_1": {
+        "precision": 0.6111,
+        "recall": 0.7857,
+        "f1Score": 0.6875,
+        "support": 28
+      },
+      "macroAvg": {
+        "precision": 0.7286,
+        "recall": 0.7439,
+        "f1Score": 0.7275,
+        "support": 75
+      },
+      "weightedAvg": {
+        "precision": 0.7584,
+        "recall": 0.7333,
+        "f1Score": 0.7376,
+        "support": 75
+      }
+    },
+    "testBinomialWilsonCi95": {
+      "recallSensitivity": {
+        "estimate": 0.7857,
+        "ci95Low": 0.6046,
+        "ci95High": 0.8979,
+        "denominatorN": 28
+      },
+      "precisionPpv": {
+        "estimate": 0.6111,
+        "ci95Low": 0.4486,
+        "ci95High": 0.7522,
+        "denominatorN": 36
+      },
+      "specificity": {
+        "estimate": 0.7021,
+        "ci95Low": 0.5602,
+        "ci95High": 0.8135,
+        "denominatorN": 47
+      }
+    },
+    "referenceThresholdsOnHoldout": [
+      {
+        "threshold": 0.2,
+        "recall": 0.9643,
+        "precision": 0.5745,
+        "specificity": 0.5745,
+        "f1Score": 0.72
+      },
+      {
+        "threshold": 0.25,
+        "recall": 0.9286,
+        "precision": 0.5778,
+        "specificity": 0.5957,
+        "f1Score": 0.7123
+      },
+      {
+        "threshold": 0.3,
+        "recall": 0.9286,
+        "precision": 0.6047,
+        "specificity": 0.6383,
+        "f1Score": 0.7324
+      },
+      {
+        "threshold": 0.35,
+        "recall": 0.9286,
+        "precision": 0.619,
+        "specificity": 0.6596,
+        "f1Score": 0.7429
+      },
+      {
+        "threshold": 0.4,
+        "recall": 0.8929,
+        "precision": 0.625,
+        "specificity": 0.6809,
+        "f1Score": 0.7353
+      },
+      {
+        "threshold": 0.45,
+        "recall": 0.8571,
+        "precision": 0.6316,
+        "specificity": 0.7021,
+        "f1Score": 0.7273
+      },
+      {
+        "threshold": 0.5,
+        "recall": 0.7857,
+        "precision": 0.6111,
+        "specificity": 0.7021,
+        "f1Score": 0.6875
+      },
+      {
+        "threshold": 0.55,
+        "recall": 0.7857,
+        "precision": 0.6875,
+        "specificity": 0.7872,
+        "f1Score": 0.7333
+      },
+      {
+        "threshold": 0.6,
+        "recall": 0.75,
+        "precision": 0.7,
+        "specificity": 0.8085,
+        "f1Score": 0.7241
+      },
+      {
+        "threshold": 0.65,
+        "recall": 0.5714,
+        "precision": 0.6667,
+        "specificity": 0.8298,
+        "f1Score": 0.6154
+      },
+      {
+        "threshold": 0.7,
+        "recall": 0.5357,
+        "precision": 0.7895,
+        "specificity": 0.9149,
+        "f1Score": 0.6383
+      }
+    ]
+  },
+  "topFeatures": [
+    [
+      "parent_has_t2dm",
+      0.284584
+    ],
+    [
+      "hereditary_load_index",
+      0.138909
+    ],
+    [
+      "propagationProbability",
+      0.131913
+    ],
+    [
+      "weightedFamilyScore",
+      0.111925
+    ],
+    [
+      "lineageRiskIndex",
+      0.099806
+    ],
+    [
+      "siblings_diabetes_count",
+      0.061581
+    ],
+    [
+      "aunts_uncles_score",
+      0.053893
+    ],
+    [
+      "hypertension_status",
+      0.030833
+    ]
+  ]
+}

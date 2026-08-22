@@ -1,0 +1,83 @@
+"""Flask application factory with absolute path resolution."""
+
+import os
+from pathlib import Path
+
+from flask import Flask
+
+from .bootstrap import ensure_database_schema
+from .config import Config
+from .extensions import cors, db
+from sqlalchemy import create_engine
+from sqlalchemy.exc import OperationalError
+
+
+def create_app() -> Flask:
+    """Create and configure Flask application."""
+    app = Flask(__name__, instance_relative_config=True)
+    app.config.from_object(Config)
+
+    # Use absolute paths from config (no relative path assumptions)
+    instance_path = Path(app.instance_path)
+    model_path = Path(app.config["MODEL_PATH"])
+    dataset_path = Path(app.config["DATASET_PATH"])
+
+    # Create required directories with absolute paths
+    instance_path.mkdir(parents=True, exist_ok=True)
+    model_path.parent.mkdir(parents=True, exist_ok=True)
+    dataset_path.parent.mkdir(parents=True, exist_ok=True)
+
+    # If a MySQL URI is configured, require a reachable MySQL server.
+    # Do not silently fall back to SQLite when MySQL is intended for production.
+    _db_uri = app.config.get("SQLALCHEMY_DATABASE_URI", "")
+    if _db_uri and _db_uri.startswith("mysql"):
+        try:
+            test_engine = create_engine(_db_uri)
+            conn = test_engine.connect()
+            conn.close()
+        except OperationalError as exc:
+            # Fail fast: raise an explicit error so deployment/CI surfaces the
+            # missing or unreachable database instead of continuing with
+            # a local SQLite fallback.
+            raise RuntimeError(
+                "Unable to connect to configured MySQL server. "
+                "Ensure MYSQL_HOST, MYSQL_DB, MYSQL_USER and MYSQL_PASSWORD "
+                "are correctly set and the server is accessible."
+            ) from exc
+
+    # Initialize extensions
+    db.init_app(app)
+    _origins = [
+        o.strip()
+        for o in str(app.config["FRONTEND_ORIGIN"]).split(",")
+        if o.strip()
+    ]
+    # Any Vite port when FLASK_ENV is development (5173, 5174, …); avoids shell env
+    # overriding .env and breaking CORS (load_dotenv override=True fixes that too).
+    _flask_env = os.getenv("FLASK_ENV", "development").strip().lower()
+    if _flask_env in ("development", "dev"):
+        _origins.extend(
+            [
+                r"^http://localhost:\d+$",
+                r"^http://127\.0\.0\.1:\d+$",
+            ]
+        )
+    cors.init_app(
+        app,
+        resources={
+            r"^/api/.*": {
+                "origins": _origins,
+            },
+        },
+    )
+
+    # Register API blueprint with modular routes
+    from .api import api_bp
+    app.register_blueprint(api_bp, url_prefix="/api")
+
+    # Initialize database
+    with app.app_context():
+        db.create_all()
+        ensure_database_schema()
+
+    return app

@@ -1,0 +1,14 @@
+.skip-btn {
+  width: 100%;
+  min-height: var(--touch-min);
+  margin-top: 0.25rem;
+  border: 1px dashed var(--color-border-hover);
+  border-radius: 10px;
+  background: transparent;
+  color: var(--color-text-muted);
+  font-size: 16px;
+}
+
+.skip-btn:hover {
+  background: var(--color-bg-neutral);
+}

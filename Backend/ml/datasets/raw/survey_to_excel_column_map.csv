@@ -1,0 +1,30 @@
+survey_item,column_name,description,coding
+Admin,patient_id,Unique patient/respondent identifier,Text or integer unique key
+Q1 Consent,consent,Participant consent,1=Yes;0=No
+Q3 Filipino,is_filipino,Filipino eligibility,1=Yes;0=No
+Q2 Age,age,Age in years,Integer >= 0
+Q4 Sex at birth,sex_at_birth,Sex at birth,1=Male;2=Female
+Q5 Height,height_cm,Height in centimeters,Numeric
+Q6 Weight,weight_kg,Weight in kilograms,Numeric
+Q7 Self hypertension,self_hypertension_status,Participant hypertension status,1=Yes;0=No;99=Not sure
+Q8 Physical activity,physical_activity_frequency,Weekly moderate/vigorous activity,1=Rarely/never;2=1-2x/week;3=3-4x/week;4=5+x/week
+Q9 Diet,diet_quality,Usual diet quality,1=Mostly unhealthy;2=Mixed;3=Mostly healthy
+Q10 Father hypertension,father_hypertension_status,Father hypertension status,1=Yes;0=No;99=Not sure
+Q11 Mother hypertension,mother_hypertension_status,Mother hypertension status,1=Yes;0=No;99=Not sure
+Q12 Father diabetes,father_t2dm_count_raw,Father diabetes count raw (binary count),1=Yes;0=No/Not sure
+Q13 Mother diabetes,mother_t2dm_count_raw,Mother diabetes count raw (binary count),1=Yes;0=No/Not sure
+Q14 Mother GDM,mother_gdm_during_index_pregnancy,Mother had gestational diabetes,1=Yes;0=No;99=Not sure
+Q15 Paternal grandfather diabetes,paternal_grandfather_t2dm_count_raw,Paternal grandfather diabetes count raw (binary count),1=Yes;0=No/Not sure
+Q16 Paternal grandmother diabetes,paternal_grandmother_t2dm_count_raw,Paternal grandmother diabetes count raw (binary count),1=Yes;0=No/Not sure
+Q17 Maternal grandfather diabetes,maternal_grandfather_t2dm_count_raw,Maternal grandfather diabetes count raw (binary count),1=Yes;0=No/Not sure
+Q18 Maternal grandmother diabetes,maternal_grandmother_t2dm_count_raw,Maternal grandmother diabetes count raw (binary count),1=Yes;0=No/Not sure
+Q19 Number of siblings,siblings_count,Total siblings,Integer >= 0
+Q20 Siblings with diabetes,siblings_t2dm_count_raw,Count of siblings with diabetes,Integer >= 0
+Q22 Father's siblings count,father_siblings_count,Total siblings of father,Integer >= 0
+Q23 Father's siblings with diabetes,paternal_aunts_uncles_t2dm_count_raw,Count of father's siblings with diabetes,Integer >= 0
+Q24 Mother's siblings count,mother_siblings_count,Total siblings of mother,Integer >= 0
+Q25 Mother's siblings with diabetes,maternal_aunts_uncles_t2dm_count_raw,Count of mother's siblings with diabetes,Integer >= 0
+Q26 Participant T2DM,patient_has_t2dm_status,Participant T2DM status (merged CSV column name),1=Yes;0=No;99=Not sure
+Target label,generation_depth,Target generation for training row,1=Child;2=Grandchild
+Target label,target_is_male,Target sex for training row,1=Male;0=Female
+Target label,outcome,Observed diabetes outcome label,1=Positive;0=Negative

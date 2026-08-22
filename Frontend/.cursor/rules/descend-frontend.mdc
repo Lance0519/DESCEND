@@ -1,0 +1,18 @@
+---
+description: DESCEND frontend healthcare UX baseline rules
+globs: REBUILD OF SYSTEM/Frontend/**/*
+alwaysApply: false
+---
+
+# DESCEND Frontend UX Rules
+
+- Single question layout: render exactly one question per screen.
+- Progress bar anchored at the absolute top of the assessment screens.
+- Typography: minimum base text 16px; headings 22px–28px.
+- Color palette: page `#F0F8FF`, cards `#FFFFFF`, primary `#2E7D32`, text `#1F2937`. Use CSS variables from `index.css`.
+- Touch targets: buttons and clickable areas at least 44×44px.
+- Icons: lucide-react only. Never use emojis.
+- Language: instant English / Tagalog toggle via shared language state.
+- Medical framing: educational disclaimers in neutral gray containers. Avoid bright red for health warnings.
+- Accessibility: Web Speech API for reading questions aloud.
+- Stack: React, Vite, TypeScript with strict typing for survey factors.

@@ -1,0 +1,142 @@
+.results {
+  min-height: 100svh;
+  background: var(--color-bg-page);
+  padding: 1rem;
+}
+
+.results__toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 640px;
+  margin: 0 auto 0.75rem;
+}
+
+.results__account {
+  color: var(--color-primary-dark);
+  font-weight: 600;
+}
+
+.results__scope {
+  font-size: 13px;
+  color: var(--color-text-muted);
+  text-align: left;
+  margin-bottom: 1rem;
+  line-height: 1.45;
+}
+
+.results__card {
+  max-width: 640px;
+  margin: 0 auto;
+  background: var(--color-bg-card);
+  border-radius: var(--radius);
+  padding: 2rem 1.5rem;
+  border: 1px solid var(--color-border);
+  text-align: center;
+}
+
+.results__card h1 {
+  font-size: 24px;
+  margin-bottom: 1rem;
+}
+
+.results__percent-label {
+  color: var(--color-text-muted);
+  font-size: 16px;
+}
+
+.results__percent {
+  font-size: 48px;
+  font-weight: 700;
+  color: var(--color-primary-dark);
+  margin: 0.25rem 0 0.5rem;
+}
+
+.results__band {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-weight: 600;
+  margin-bottom: 1.25rem;
+}
+
+.results__band--low {
+  background: var(--color-primary-light);
+  color: var(--color-primary-dark);
+}
+
+.results__band--moderate {
+  background: var(--color-bg-neutral);
+  color: var(--color-text-main);
+}
+
+.results__band--high {
+  background: #e5e7eb;
+  color: var(--color-text-main);
+}
+
+.results__icons {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  color: var(--color-primary);
+  margin-bottom: 1rem;
+}
+
+.results__bmi {
+  color: var(--color-text-muted);
+  margin-bottom: 1.25rem;
+}
+
+.results__factors-title {
+  font-size: 18px;
+  text-align: left;
+  margin-bottom: 0.75rem;
+}
+
+.results__factors {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1.5rem;
+  text-align: left;
+}
+
+.results__factors li {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.65rem 0;
+  border-bottom: 1px solid var(--color-border);
+  font-size: 16px;
+}
+
+.delta-up {
+  color: var(--color-text-muted);
+}
+
+.delta-down {
+  color: var(--color-primary-dark);
+}
+
+.results__disclaimer {
+  background: var(--color-bg-neutral);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 1rem;
+  font-size: 15px;
+  color: var(--color-text-muted);
+  text-align: left;
+  line-height: 1.5;
+}
+
+.results__retake {
+  width: 100%;
+  min-height: 52px;
+  margin-top: 1.5rem;
+  background: var(--color-primary);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 17px;
+  font-weight: 700;
+}

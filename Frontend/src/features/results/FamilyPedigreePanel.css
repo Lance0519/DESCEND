@@ -1,0 +1,52 @@
+.pedigree-panel {
+  margin-top: 1.5rem;
+  text-align: left;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--color-border);
+}
+
+.pedigree-panel__head {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--color-primary-dark);
+  margin-bottom: 1rem;
+}
+
+.pedigree-panel__head h2 {
+  font-size: 20px;
+}
+
+.pedigree-panel__row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: 0.65rem;
+}
+
+.pedigree-node {
+  min-width: 110px;
+  padding: 0.55rem 0.65rem;
+  border-radius: 8px;
+  border: 1px solid var(--color-border);
+  background: var(--color-bg-neutral);
+  text-align: center;
+  font-size: 13px;
+}
+
+.pedigree-node--yes {
+  border-color: var(--color-primary-border);
+  background: var(--color-primary-light);
+}
+
+.pedigree-node__label {
+  display: block;
+  font-weight: 600;
+  color: var(--color-text-main);
+}
+
+.pedigree-node__status {
+  color: var(--color-text-muted);
+  text-transform: capitalize;
+}
