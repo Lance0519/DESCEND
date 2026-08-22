@@ -101,9 +101,11 @@ Open [https://vercel.com](https://vercel.com) → **Add New** → **Project** �
 |---------|-------------|
 | **Framework Preset** | **Other** (or Flask if listed — do **not** point Flask at Frontend) |
 | **Root Directory** | Click Edit → set to **`Backend`** (not `Frontend`) |
-| **Build Command** | leave default / empty (uses `Backend/vercel.json`) |
+| **Build Command** | leave empty |
 | **Output Directory** | leave empty |
 | **Install Command** | leave default |
+
+Vercel detects Flask via `Backend/index.py` (`app = create_app()`). Do not point the project at `api/index.py`.
 
 ### B2. Environment Variables — what to put in Key / Value
 
