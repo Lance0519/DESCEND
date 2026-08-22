@@ -12,10 +12,11 @@ import './ResultsPage.css'
 
 export function ResultsPage() {
   const { t } = useLanguage()
-  const { result, resetAssessment } = useAssessment()
+  const { result, answers, resetAssessment } = useAssessment()
   const { user } = useAuth()
   const navigate = useNavigate()
 
+  if (answers.diagnosedT2dm === 'yes') return <Navigate to="/management" replace />
   if (!result) return <Navigate to="/assessment" replace />
 
   const bandClass =

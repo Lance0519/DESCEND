@@ -327,6 +327,15 @@ Access → **Continue with Google** → sign in → Profile shows Google.
 | Vercel Root Directory = `Frontend` | Change to **`Backend`** |
 | Netlify missing `VITE_` prefix | Keys must start with `VITE_` or the browser never sees them |
 | Trailing slash on `VITE_API_BASE_URL` | Use `https://xxx.vercel.app` not `...app/` |
+
+### Patient survey migration (diagnosed vs undiagnosed)
+
+After `001_descend_schema.sql`, run `supabase/migrations/002_patient_survey_records.sql` in the Supabase SQL editor. It adds:
+
+- `patient_survey_records` with `diagnosed_t2dm` (boolean), `age_of_onset` (integer), typed survey metrics, and ExtraTrees `feature_vector`
+- Optional typed columns on `assessments`
+
+The Flask API exposes `POST /api/estimate` (and `/api/predict` uses the same workflow): diagnosed → management path (no model); undiagnosed → feature array + ExtraTrees probability × 100.
 | Enabling Google before Netlify URL exists | Finish Section F first, then do Section G |
 | Google redirect wrong | Must be `https://<ref>.supabase.co/auth/v1/callback` |
 | Google button missing on Access | Set `VITE_ENABLE_GOOGLE_SIGNIN=true` on Netlify + Supabase keys → redeploy |

@@ -4,7 +4,6 @@ import csv
 import json
 from datetime import datetime
 from io import StringIO
-from pathlib import Path
 from typing import List, Optional
 
 from flask import Blueprint, Response, current_app, jsonify, request
@@ -13,17 +12,13 @@ from sqlalchemy import desc
 from ..extensions import db
 from ..ml.feature_builder import build_base_features
 from ..ml.predictor import (
-    get_model_evaluation,
-    predict_assessment,
     respondent_probability_from_scenario_lookup,
     respondent_risk_band_for_display,
     risk_band_for_probability,
-    train_model_from_dataset,
 )
-from ..models import Assessment, PredictionResult, User
+from ..models import Assessment, User
 from .auth import _get_current_user
-from .profile import save_assessment_for_user
-from ..supabase_auth import verify_bearer_token
+from .estimation import run_estimation
 
 assessment_bp = Blueprint("assessment", __name__)
 
@@ -181,9 +176,33 @@ def _csv_response(filename: str, rows: List[dict]) -> Response:
 # ============= ENDPOINTS =============
 
 
+@assessment_bp.post("/estimate")
+def estimate():
+    """
+    Dedicated estimation endpoint.
+    Diagnosed patients → management path (no ExtraTrees).
+    Undiagnosed → normalized feature array + ExtraTrees positive-class probability × 100.
+    """
+    payload = request.get_json(silent=True) or {}
+    try:
+        user = _get_current_user(required=False)
+    except ValueError as exc:
+        return jsonify({"message": str(exc)}), 401
+
+    try:
+        result = run_estimation(payload, flask_user=user)
+    except ValueError as exc:
+        return jsonify({"message": str(exc)}), 400
+    except Exception:
+        current_app.logger.exception("Estimation failed")
+        return jsonify({"message": "Estimation failed."}), 500
+
+    return jsonify(result)
+
+
 @assessment_bp.post("/predict")
 def predict():
-    """Make prediction from assessment payload."""
+    """Make prediction from assessment payload (delegates to /estimate workflow)."""
     payload = request.get_json(silent=True) or {}
 
     try:
@@ -191,51 +210,16 @@ def predict():
     except ValueError as exc:
         return jsonify({"message": str(exc)}), 401
 
-    result = predict_assessment(payload)
-    assessment_title = (
-        str(payload.get("title", "")).strip()
-        or f"Assessment {datetime.utcnow().strftime('%Y-%m-%d %H:%M')}"
-    )
+    try:
+        result = run_estimation(payload, flask_user=user)
+    except ValueError as exc:
+        return jsonify({"message": str(exc)}), 400
+    except Exception:
+        current_app.logger.exception("Prediction failed")
+        return jsonify({"message": "Prediction failed."}), 500
 
-    stored_payload = {
-        "v": _ASSESSMENT_STORE_VERSION,
-        "form": payload,
-        "respondentProbability": result["summary"]["averageProbability"],
-        "lineageScenarioMultiplier": result.get("scenarioLineageMultiplier", 1.0),
-    }
-    assessment = Assessment(
-        user_id=user.id if user else None,
-        title=assessment_title,
-        bmi=result["derivedMetrics"]["bmi"],
-        weighted_family_score=result["derivedMetrics"]["weightedFamilyScore"],
-        payload_json=json.dumps(stored_payload),
-    )
-    db.session.add(assessment)
-    db.session.flush()
-
-    for item in result["predictions"]:
-        db.session.add(
-            PredictionResult(
-                assessment_id=assessment.id,
-                target_key=item["key"],
-                target_label=item["label"],
-                probability=item["probability"],
-                risk_band=item["riskBand"],
-            )
-        )
-
-    db.session.commit()
-
-    claims = verify_bearer_token()
-    supabase_uid = claims.get("sub") if claims else None
-    if supabase_uid:
-        try:
-            save_assessment_for_user(supabase_uid, payload, result)
-        except Exception:
-            current_app.logger.exception("Failed to save DESCEND assessment for Supabase user")
-
-    saved = bool(user) or bool(supabase_uid)
-    return jsonify({"assessmentId": assessment.id, "savedToHistory": saved, **result})
+    # Legacy clients expect prediction fields at top level; management path omits scores.
+    return jsonify(result)
 
 
 @assessment_bp.get("/history")

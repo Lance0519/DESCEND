@@ -8,6 +8,7 @@ import { AuthCallbackPage } from './pages/AuthCallbackPage'
 import { HistoryPage } from './pages/HistoryPage'
 import { LandingPage } from './pages/LandingPage'
 import { LoginPage } from './pages/LoginPage'
+import { ManagementPage } from './pages/ManagementPage'
 import { ProfilePage } from './pages/ProfilePage'
 import { RegisterPage } from './pages/RegisterPage'
 import { ResultsPage } from './pages/ResultsPage'
@@ -25,6 +26,7 @@ export default function App() {
               <Route path="/register" element={<RegisterPage />} />
               <Route path="/auth/callback" element={<AuthCallbackPage />} />
               <Route path="/assessment" element={<AssessmentPage />} />
+              <Route path="/management" element={<ManagementPage />} />
               <Route path="/results" element={<ResultsPage />} />
               <Route path="/account" element={<ProfilePage />} />
               <Route path="/history" element={<HistoryPage />} />

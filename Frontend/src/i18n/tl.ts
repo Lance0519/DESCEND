@@ -80,6 +80,33 @@ export const tl: TranslationDict = {
   signOut: 'Mag-sign out',
   preferredAge: 'Edad (para sa susunod na pagsusuri)',
   preferredSex: 'Kasarian (para sa susunod na pagsusuri)',
+  diagnosisGateTitle: 'Bago tayo magsimula',
+  diagnosisGateQuestion: 'Na-diagnose ka ba ng Type 2 diabetes ng isang doktor?',
+  diagnosisGateYes: 'Oo — na-diagnose na ako',
+  diagnosisGateNo: 'Hindi — hindi pa ako na-diagnose',
+  diagnosisOnsetTitle: 'Edad nang ma-diagnose',
+  diagnosisOnsetHelp: 'Ilagay ang edad nang unang na-diagnose ka ng Type 2 diabetes.',
+  diagnosisOnsetContinue: 'Magpatuloy sa pamamahala ng pamumuhay',
+  mgmtBadge: 'Pamamahala ng sakit',
+  mgmtTitle: 'Pamumuhay na may Type 2 diabetes',
+  mgmtLead:
+    'Dahil may klinikal ka nang diyagnosis, hindi gumagawa ang DESCEND ng predictive risk score. Gamitin ang mga gabay na ito kasama ang iyong care team.',
+  mgmtOnsetLabel: 'Edad ng onset na iyong inilagay',
+  mgmtTipDietTitle: 'Nutrisyon',
+  mgmtTipDietText:
+    'Paboran ang gulay, pagkaing mayaman sa fiber, at bawasan ang inuming matamis. Makipag-usap sa clinician o dietitian para sa planong angkop sa gamot at labs.',
+  mgmtTipActivityTitle: 'Gumalaw araw-araw',
+  mgmtTipActivityText:
+    'Maglakad o gumawa ng aktibidad na aprubado ng doktor. Kahit maikling session ay nakakatulong kung regular.',
+  mgmtTipCareTitle: 'Manatiling konektado sa pangangalaga',
+  mgmtTipCareText:
+    'Sundin ang check-up, pagsusuri ng gamot, at labs. Magtanong tungkol sa hypoglycemia, paa, at blood pressure.',
+  mgmtTipLifestyleTitle: 'Tulog, stress, at paninigarilyo',
+  mgmtTipLifestyleText:
+    'Protektahan ang tulog, iwasan ang usok ng sigarilyo, at pamahalaan ang stress — nakakatulong ito sa glucose at puso.',
+  mgmtDisclaimer:
+    'Gabay pang-edukasyon lamang — hindi kapalit ng medikal na payo, reseta, o emergency care.',
+  mgmtRestart: 'Magsimula ulit',
   section: {
     demographic: 'Tungkol sa iyo',
     anthropometric: 'Sukat ng katawan',

@@ -102,22 +102,6 @@ export const QUESTIONS: QuestionDef[] = [
     options: yesNo,
   },
   {
-    id: 'diagnosedT2dm',
-    type: 'choice',
-    section: 'target',
-    questionKey: 'diagnosedT2dm',
-    options: yesNo,
-  },
-  {
-    id: 'ageAtDiagnosis',
-    type: 'number',
-    section: 'target',
-    questionKey: 'ageAtDiagnosis',
-    min: 1,
-    max: 90,
-    showIf: (a) => a.diagnosedT2dm === 'yes',
-  },
-  {
     id: 'fastingGlucoseMgDl',
     type: 'optionalNumber',
     section: 'blood',

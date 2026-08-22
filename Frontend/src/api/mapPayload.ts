@@ -16,7 +16,7 @@ export function mapPayload(answers: AssessmentAnswers) {
       sex: answers.sex ?? 'female',
       heightCm: answers.heightCm ?? 160,
       weightKg: answers.weightKg ?? 60,
-      diagnosedT2dm: answers.diagnosedT2dm ?? 'no',
+      diagnosedT2dm: answers.diagnosedT2dm === 'yes' ? 'yes' : 'no',
       diagnosedHypertension: answers.hypertension ?? 'no',
       isFilipino: 'yes',
       diagnosedT2dmConfirmationMethod:

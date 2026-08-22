@@ -22,10 +22,18 @@ import {
   type NumberFieldError,
 } from '../lib/assessmentValidation'
 import { computeBmi, type AnswerKey, type AssessmentAnswers } from '../types/assessment'
-import { PredictApiError, predictAssessment } from '../api/client'
+import { PredictApiError, estimateAssessment, mapDiagnosedPayload, predictAssessment } from '../api/client'
 import { mapPayload } from '../api/mapPayload'
 import { mockScore } from '../utils/mockScore'
 import './AssessmentPage.css'
+
+type DiagnosisGate = 'diagnosis' | 'onset' | 'survey'
+
+function initialGate(answers: AssessmentAnswers): DiagnosisGate {
+  if (answers.diagnosedT2dm === 'no') return 'survey'
+  if (answers.diagnosedT2dm === 'yes') return 'onset'
+  return 'diagnosis'
+}
 
 export function AssessmentPage() {
   const { t, language } = useLanguage()
@@ -48,6 +56,12 @@ export function AssessmentPage() {
   const [predictError, setPredictError] = useState<string | null>(null)
   const [fieldError, setFieldError] = useState<string | null>(null)
   const [attemptedNext, setAttemptedNext] = useState(false)
+  const [gate, setGate] = useState<DiagnosisGate>(() => initialGate(answers))
+  const [onsetAge, setOnsetAge] = useState<number | ''>(
+    typeof answers.ageAtDiagnosis === 'number' ? answers.ageAtDiagnosis : '',
+  )
+  const [onsetError, setOnsetError] = useState<string | null>(null)
+  const [gateSubmitting, setGateSubmitting] = useState(false)
 
   const current = flow.current
 
@@ -106,7 +120,18 @@ export function AssessmentPage() {
           <div className="resume-card">
             <h2>{t.resumeTitle}</h2>
             <p>{t.resumeText}</p>
-            <button type="button" className="btn btn--primary" onClick={() => setShowResume(false)}>
+            <button
+              type="button"
+              className="btn btn--primary"
+              onClick={() => {
+                setShowResume(false)
+                if (answers.diagnosedT2dm === 'yes' && answers.ageAtDiagnosis != null) {
+                  navigate('/management', { replace: true })
+                  return
+                }
+                setGate(initialGate(answers))
+              }}
+            >
               {t.resumeContinue}
             </button>
             <button
@@ -114,10 +139,132 @@ export function AssessmentPage() {
               className="btn btn--ghost"
               onClick={() => {
                 resetAssessment()
+                setGate('diagnosis')
+                setOnsetAge('')
                 setShowResume(false)
               }}
             >
               {t.resumeStartOver}
+            </button>
+          </div>
+        </div>
+      </PageBackground>
+    )
+  }
+
+  if (gate === 'diagnosis') {
+    return (
+      <PageBackground>
+        <div className="assessment-page assessment-page--resume">
+          <div className="resume-card" style={{ textAlign: 'left', maxWidth: 480 }}>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '0.75rem' }}>
+              <LanguageToggle />
+            </div>
+            <h2>{t.diagnosisGateTitle}</h2>
+            <p style={{ margin: '0.75rem 0 1rem', color: 'var(--color-text-muted)' }}>
+              {t.diagnosisGateQuestion}
+            </p>
+            <button
+              type="button"
+              className="btn btn--primary"
+              onClick={() => {
+                setAnswer('diagnosedT2dm', 'yes')
+                setGate('onset')
+              }}
+            >
+              {t.diagnosisGateYes}
+            </button>
+            <button
+              type="button"
+              className="btn btn--ghost"
+              onClick={() => {
+                setAnswer('diagnosedT2dm', 'no')
+                setAnswer('ageAtDiagnosis', undefined as never)
+                setQuestionIndex(0)
+                setGate('survey')
+              }}
+            >
+              {t.diagnosisGateNo}
+            </button>
+          </div>
+        </div>
+      </PageBackground>
+    )
+  }
+
+  if (gate === 'onset') {
+    return (
+      <PageBackground>
+        <div className="assessment-page assessment-page--resume">
+          <div className="resume-card" style={{ textAlign: 'left', maxWidth: 480 }}>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '0.75rem' }}>
+              <LanguageToggle />
+            </div>
+            <h2>{t.diagnosisOnsetTitle}</h2>
+            <p style={{ margin: '0.75rem 0 1rem', color: 'var(--color-text-muted)' }}>
+              {t.diagnosisOnsetHelp}
+            </p>
+            <NumberInput
+              id="ageOfOnset"
+              value={onsetAge}
+              min={1}
+              max={90}
+              step={1}
+              error={onsetError}
+              onChange={(v) => {
+                setOnsetAge(v)
+                if (v === '') {
+                  setOnsetError(t.fieldRequired)
+                  return
+                }
+                if (v < 1 || v > 90) {
+                  setOnsetError(t.fieldOutOfRange.replace('{min}', '1').replace('{max}', '90'))
+                  return
+                }
+                setOnsetError(null)
+              }}
+            />
+            <button
+              type="button"
+              className="btn btn--primary"
+              disabled={gateSubmitting}
+              onClick={() => {
+                void (async () => {
+                  if (onsetAge === '' || onsetAge < 1 || onsetAge > 90) {
+                    setOnsetError(
+                      onsetAge === ''
+                        ? t.fieldRequired
+                        : t.fieldOutOfRange.replace('{min}', '1').replace('{max}', '90'),
+                    )
+                    return
+                  }
+                  setGateSubmitting(true)
+                  setOnsetError(null)
+                  setAnswer('diagnosedT2dm', 'yes')
+                  setAnswer('ageAtDiagnosis', onsetAge)
+                  try {
+                    await estimateAssessment(mapDiagnosedPayload(onsetAge))
+                  } catch {
+                    // Local management path still proceeds if the save/estimate call fails.
+                  }
+                  clearDraft()
+                  navigate('/management', { replace: true })
+                  setGateSubmitting(false)
+                })()
+              }}
+            >
+              {gateSubmitting ? t.loading : t.diagnosisOnsetContinue}
+            </button>
+            <button
+              type="button"
+              className="btn btn--ghost"
+              disabled={gateSubmitting}
+              onClick={() => {
+                setGate('diagnosis')
+                setOnsetError(null)
+              }}
+            >
+              {t.back}
             </button>
           </div>
         </div>
@@ -240,9 +387,11 @@ export function AssessmentPage() {
       return
     }
 
+    const scoredAnswers: AssessmentAnswers = { ...latest, diagnosedT2dm: 'no' }
+
     setSubmitting(true)
     try {
-      const payload = mapPayload(latest)
+      const payload = mapPayload(scoredAnswers)
       try {
         const apiResult = await predictAssessment(payload)
         setResult(apiResult)
@@ -250,7 +399,7 @@ export function AssessmentPage() {
         navigate('/results')
       } catch (err) {
         if (import.meta.env.DEV) {
-          setResult(mockScore(latest))
+          setResult(mockScore(scoredAnswers))
           clearDraft()
           navigate('/results')
           return

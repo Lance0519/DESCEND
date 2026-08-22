@@ -78,6 +78,33 @@ export const en = {
   signOut: 'Sign out',
   preferredAge: 'Preferred age (for next assessment)',
   preferredSex: 'Preferred sex (for next assessment)',
+  diagnosisGateTitle: 'Before we begin',
+  diagnosisGateQuestion: 'Has a doctor diagnosed you with Type 2 diabetes?',
+  diagnosisGateYes: 'Yes — I have been diagnosed',
+  diagnosisGateNo: 'No — I have not been diagnosed',
+  diagnosisOnsetTitle: 'Age at diagnosis',
+  diagnosisOnsetHelp: 'Enter the age when a doctor first diagnosed you with Type 2 diabetes.',
+  diagnosisOnsetContinue: 'Continue to lifestyle management',
+  mgmtBadge: 'Disease management',
+  mgmtTitle: 'Living with Type 2 diabetes',
+  mgmtLead:
+    'Because you already have a clinical diagnosis, DESCEND does not generate a predictive risk score. Use these practical lifestyle tools alongside your care team.',
+  mgmtOnsetLabel: 'Age at onset you reported',
+  mgmtTipDietTitle: 'Nutrition patterns',
+  mgmtTipDietText:
+    'Favor vegetables, fiber-rich foods, and fewer sugary drinks. Work with a clinician or dietitian for a plan that fits your medications and labs.',
+  mgmtTipActivityTitle: 'Move most days',
+  mgmtTipActivityText:
+    'Aim for regular walking or other activity your clinician approves. Even short sessions help glucose control when done consistently.',
+  mgmtTipCareTitle: 'Stay linked to care',
+  mgmtTipCareText:
+    'Keep scheduled check-ups, medication reviews, and lab monitoring. Bring questions about hypoglycemia, foot care, and blood pressure.',
+  mgmtTipLifestyleTitle: 'Sleep, stress, and tobacco',
+  mgmtTipLifestyleText:
+    'Protect sleep, reduce smoking exposure, and manage stress — all support glucose stability and long-term heart health.',
+  mgmtDisclaimer:
+    'Educational guidance only — not a substitute for medical advice, prescriptions, or emergency care.',
+  mgmtRestart: 'Start over',
   section: {
     demographic: 'About you',
     anthropometric: 'Body measurements',

@@ -1,6 +1,7 @@
 import type { PredictionResult, RiskBand } from '../types/prediction'
+import type { AssessmentAnswers } from '../types/assessment'
 
-/** Strip trailing slashes so `…vercel.app/` + `/api/predict` never becomes `…app//api/…` (breaks CORS preflight). */
+/** Strip trailing slashes so `…vercel.app/` + `/api/…` never becomes `…app//api/…`. */
 function normalizeApiBase(raw: string | undefined): string {
   return (raw ?? '').trim().replace(/\/+$/, '')
 }
@@ -26,6 +27,19 @@ export class PredictApiError extends Error {
   }
 }
 
+export type EstimatePath = 'management' | 'predictive'
+
+export interface EstimateResponse {
+  path: EstimatePath
+  diagnosed: boolean
+  ageOfOnset?: number | null
+  recordId?: number | null
+  assessmentId?: number
+  message?: string
+  featureVector?: number[] | null
+  prediction?: PredictionResult
+}
+
 function authHeaders(): HeadersInit {
   const token = sessionStorage.getItem('descend-supabase-access-token')
   const headers: Record<string, string> = { 'Content-Type': 'application/json' }
@@ -33,14 +47,60 @@ function authHeaders(): HeadersInit {
   return headers
 }
 
-export async function predictAssessment(payload: unknown): Promise<PredictionResult> {
+function mapPredictiveBody(data: Record<string, unknown>): PredictionResult {
+  const summary = (data.summary ?? {}) as {
+    averagePercentage?: number
+    averageProbability?: number
+    overallRiskBand?: string
+    modelAveragePercentage?: number
+    modelAverageProbability?: number
+  }
+  const features = (data.features ?? {}) as { bmi?: number }
+
+  const probability = summary.averageProbability ?? summary.modelAverageProbability ?? 0.2
+  const percentage =
+    summary.averagePercentage ??
+    summary.modelAveragePercentage ??
+    Math.round(probability * 100)
+  const riskBand = (summary.overallRiskBand as RiskBand) ?? 'Low'
+
+  if (!Number.isFinite(probability) || !Number.isFinite(percentage)) {
+    throw new PredictApiError('invalid', 'Predict response missing numeric score')
+  }
+
+  return {
+    percentage,
+    probability,
+    riskBand,
+    bmi: features.bmi ?? null,
+    source: 'api',
+    softAdjustment: (data.softAdjustment as PredictionResult['softAdjustment']) ?? {
+      lifestyle: 0,
+      blood: 0,
+      earlyOnset: 0,
+      base: probability,
+      net: 0,
+      contributions: [],
+    },
+    predictions: data.predictions as PredictionResult['predictions'],
+    scenarioProbabilities:
+      (data.scenarioProbabilities as PredictionResult['scenarioProbabilities']) ?? null,
+    futureGenerations: data.futureGenerations as PredictionResult['futureGenerations'],
+    familyLineage: (data.familyLineage as PredictionResult['familyLineage']) ?? null,
+    predictionScopeNote: data.predictionScopeNote as string | undefined,
+    chartData: data.chartData as Record<string, number> | undefined,
+  }
+}
+
+/** Dedicated estimation endpoint — branches diagnosed vs ExtraTrees. */
+export async function estimateAssessment(payload: unknown): Promise<EstimateResponse> {
   if (!API_BASE) {
     throw new PredictApiError('config', 'API base URL is not configured')
   }
 
   let res: Response
   try {
-    res = await fetch(apiUrl('/api/predict'), {
+    res = await fetch(apiUrl('/api/estimate'), {
       method: 'POST',
       headers: authHeaders(),
       body: JSON.stringify(payload),
@@ -56,67 +116,73 @@ export async function predictAssessment(payload: unknown): Promise<PredictionRes
     } catch {
       detail = ''
     }
-    throw new PredictApiError(
-      'http',
-      detail || `Predict failed (${res.status})`,
-      res.status,
-    )
+    throw new PredictApiError('http', detail || `Estimate failed (${res.status})`, res.status)
   }
 
-  let data: {
-    summary?: {
-      averagePercentage?: number
-      averageProbability?: number
-      overallRiskBand?: string
-    }
-    softAdjustment?: PredictionResult['softAdjustment']
-    features?: { bmi?: number }
-    predictions?: PredictionResult['predictions']
-    scenarioProbabilities?: PredictionResult['scenarioProbabilities']
-    futureGenerations?: PredictionResult['futureGenerations']
-    familyLineage?: PredictionResult['familyLineage']
-    predictionScopeNote?: string
-    chartData?: Record<string, number>
-  }
-
+  let data: Record<string, unknown>
   try {
-    data = (await res.json()) as typeof data
+    data = (await res.json()) as Record<string, unknown>
   } catch {
-    throw new PredictApiError('invalid', 'Invalid JSON from predict API')
+    throw new PredictApiError('invalid', 'Invalid JSON from estimate API')
   }
 
-  if (!data || typeof data !== 'object') {
-    throw new PredictApiError('invalid', 'Empty predict response')
-  }
+  const path = (data.path as EstimatePath) || (data.diagnosed ? 'management' : 'predictive')
 
-  const probability = data.summary?.averageProbability ?? 0.2
-  const percentage = data.summary?.averagePercentage ?? Math.round(probability * 100)
-  const riskBand = (data.summary?.overallRiskBand as RiskBand) ?? 'Low'
-
-  if (!Number.isFinite(probability) || !Number.isFinite(percentage)) {
-    throw new PredictApiError('invalid', 'Predict response missing numeric score')
+  if (path === 'management' || data.diagnosed === true) {
+    return {
+      path: 'management',
+      diagnosed: true,
+      ageOfOnset: (data.ageOfOnset as number | null | undefined) ?? null,
+      recordId: (data.recordId as number | null | undefined) ?? null,
+      assessmentId: data.assessmentId as number | undefined,
+      message: data.message as string | undefined,
+      featureVector: null,
+    }
   }
 
   return {
-    percentage,
-    probability,
-    riskBand,
-    bmi: data.features?.bmi ?? null,
-    source: 'api',
-    softAdjustment: data.softAdjustment ?? {
-      lifestyle: 0,
-      blood: 0,
-      earlyOnset: 0,
-      base: probability,
-      net: 0,
-      contributions: [],
+    path: 'predictive',
+    diagnosed: false,
+    ageOfOnset: null,
+    recordId: (data.recordId as number | null | undefined) ?? null,
+    assessmentId: data.assessmentId as number | undefined,
+    featureVector: (data.featureVector as number[] | null | undefined) ?? null,
+    prediction: mapPredictiveBody(data),
+  }
+}
+
+/** Undiagnosed survey scoring (uses /api/estimate). */
+export async function predictAssessment(payload: unknown): Promise<PredictionResult> {
+  const estimated = await estimateAssessment(payload)
+  if (estimated.path === 'management' || !estimated.prediction) {
+    throw new PredictApiError(
+      'invalid',
+      'Diagnosed profiles cannot receive a predictive risk score',
+    )
+  }
+  return estimated.prediction
+}
+
+/** Minimal payload for already-diagnosed patients (no survey features). */
+export function mapDiagnosedPayload(ageOfOnset: number) {
+  return {
+    personalInfo: {
+      diagnosedT2dm: 'yes',
+      ageAtDiagnosis: ageOfOnset,
     },
-    predictions: data.predictions,
-    scenarioProbabilities: data.scenarioProbabilities ?? null,
-    futureGenerations: data.futureGenerations,
-    familyLineage: data.familyLineage ?? null,
-    predictionScopeNote: data.predictionScopeNote,
-    chartData: data.chartData,
+    diagnosisAges: {
+      self: ageOfOnset,
+    },
+    familyHistory: {},
+    lifestyle: {},
+    labs: {},
+  }
+}
+
+export function ensureUndiagnosedPayload(answers: AssessmentAnswers) {
+  return {
+    ...answers,
+    diagnosedT2dm: 'no' as const,
   }
 }
 
