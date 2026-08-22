@@ -11,7 +11,11 @@ export function AccessPage() {
   const { t } = useLanguage()
   const { continueAsGuest, signInWithGoogle, configured } = useAuth()
   const navigate = useNavigate()
-  const googleEnabled = import.meta.env.VITE_ENABLE_GOOGLE_SIGNIN === 'true'
+  const googleFlag = String(import.meta.env.VITE_ENABLE_GOOGLE_SIGNIN ?? '')
+    .trim()
+    .toLowerCase()
+  const googleEnabled = googleFlag === 'true' || googleFlag === '1' || googleFlag === 'yes'
+  const showGoogle = googleEnabled && configured
 
   return (
     <PageBackground>
@@ -47,7 +51,7 @@ export function AccessPage() {
             {t.accessRegister}
           </button>
 
-          {googleEnabled && configured ? (
+          {showGoogle ? (
             <>
               <button
                 type="button"
