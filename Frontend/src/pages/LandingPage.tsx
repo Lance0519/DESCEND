@@ -31,9 +31,10 @@ export function LandingPage() {
           <h2 className="landing__subtitle">{t.subtitle}</h2>
           <p className="landing__desc">{t.description}</p>
 
-          <DisclaimerBox title={t.disclaimerTitle} text={t.disclaimerText} icon={Info} variant="neutral" />
-          <div className="landing__spacer" />
-          <DisclaimerBox title={t.privacyTitle} text={t.privacyText} icon={ShieldCheck} variant="primary" />
+          <div className="landing__disclaimers">
+            <DisclaimerBox title={t.disclaimerTitle} text={t.disclaimerText} icon={Info} variant="neutral" />
+            <DisclaimerBox title={t.privacyTitle} text={t.privacyText} icon={ShieldCheck} variant="primary" />
+          </div>
 
           <button type="button" className="landing__cta" onClick={() => navigate('/access')}>
             {t.startAssessment}
