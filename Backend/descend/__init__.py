@@ -98,9 +98,9 @@ def create_app() -> Flask:
             db.create_all()
             ensure_database_schema()
         except Exception:
+            # Never fail process startup on schema issues (Vercel build/runtime,
+            # bad Postgres URI, etc.). Predict can still run without DB writes.
             logger.exception("Database schema init failed")
-            if not _is_vercel():
-                raise
 
     @app.get("/")
     def root():
