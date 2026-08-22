@@ -9,6 +9,19 @@
   --color-bg-page: #F0F8FF;
   --color-bg-card: #FFFFFF;
   --color-bg-neutral: #F3F4F6;
+  --color-ice: #E8F4FC;
+  --color-ice-deep: #B3E5FC;
+
+  /* Themed glass / panel surfaces */
+  --surface-card:
+    linear-gradient(
+      155deg,
+      rgba(255, 255, 255, 0.94) 0%,
+      rgba(232, 245, 233, 0.9) 48%,
+      rgba(232, 244, 252, 0.92) 100%
+    );
+  --surface-card-border: rgba(46, 125, 50, 0.18);
+  --surface-card-shadow: 0 12px 40px rgba(27, 94, 32, 0.08), 0 2px 8px rgba(31, 41, 55, 0.04);
 
   /* Typography & Contrast */
   --color-text-main: #1F2937;
