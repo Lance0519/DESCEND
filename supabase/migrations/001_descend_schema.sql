@@ -1,5 +1,5 @@
 -- DESCEND Supabase schema (run in Supabase SQL editor)
--- Mirrors app tables; RLS for client-side access. Flask also keeps SQLite mirrors for local/dev.
+-- Safe to re-run: tables use IF NOT EXISTS; policies are dropped then recreated.
 
 create table if not exists public.profiles (
   id uuid primary key references auth.users(id) on delete cascade,
@@ -34,12 +34,15 @@ alter table public.profiles enable row level security;
 alter table public.assessments enable row level security;
 alter table public.assessment_drafts enable row level security;
 
+drop policy if exists "profiles_own" on public.profiles;
 create policy "profiles_own" on public.profiles
   for all using (auth.uid() = id) with check (auth.uid() = id);
 
+drop policy if exists "assessments_own" on public.assessments;
 create policy "assessments_own" on public.assessments
   for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
 
+drop policy if exists "drafts_own" on public.assessment_drafts;
 create policy "drafts_own" on public.assessment_drafts
   for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
 
