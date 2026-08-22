@@ -8,6 +8,7 @@ import { useLanguage } from '../context/LanguageContext'
 import { DescendantProjection } from '../features/results/DescendantProjection'
 import { FamilyPedigreePanel } from '../features/results/FamilyPedigreePanel'
 import { clearDraft } from '../lib/draftStorage'
+import { buildOnsetHorizon } from '../utils/onsetHorizon'
 import './ResultsPage.css'
 
 export function ResultsPage() {
@@ -27,6 +28,8 @@ export function ResultsPage() {
         : 'results__band--high'
 
   const contribLabel = (key: string) => (t.contrib as Record<string, string>)[key] ?? key
+  const horizon =
+    result.onsetHorizon ?? buildOnsetHorizon(result.probability, answers.age ?? null)
 
   return (
     <PageBackground>
@@ -53,6 +56,28 @@ export function ResultsPage() {
           <p className={`results__band ${bandClass}`}>
             {t.resultsBand}: {t.bands[result.riskBand]}
           </p>
+
+          <section className="results__horizon" aria-label={t.resultsHorizonTitle}>
+            <h2 className="results__horizon-title">{t.resultsHorizonTitle}</h2>
+            <p className="results__horizon-years">
+              {t.resultsHorizonYears
+                .replace('{min}', String(horizon.yearsMin))
+                .replace('{max}', String(horizon.yearsMax))}
+            </p>
+            {horizon.possibleAgeMin != null && horizon.possibleAgeMax != null ? (
+              <p className="results__horizon-meta">
+                {t.resultsHorizonAge
+                  .replace('{ageMin}', String(horizon.possibleAgeMin))
+                  .replace('{ageMax}', String(horizon.possibleAgeMax))}
+              </p>
+            ) : null}
+            <p className="results__horizon-meta">
+              {t.resultsHorizonCalendar
+                .replace('{yearMin}', String(horizon.calendarYearMin))
+                .replace('{yearMax}', String(horizon.calendarYearMax))}
+            </p>
+            <p className="results__horizon-note">{t.resultsHorizonNote}</p>
+          </section>
 
           <div className="results__icons" aria-hidden>
             <span>

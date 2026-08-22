@@ -5,6 +5,7 @@ import type {
   SoftAdjustmentContribution,
 } from '../types/prediction'
 import { buildDescendantScenarios } from './descendantScenarios'
+import { buildOnsetHorizon } from './onsetHorizon'
 
 function clamp(n: number, min: number, max: number) {
   return Math.min(max, Math.max(min, n))
@@ -246,6 +247,7 @@ export function mockScore(answers: AssessmentAnswers): PredictionResult {
       contributions,
     },
     ...descendants,
+    onsetHorizon: buildOnsetHorizon(probability, answers.age),
     predictionScopeNote:
       'Child percentages are illustrative projections from your awareness score, not a medical diagnosis.',
     familyLineage: buildSimpleLineage(answers),

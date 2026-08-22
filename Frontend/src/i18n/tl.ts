@@ -42,6 +42,12 @@ export const tl: TranslationDict = {
   resultsScopeHeading: 'Paano ginawa ang markang ito',
   resultsBand: 'Antas ng kamalayan',
   resultsPercent: 'Tinatayang marka',
+  resultsHorizonTitle: 'Posibleng taon hanggang diabetes (halimbawa)',
+  resultsHorizonYears: 'Mga {min}–{max} taon mula ngayon',
+  resultsHorizonAge: 'Sa edad na humigit-kumulang {ageMin}–{ageMax} (batay sa iyong kasalukuyang edad)',
+  resultsHorizonCalendar: 'Humigit-kumulang taon {yearMin}–{yearMax}',
+  resultsHorizonNote:
+    'Ang timeline na ito ay proyektong pang-edukasyon mula sa iyong marka — hindi medikal na hula kung kailan magkakaroon ng diabetes.',
   resultsFactors: 'Mga nakatulong na salik',
   resultsDisclaimer:
     'Ito ay marka para sa edukasyon at kamalayan, hindi diyagnosis. Makipag-usap sa propesyonal sa kalusugan kung may pag-aalala.',
