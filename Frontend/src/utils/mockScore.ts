@@ -254,13 +254,49 @@ export function mockScore(answers: AssessmentAnswers): PredictionResult {
 
 function buildSimpleLineage(answers: AssessmentAnswers) {
   const nodes = [
-    { id: 'mgm', label: 'Maternal Grandmother', status: answers.maternalGrandmotherT2dm ?? 'unknown', generation: 1 },
-    { id: 'mgf', label: 'Maternal Grandfather', status: answers.maternalGrandfatherT2dm ?? 'unknown', generation: 1 },
-    { id: 'pgm', label: 'Paternal Grandmother', status: answers.paternalGrandmotherT2dm ?? 'unknown', generation: 1 },
-    { id: 'pgf', label: 'Paternal Grandfather', status: answers.paternalGrandfatherT2dm ?? 'unknown', generation: 1 },
-    { id: 'mother', label: 'Mother', status: answers.motherT2dm ?? 'unknown', generation: 2 },
-    { id: 'father', label: 'Father', status: answers.fatherT2dm ?? 'unknown', generation: 2 },
-    { id: 'user', label: 'You', status: answers.diagnosedT2dm ?? 'no', generation: 3 },
+    {
+      key: 'maternalGrandmother',
+      label: 'Maternal Grandmother',
+      status: answers.maternalGrandmotherT2dm ?? 'unknown',
+      generation: 0,
+    },
+    {
+      key: 'maternalGrandfather',
+      label: 'Maternal Grandfather',
+      status: answers.maternalGrandfatherT2dm ?? 'unknown',
+      generation: 0,
+    },
+    {
+      key: 'paternalGrandmother',
+      label: 'Paternal Grandmother',
+      status: answers.paternalGrandmotherT2dm ?? 'unknown',
+      generation: 0,
+    },
+    {
+      key: 'paternalGrandfather',
+      label: 'Paternal Grandfather',
+      status: answers.paternalGrandfatherT2dm ?? 'unknown',
+      generation: 0,
+    },
+    { key: 'mother', label: 'Mother', status: answers.motherT2dm ?? 'unknown', generation: 1 },
+    { key: 'father', label: 'Father', status: answers.fatherT2dm ?? 'unknown', generation: 1 },
+    {
+      key: 'user',
+      label: 'You',
+      status: answers.diagnosedT2dm ?? 'no',
+      generation: 2,
+      isRespondent: true,
+    },
   ]
-  return { nodes }
+  return {
+    nodes,
+    edges: [
+      { from: 'maternalGrandmother', to: 'mother' },
+      { from: 'maternalGrandfather', to: 'mother' },
+      { from: 'paternalGrandmother', to: 'father' },
+      { from: 'paternalGrandfather', to: 'father' },
+      { from: 'mother', to: 'user' },
+      { from: 'father', to: 'user' },
+    ],
+  }
 }

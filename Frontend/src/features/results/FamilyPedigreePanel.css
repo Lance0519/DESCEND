@@ -10,11 +10,48 @@
   align-items: center;
   gap: 0.5rem;
   color: var(--color-primary-dark);
-  margin-bottom: 1rem;
+  margin-bottom: 0.35rem;
 }
 
 .pedigree-panel__head h2 {
   font-size: 20px;
+}
+
+.pedigree-panel__caption {
+  font-size: 13px;
+  color: var(--color-text-muted);
+  margin: 0 0 1rem;
+  line-height: 1.4;
+}
+
+.pedigree-panel__generation {
+  margin-bottom: 1rem;
+}
+
+.pedigree-panel__gen-label {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-primary-dark);
+  margin: 0 0 0.5rem;
+}
+
+.pedigree-panel__branches {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+@media (max-width: 520px) {
+  .pedigree-panel__branches {
+    grid-template-columns: 1fr;
+  }
+}
+
+.pedigree-panel__branch-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  margin: 0 0 0.35rem;
 }
 
 .pedigree-panel__row {
@@ -22,7 +59,7 @@
   flex-wrap: wrap;
   justify-content: center;
   gap: 0.5rem;
-  margin-bottom: 0.65rem;
+  margin-bottom: 0.35rem;
 }
 
 .pedigree-node {
@@ -53,6 +90,19 @@
 .pedigree-node--yes {
   border-color: var(--color-primary-border);
   background: var(--color-primary-light);
+}
+
+.pedigree-node--no {
+  border-color: var(--color-border);
+  background: rgba(255, 255, 255, 0.75);
+}
+
+.pedigree-node--unknown {
+  border-style: dashed;
+}
+
+.pedigree-node--you {
+  box-shadow: inset 0 0 0 2px var(--color-primary);
 }
 
 .pedigree-node__label {

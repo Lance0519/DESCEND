@@ -47,6 +47,12 @@ export const en = {
   bmiLabel: 'Your BMI (computed)',
   bmiHelper: 'Based on the height and weight you entered.',
   pedigreeTitle: 'Family lineage',
+  pedigreeCaption: 'From grandparents through you (present generation).',
+  pedigreeGrandparents: 'Grandparents',
+  pedigreeMaternal: 'Maternal side',
+  pedigreePaternal: 'Paternal side',
+  pedigreeParents: 'Parents',
+  pedigreePresent: 'You (present)',
   descendantsTitle: 'Projected children',
   childrenTitle: 'Children (illustrative)',
   descendantsDisclaimer:

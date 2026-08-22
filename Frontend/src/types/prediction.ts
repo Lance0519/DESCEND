@@ -45,10 +45,16 @@ export interface FutureGenerationsPayload {
 }
 
 export interface FamilyLineageNode {
-  id: string
+  /** API field */
+  key?: string
+  /** Older mock field */
+  id?: string
   label: string
   status?: string
+  /** 0 = grandparents, 1 = parents, 2 = present (you) */
   generation?: number
+  isRespondent?: boolean
+  gender?: 'male' | 'female'
 }
 
 export interface FamilyLineage {
