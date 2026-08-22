@@ -1,12 +1,8 @@
-"""Vercel / WSGI entry for DESCEND Flask API.
-
-Always bind a Flask ``app`` at import time so Vercel entrypoint detection
-succeeds even if the full application factory fails during build.
-"""
+"""Vercel / WSGI entry for DESCEND Flask API."""
 
 from flask import Flask, jsonify
 
-# Guaranteed top-level Flask instance for Vercel detection.
+# Top-level Flask instance required by @vercel/python detection.
 app = Flask(__name__)
 
 
@@ -17,13 +13,7 @@ def _fallback_health():
 
 @app.get("/")
 def _fallback_root():
-    return jsonify(
-        {
-            "service": "DESCEND API",
-            "health": "/api/health",
-            "mode": "fallback",
-        }
-    )
+    return jsonify({"service": "DESCEND API", "health": "/api/health", "mode": "fallback"})
 
 
 try:
