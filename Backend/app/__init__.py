@@ -1,15 +1,22 @@
 """Flask application factory with absolute path resolution."""
 
+import logging
 import os
 from pathlib import Path
 
 from flask import Flask
+from sqlalchemy import create_engine
+from sqlalchemy.exc import OperationalError
 
 from .bootstrap import ensure_database_schema
 from .config import Config
 from .extensions import cors, db
-from sqlalchemy import create_engine
-from sqlalchemy.exc import OperationalError
+
+logger = logging.getLogger(__name__)
+
+
+def _is_vercel() -> bool:
+    return bool(os.getenv("VERCEL"))
 
 
 def create_app() -> Flask:
@@ -22,10 +29,11 @@ def create_app() -> Flask:
     model_path = Path(app.config["MODEL_PATH"])
     dataset_path = Path(app.config["DATASET_PATH"])
 
-    # Create required directories with absolute paths
-    instance_path.mkdir(parents=True, exist_ok=True)
-    model_path.parent.mkdir(parents=True, exist_ok=True)
-    dataset_path.parent.mkdir(parents=True, exist_ok=True)
+    # Vercel filesystem is read-only except /tmp — skip local mkdir there.
+    if not _is_vercel():
+        instance_path.mkdir(parents=True, exist_ok=True)
+        model_path.parent.mkdir(parents=True, exist_ok=True)
+        dataset_path.parent.mkdir(parents=True, exist_ok=True)
 
     # If a MySQL URI is configured, require a reachable MySQL server.
     # Do not silently fall back to SQLite when MySQL is intended for production.
@@ -36,9 +44,6 @@ def create_app() -> Flask:
             conn = test_engine.connect()
             conn.close()
         except OperationalError as exc:
-            # Fail fast: raise an explicit error so deployment/CI surfaces the
-            # missing or unreachable database instead of continuing with
-            # a local SQLite fallback.
             raise RuntimeError(
                 "Unable to connect to configured MySQL server. "
                 "Ensure MYSQL_HOST, MYSQL_DB, MYSQL_USER and MYSQL_PASSWORD "
@@ -73,11 +78,27 @@ def create_app() -> Flask:
 
     # Register API blueprint with modular routes
     from .api import api_bp
+
     app.register_blueprint(api_bp, url_prefix="/api")
 
-    # Initialize database
+    # Initialize database (do not crash the whole serverless function on Vercel
+    # if Postgres is misconfigured — /api/health and /api/predict can still run).
     with app.app_context():
-        db.create_all()
-        ensure_database_schema()
+        try:
+            db.create_all()
+            ensure_database_schema()
+        except Exception:
+            logger.exception("Database schema init failed")
+            if not _is_vercel():
+                raise
+
+    @app.get("/")
+    def root():
+        """Avoid a bare-domain crash page; point callers at the API."""
+        return {
+            "service": "DESCEND API",
+            "health": "/api/health",
+            "predict": "/api/predict",
+        }
 
     return app

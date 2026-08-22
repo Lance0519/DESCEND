@@ -37,17 +37,31 @@ for env_file in env_files:
         load_dotenv(env_file, override=True)
 
 
+def _normalize_database_uri(uri: str) -> str:
+    """Normalize Postgres URIs for SQLAlchemy + Supabase SSL."""
+    value = uri.strip()
+    if value.startswith("postgres://"):
+        value = "postgresql://" + value[len("postgres://") :]
+    if value.startswith("postgresql://") and "+psycopg2" not in value.split("://", 1)[0]:
+        value = "postgresql+psycopg2://" + value[len("postgresql://") :]
+    # Supabase (and most hosted Postgres) need SSL from serverless hosts.
+    if value.startswith("postgresql") and "sslmode=" not in value:
+        sep = "&" if "?" in value else "?"
+        value = f"{value}{sep}sslmode=require"
+    return value
+
+
 def _build_database_uri() -> str:
     """Build SQLAlchemy database URI with explicit priority."""
     # Priority 0: Explicit SQLALCHEMY_DATABASE_URI (for testing/custom setups)
     explicit_db_uri = os.getenv("SQLALCHEMY_DATABASE_URI")
     if explicit_db_uri:
-        return explicit_db_uri
-    
+        return _normalize_database_uri(explicit_db_uri)
+
     # Priority 1: Explicit DATABASE_URL environment variable
     explicit_url = os.getenv("DATABASE_URL")
     if explicit_url:
-        return explicit_url
+        return _normalize_database_uri(explicit_url)
 
     # Priority 2: MySQL
     mysql_host = os.getenv("MYSQL_HOST", "")
@@ -60,7 +74,9 @@ def _build_database_uri() -> str:
         encoded_password = quote_plus(mysql_pass)
         return f"mysql+pymysql://{mysql_user}:{encoded_password}@{mysql_host}:{mysql_port}/{mysql_db}"
 
-    # Priority 3: SQLite fallback for development
+    # Priority 3: SQLite — use /tmp on Vercel (read-only app filesystem)
+    if os.getenv("VERCEL"):
+        return "sqlite:////tmp/descend_vercel.db"
     sqlite_path = INSTANCE_DIR / "t2dm_dev.db"
     return f"sqlite:///{sqlite_path}"
 

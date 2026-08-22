@@ -11,6 +11,7 @@ export function AccessPage() {
   const { t } = useLanguage()
   const { continueAsGuest, signInWithGoogle, configured } = useAuth()
   const navigate = useNavigate()
+  const googleEnabled = import.meta.env.VITE_ENABLE_GOOGLE_SIGNIN === 'true'
 
   return (
     <PageBackground>
@@ -46,7 +47,7 @@ export function AccessPage() {
             {t.accessRegister}
           </button>
 
-          {configured ? (
+          {googleEnabled && configured ? (
             <>
               <button
                 type="button"
@@ -58,9 +59,10 @@ export function AccessPage() {
               </button>
               <p className="access__hint">{t.accessGoogleHint}</p>
             </>
-          ) : (
+          ) : null}
+          {googleEnabled && !configured ? (
             <p className="access__hint access__hint--muted">{t.accessGoogleNeedsConfig}</p>
-          )}
+          ) : null}
         </motion.main>
       </div>
     </PageBackground>
