@@ -385,6 +385,12 @@ def transform_row(raw_row: dict, source_record_id: int, demo: dict) -> dict:
     else:
         final_outcome = 1 if raw_outcome >= 1 else 0
 
+    raw_spid = raw_row.get("source_patient_id")
+    if raw_spid is not None and str(raw_spid).strip():
+        source_patient_id = str(raw_spid).strip()
+    else:
+        source_patient_id = str(safe_int(raw_row.get("patient_id", 0), fallback=0))
+
     base_row = {
         'age': round(age, 2),
         'bmi': bmi,
@@ -411,7 +417,7 @@ def transform_row(raw_row: dict, source_record_id: int, demo: dict) -> dict:
         'activity_metabolic_index': activity_metabolic_index,
         'outcome': final_outcome,
         'source_record_id': source_record_id,
-        'source_patient_id': safe_int(raw_row.get('patient_id', 0), fallback=0),
+        'source_patient_id': source_patient_id,
     }
 
     return base_row
