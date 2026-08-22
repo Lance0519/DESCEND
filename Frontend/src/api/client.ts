@@ -1,6 +1,16 @@
 import type { PredictionResult, RiskBand } from '../types/prediction'
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL ?? ''
+/** Strip trailing slashes so `…vercel.app/` + `/api/predict` never becomes `…app//api/…` (breaks CORS preflight). */
+function normalizeApiBase(raw: string | undefined): string {
+  return (raw ?? '').trim().replace(/\/+$/, '')
+}
+
+const API_BASE = normalizeApiBase(import.meta.env.VITE_API_BASE_URL)
+
+function apiUrl(path: string): string {
+  const p = path.startsWith('/') ? path : `/${path}`
+  return `${API_BASE}${p}`
+}
 
 export type PredictErrorCode = 'config' | 'network' | 'http' | 'invalid'
 
@@ -30,7 +40,7 @@ export async function predictAssessment(payload: unknown): Promise<PredictionRes
 
   let res: Response
   try {
-    res = await fetch(`${API_BASE}/api/predict`, {
+    res = await fetch(apiUrl('/api/predict'), {
       method: 'POST',
       headers: authHeaders(),
       body: JSON.stringify(payload),
@@ -111,13 +121,13 @@ export async function predictAssessment(payload: unknown): Promise<PredictionRes
 }
 
 export async function fetchProfile(): Promise<unknown> {
-  const res = await fetch(`${API_BASE}/api/profile`, { headers: authHeaders() })
+  const res = await fetch(apiUrl('/api/profile'), { headers: authHeaders() })
   if (!res.ok) throw new Error('Profile fetch failed')
   return res.json()
 }
 
 export async function patchProfile(body: Record<string, unknown>): Promise<unknown> {
-  const res = await fetch(`${API_BASE}/api/profile`, {
+  const res = await fetch(apiUrl('/api/profile'), {
     method: 'PATCH',
     headers: authHeaders(),
     body: JSON.stringify(body),
@@ -127,7 +137,7 @@ export async function patchProfile(body: Record<string, unknown>): Promise<unkno
 }
 
 export async function fetchHistory(): Promise<{ items: unknown[] }> {
-  const res = await fetch(`${API_BASE}/api/profile/history`, { headers: authHeaders() })
+  const res = await fetch(apiUrl('/api/profile/history'), { headers: authHeaders() })
   if (!res.ok) throw new Error('History fetch failed')
   return res.json()
 }
