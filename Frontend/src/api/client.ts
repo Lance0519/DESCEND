@@ -2,6 +2,20 @@ import type { PredictionResult, RiskBand } from '../types/prediction'
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL ?? ''
 
+export type PredictErrorCode = 'config' | 'network' | 'http' | 'invalid'
+
+export class PredictApiError extends Error {
+  readonly code: PredictErrorCode
+  readonly status?: number
+
+  constructor(code: PredictErrorCode, message?: string, status?: number) {
+    super(message ?? code)
+    this.name = 'PredictApiError'
+    this.code = code
+    this.status = status
+  }
+}
+
 function authHeaders(): HeadersInit {
   const token = sessionStorage.getItem('descend-supabase-access-token')
   const headers: Record<string, string> = { 'Content-Type': 'application/json' }
@@ -10,16 +24,36 @@ function authHeaders(): HeadersInit {
 }
 
 export async function predictAssessment(payload: unknown): Promise<PredictionResult> {
-  const res = await fetch(`${API_BASE}/api/predict`, {
-    method: 'POST',
-    headers: authHeaders(),
-    body: JSON.stringify(payload),
-  })
-  if (!res.ok) {
-    const text = await res.text()
-    throw new Error(text || `Predict failed (${res.status})`)
+  if (!API_BASE) {
+    throw new PredictApiError('config', 'API base URL is not configured')
   }
-  const data = (await res.json()) as {
+
+  let res: Response
+  try {
+    res = await fetch(`${API_BASE}/api/predict`, {
+      method: 'POST',
+      headers: authHeaders(),
+      body: JSON.stringify(payload),
+    })
+  } catch {
+    throw new PredictApiError('network', 'Network request failed')
+  }
+
+  if (!res.ok) {
+    let detail = ''
+    try {
+      detail = (await res.text()).slice(0, 280)
+    } catch {
+      detail = ''
+    }
+    throw new PredictApiError(
+      'http',
+      detail || `Predict failed (${res.status})`,
+      res.status,
+    )
+  }
+
+  let data: {
     summary?: {
       averagePercentage?: number
       averageProbability?: number
@@ -35,9 +69,23 @@ export async function predictAssessment(payload: unknown): Promise<PredictionRes
     chartData?: Record<string, number>
   }
 
+  try {
+    data = (await res.json()) as typeof data
+  } catch {
+    throw new PredictApiError('invalid', 'Invalid JSON from predict API')
+  }
+
+  if (!data || typeof data !== 'object') {
+    throw new PredictApiError('invalid', 'Empty predict response')
+  }
+
   const probability = data.summary?.averageProbability ?? 0.2
   const percentage = data.summary?.averagePercentage ?? Math.round(probability * 100)
   const riskBand = (data.summary?.overallRiskBand as RiskBand) ?? 'Low'
+
+  if (!Number.isFinite(probability) || !Number.isFinite(percentage)) {
+    throw new PredictApiError('invalid', 'Predict response missing numeric score')
+  }
 
   return {
     percentage,

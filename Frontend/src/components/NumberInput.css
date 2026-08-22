@@ -35,6 +35,23 @@
   border-color: var(--color-primary);
 }
 
+.number-input input.number-input__field--error {
+  border-color: #c62828;
+  background: rgba(255, 235, 238, 0.65);
+}
+
+.number-input input.number-input__field--error:focus {
+  outline-color: rgba(198, 40, 40, 0.35);
+  border-color: #c62828;
+}
+
+.number-input__error {
+  margin: 0;
+  font-size: 13px;
+  color: #b71c1c;
+  line-height: 1.35;
+}
+
 .number-input__unit {
   color: var(--color-text-muted);
   font-weight: 600;

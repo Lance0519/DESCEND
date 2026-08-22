@@ -15,8 +15,14 @@ import { useLanguage } from '../context/LanguageContext'
 import { useAssessmentFlow } from '../hooks/useAssessmentFlow'
 import { useSpeech } from '../hooks/useSpeech'
 import { clearDraft } from '../lib/draftStorage'
+import {
+  isStrictNumberField,
+  validateAnswersForSubmit,
+  validateNumberField,
+  type NumberFieldError,
+} from '../lib/assessmentValidation'
 import { computeBmi, type AnswerKey, type AssessmentAnswers } from '../types/assessment'
-import { predictAssessment } from '../api/client'
+import { PredictApiError, predictAssessment } from '../api/client'
 import { mapPayload } from '../api/mapPayload'
 import { mockScore } from '../utils/mockScore'
 import './AssessmentPage.css'
@@ -40,10 +46,14 @@ export function AssessmentPage() {
   const [draftNumber, setDraftNumber] = useState<number | ''>('')
   const [showResume, setShowResume] = useState(hasDraft && Object.keys(answers).length > 0)
   const [predictError, setPredictError] = useState<string | null>(null)
+  const [fieldError, setFieldError] = useState<string | null>(null)
+  const [attemptedNext, setAttemptedNext] = useState(false)
 
   const current = flow.current
 
   useEffect(() => {
+    setFieldError(null)
+    setAttemptedNext(false)
     if (!current) return
     if (current.type === 'number' || current.type === 'optionalNumber') {
       const key = current.id as AnswerKey
@@ -63,6 +73,31 @@ export function AssessmentPage() {
     const opts = current.options?.map((o) => optionLabel(String(o.labelKey))).join('. ') ?? ''
     return `${questionText}. ${opts}`
   }, [current, questionText, language])
+
+  function rangeMessage(min?: number, max?: number) {
+    return t.fieldOutOfRange
+      .replace('{min}', min != null ? String(min) : '—')
+      .replace('{max}', max != null ? String(max) : '—')
+  }
+
+  function messageForFieldError(code: NumberFieldError, min?: number, max?: number) {
+    if (code === 'required') return t.fieldRequired
+    if (code === 'range') return rangeMessage(min, max)
+    return null
+  }
+
+  function messageForPredictError(err: unknown): string {
+    if (err instanceof PredictApiError) {
+      if (err.code === 'network') return t.predictErrorNetwork
+      if (err.code === 'config') return t.predictErrorConfig
+      if (err.code === 'invalid') return t.predictErrorInvalid
+      if (err.code === 'http') {
+        return err.message && err.message !== 'http' ? err.message : t.predictErrorText
+      }
+    }
+    if (err instanceof Error && err.message) return err.message
+    return t.predictErrorText
+  }
 
   if (showResume) {
     return (
@@ -93,7 +128,25 @@ export function AssessmentPage() {
   if (!current) {
     return (
       <PageBackground>
-        <div className="assessment-page">{t.errorRetry}</div>
+        <div className="assessment-page assessment-page--resume">
+          <div className="resume-card" role="alert">
+            <h2>{t.flowErrorTitle}</h2>
+            <p>{t.flowErrorText}</p>
+            <button
+              type="button"
+              className="btn btn--primary"
+              onClick={() => {
+                resetAssessment()
+                navigate('/assessment', { replace: true })
+              }}
+            >
+              {t.flowErrorRestart}
+            </button>
+            <Link to="/" className="btn btn--ghost" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none' }}>
+              {t.brand}
+            </Link>
+          </div>
+        </div>
       </PageBackground>
     )
   }
@@ -112,6 +165,11 @@ export function AssessmentPage() {
         ? answers.hba1cSkipped === true || draftNumber !== '' || answers.hba1cPercent != null
         : false
 
+  const numberErrorCode =
+    current.type === 'number' && isStrictNumberField(String(current.id))
+      ? validateNumberField(current, draftNumber)
+      : null
+
   const canProceed =
     current.type === 'bmiConfirm'
       ? answers.heightCm != null && answers.weightKg != null
@@ -119,7 +177,9 @@ export function AssessmentPage() {
         ? flow.isAnswered(current)
         : current.type === 'optionalNumber'
           ? optionalAnswered
-          : draftNumber !== '' || flow.isAnswered(current)
+          : current.type === 'number' && isStrictNumberField(String(current.id))
+            ? draftNumber !== '' && numberErrorCode === null
+            : draftNumber !== '' || flow.isAnswered(current)
 
   function commitNumber(value: number | '', into?: AssessmentAnswers): AssessmentAnswers {
     const next = { ...(into ?? answers) }
@@ -143,23 +203,44 @@ export function AssessmentPage() {
       setAnswer('hba1cPercent', null)
       setAnswer('hba1cSkipped', true)
     }
+    setDraftNumber('')
+    setFieldError(null)
+    setAttemptedNext(false)
   }
 
   async function handleNext() {
+    setAttemptedNext(true)
+    setPredictError(null)
+
+    if (current!.type === 'number' && isStrictNumberField(String(current!.id))) {
+      const code = validateNumberField(current!, draftNumber)
+      if (code) {
+        setFieldError(messageForFieldError(code, current!.min, current!.max))
+        return
+      }
+      setFieldError(null)
+    }
+
     let latest = answers
     if (current!.type === 'number' || current!.type === 'optionalNumber') {
-      if (draftNumber !== '') latest = commitNumber(draftNumber)
+      const skipped =
+        (current!.id === 'fastingGlucoseMgDl' && answers.fastingGlucoseSkipped) ||
+        (current!.id === 'hba1cPercent' && answers.hba1cSkipped)
+      if (draftNumber !== '' && !skipped) latest = commitNumber(draftNumber)
     }
 
     if (!flow.isLast) {
       cancel()
-      setPredictError(null)
       flow.goNext()
       return
     }
 
+    if (!validateAnswersForSubmit(latest)) {
+      setPredictError(t.submitIncomplete)
+      return
+    }
+
     setSubmitting(true)
-    setPredictError(null)
     try {
       const payload = mapPayload(latest)
       try {
@@ -168,16 +249,16 @@ export function AssessmentPage() {
         clearDraft()
         navigate('/results')
       } catch (err) {
-        // Dev-only escape hatch: local mock when API is down. Never on production builds.
         if (import.meta.env.DEV) {
           setResult(mockScore(latest))
           clearDraft()
           navigate('/results')
           return
         }
-        const message = err instanceof Error ? err.message : t.predictErrorText
-        setPredictError(message || t.predictErrorText)
+        setPredictError(messageForPredictError(err))
       }
+    } catch (err) {
+      setPredictError(messageForPredictError(err))
     } finally {
       setSubmitting(false)
     }
@@ -186,6 +267,11 @@ export function AssessmentPage() {
   const bmi =
     answers.heightCm != null && answers.weightKg != null
       ? computeBmi(answers.heightCm, answers.weightKg)
+      : null
+
+  const shownFieldError =
+    isStrictNumberField(String(current.id)) && (attemptedNext || fieldError)
+      ? fieldError ?? messageForFieldError(numberErrorCode, current.min, current.max)
       : null
 
   return (
@@ -244,9 +330,17 @@ export function AssessmentPage() {
                   max={current.max}
                   step={current.step}
                   unit={current.unit}
+                  error={shownFieldError}
                   onChange={(v) => {
                     setDraftNumber(v)
-                    if (v !== '') commitNumber(v)
+                    if (isStrictNumberField(String(current.id))) {
+                      const code = validateNumberField(current, v)
+                      setFieldError(messageForFieldError(code, current.min, current.max))
+                      if (v !== '' && code === null) commitNumber(v)
+                    } else if (v !== '') {
+                      setFieldError(null)
+                      commitNumber(v)
+                    }
                   }}
                 />
               )}
@@ -263,6 +357,12 @@ export function AssessmentPage() {
                   <p className="bmi-confirm__helper">{t.bmiHelper}</p>
                 </div>
               ) : null}
+
+              {current.type === 'bmiConfirm' && bmi == null ? (
+                <p className="assessment-page__inline-error" role="alert">
+                  {t.submitIncomplete}
+                </p>
+              ) : null}
             </QuestionCard>
           </motion.div>
 
@@ -274,6 +374,8 @@ export function AssessmentPage() {
               onClick={() => {
                 cancel()
                 setPredictError(null)
+                setFieldError(null)
+                setAttemptedNext(false)
                 flow.goBack()
               }}
             >
@@ -282,7 +384,7 @@ export function AssessmentPage() {
             <button
               type="button"
               className="btn btn--primary"
-              disabled={!canProceed || submitting}
+              disabled={submitting || (current.type === 'choice' && !canProceed)}
               onClick={() => void handleNext()}
             >
               {submitting ? t.loading : flow.isLast ? t.seeResults : t.next}
@@ -292,8 +394,7 @@ export function AssessmentPage() {
           {predictError ? (
             <div className="assessment-page__predict-error" role="alert">
               <h3>{t.predictErrorTitle}</h3>
-              <p>{t.predictErrorText}</p>
-              <p className="assessment-page__predict-error-detail">{predictError}</p>
+              <p>{predictError}</p>
               <button
                 type="button"
                 className="btn btn--primary"

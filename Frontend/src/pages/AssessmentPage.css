@@ -185,3 +185,10 @@
   margin-top: 0.75rem;
   width: 100%;
 }
+
+.assessment-page__inline-error {
+  margin: 0.5rem 0 0;
+  font-size: 14px;
+  color: #b71c1c;
+  line-height: 1.4;
+}
