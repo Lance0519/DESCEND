@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import json
 import math
-from datetime import datetime
 from pathlib import Path
 
 from flask import current_app
@@ -42,11 +41,6 @@ RISK_THRESHOLD_RATIONALE = (
     "Low 0%-33% (probability < 0.34), Medium 34%-66% (0.34 <= p < 0.67), "
     "High 67%-100% (p >= 0.67). These are thesis operational cutoffs for a "
     "non-diagnostic prototype, not universal clinical thresholds."
-)
-ONSET_HORIZON_NOTE = (
-    "Illustrative years-to-possible-onset range derived from the awareness probability "
-    "and current age for educational communication only. It is not a clinical forecast, "
-    "diagnosis timeline, or guarantee of if/when Type 2 diabetes will occur."
 )
 # When calibrated probability sits just below the Low ceiling but structured pedigree
 # burden is high, the displayed respondent band is upgraded to Moderate (probability unchanged).
@@ -308,50 +302,6 @@ def _risk_band(probability: float) -> str:
     return "Low"
 
 
-def build_onset_horizon(probability: float, age: float | int | None) -> dict:
-    """
-    Map awareness probability to an illustrative years-until-possible-onset window.
-
-    Higher probability → shorter horizon. Uses current age for possible ages and
-    calendar year bounds. Communicative thesis prototype only — not clinical timing.
-    """
-    p = max(0.0, min(1.0, float(probability)))
-    mid = 2.0 + 36.0 * ((1.0 - p) ** 1.25)
-    mid = max(2.0, min(40.0, mid))
-    spread = max(2.0, min(8.0, mid * 0.28))
-    years_min = max(1, int(round(mid - spread)))
-    years_max = min(45, int(round(mid + spread)))
-    if years_max < years_min:
-        years_max = years_min
-
-    current_age = None
-    try:
-        if age is not None:
-            current_age = int(float(age))
-    except (TypeError, ValueError):
-        current_age = None
-    if current_age is not None:
-        current_age = max(1, min(120, current_age))
-
-    year_now = datetime.utcnow().year
-    payload: dict = {
-        "illustrative": True,
-        "yearsMin": years_min,
-        "yearsMax": years_max,
-        "midYears": int(round(mid)),
-        "probability": round(p, 4),
-        "riskBand": _risk_band(p),
-        "calendarYearMin": year_now + years_min,
-        "calendarYearMax": year_now + years_max,
-        "note": ONSET_HORIZON_NOTE,
-    }
-    if current_age is not None:
-        payload["fromAge"] = current_age
-        payload["possibleAgeMin"] = current_age + years_min
-        payload["possibleAgeMax"] = current_age + years_max
-    return payload
-
-
 def _prediction_percentage(predictions: list, key: str) -> float | None:
     for p in predictions:
         if p.get("key") == key:
@@ -574,6 +524,5 @@ def predict_assessment(payload: dict) -> dict:
         "chartData": probability_map,
         "scenarioProbabilities": build_scenario_probabilities(predictions),
         "futureGenerations": build_future_generations(),
-        "onsetHorizon": build_onset_horizon(respondent_probability, personal.get("age")),
         "modelEvaluation": get_model_evaluation(),
     }

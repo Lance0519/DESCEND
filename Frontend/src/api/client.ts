@@ -89,7 +89,6 @@ function mapPredictiveBody(data: Record<string, unknown>): PredictionResult {
     familyLineage: (data.familyLineage as PredictionResult['familyLineage']) ?? null,
     predictionScopeNote: data.predictionScopeNote as string | undefined,
     chartData: data.chartData as Record<string, number> | undefined,
-    onsetHorizon: (data.onsetHorizon as PredictionResult['onsetHorizon']) ?? null,
   }
 }
 

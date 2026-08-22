@@ -57,19 +57,6 @@ export interface FamilyLineage {
   [key: string]: unknown
 }
 
-export interface OnsetHorizon {
-  illustrative: boolean
-  yearsMin: number
-  yearsMax: number
-  midYears: number
-  fromAge?: number
-  possibleAgeMin?: number
-  possibleAgeMax?: number
-  calendarYearMin: number
-  calendarYearMax: number
-  note?: string
-}
-
 export interface PredictionResult {
   percentage: number
   probability: number
@@ -83,5 +70,4 @@ export interface PredictionResult {
   familyLineage?: FamilyLineage | null
   predictionScopeNote?: string
   chartData?: Record<string, number>
-  onsetHorizon?: OnsetHorizon | null
 }

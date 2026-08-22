@@ -40,12 +40,6 @@ export const en = {
   resultsScopeHeading: 'How this score is produced',
   resultsBand: 'Awareness band',
   resultsPercent: 'Estimated awareness score',
-  resultsHorizonTitle: 'Possible years until diabetes (illustrative)',
-  resultsHorizonYears: 'About {min}–{max} years from now',
-  resultsHorizonAge: 'Around ages {ageMin}–{ageMax} (based on your current age)',
-  resultsHorizonCalendar: 'Roughly calendar years {yearMin}–{yearMax}',
-  resultsHorizonNote:
-    'This timing window is an educational projection from your awareness score — not a medical prediction of if or when diabetes will occur.',
   resultsFactors: 'What contributed',
   resultsDisclaimer:
     'This is an educational awareness score, not a diagnosis. Talk with a healthcare professional about any concerns.',
