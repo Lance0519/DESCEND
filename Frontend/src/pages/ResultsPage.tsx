@@ -40,6 +40,13 @@ export function ResultsPage() {
         </div>
         <main className="results__card">
           <h1>{t.resultsTitle}</h1>
+          <p
+            className={`results__source ${
+              result.source === 'api' ? 'results__source--api' : 'results__source--mock'
+            }`}
+          >
+            {result.source === 'api' ? t.resultsModelBadge : t.resultsMockBadge}
+          </p>
           <p className="results__percent-label">{t.resultsPercent}</p>
           <p className="results__percent">{result.percentage}%</p>
           <p className={`results__band ${bandClass}`}>
@@ -99,7 +106,10 @@ export function ResultsPage() {
           </ul>
 
           {result.predictionScopeNote ? (
-            <p className="results__scope">{result.predictionScopeNote}</p>
+            <section className="results__scope-block">
+              <h2 className="results__scope-heading">{t.resultsScopeHeading}</h2>
+              <p className="results__scope">{result.predictionScopeNote}</p>
+            </section>
           ) : null}
 
           <div className="results__disclaimer">{t.resultsDisclaimer}</div>

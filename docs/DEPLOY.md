@@ -117,7 +117,7 @@ Add **each** row (Environment: Production and Preview is fine):
 |------------------|-------------------------|
 | `SECRET_KEY` | Make one up: long random string (e.g. password generator, 32+ chars) |
 | `FLASK_ENV` | `production` |
-| `FRONTEND_ORIGIN` | `https://descendt2dm.netlify.app` (no trailing slash) |
+| `FRONTEND_ORIGIN` | `https://descendt2dm.netlify.app` (no trailing slash). The API also always allows this origin in code as a safety net. |
 | `SUPABASE_URL` | Supabase **Project URL** (`https://xxxx.supabase.co`) |
 | `SUPABASE_JWT_SECRET` | Supabase **JWT Secret** |
 | `SUPABASE_SERVICE_ROLE_KEY` | Supabase **service_role** key (optional) |

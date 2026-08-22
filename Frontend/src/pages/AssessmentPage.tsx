@@ -39,6 +39,7 @@ export function AssessmentPage() {
   const [submitting, setSubmitting] = useState(false)
   const [draftNumber, setDraftNumber] = useState<number | ''>('')
   const [showResume, setShowResume] = useState(hasDraft && Object.keys(answers).length > 0)
+  const [predictError, setPredictError] = useState<string | null>(null)
 
   const current = flow.current
 
@@ -152,21 +153,31 @@ export function AssessmentPage() {
 
     if (!flow.isLast) {
       cancel()
+      setPredictError(null)
       flow.goNext()
       return
     }
 
     setSubmitting(true)
+    setPredictError(null)
     try {
       const payload = mapPayload(latest)
       try {
         const apiResult = await predictAssessment(payload)
         setResult(apiResult)
-      } catch {
-        setResult(mockScore(latest))
+        clearDraft()
+        navigate('/results')
+      } catch (err) {
+        // Dev-only escape hatch: local mock when API is down. Never on production builds.
+        if (import.meta.env.DEV) {
+          setResult(mockScore(latest))
+          clearDraft()
+          navigate('/results')
+          return
+        }
+        const message = err instanceof Error ? err.message : t.predictErrorText
+        setPredictError(message || t.predictErrorText)
       }
-      clearDraft()
-      navigate('/results')
     } finally {
       setSubmitting(false)
     }
@@ -262,6 +273,7 @@ export function AssessmentPage() {
               disabled={flow.isFirst || submitting}
               onClick={() => {
                 cancel()
+                setPredictError(null)
                 flow.goBack()
               }}
             >
@@ -276,6 +288,22 @@ export function AssessmentPage() {
               {submitting ? t.loading : flow.isLast ? t.seeResults : t.next}
             </button>
           </div>
+
+          {predictError ? (
+            <div className="assessment-page__predict-error" role="alert">
+              <h3>{t.predictErrorTitle}</h3>
+              <p>{t.predictErrorText}</p>
+              <p className="assessment-page__predict-error-detail">{predictError}</p>
+              <button
+                type="button"
+                className="btn btn--primary"
+                disabled={submitting}
+                onClick={() => void handleNext()}
+              >
+                {submitting ? t.loading : t.predictRetry}
+              </button>
+            </div>
+          ) : null}
         </div>
       </div>
     </PageBackground>
