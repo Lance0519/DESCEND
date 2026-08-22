@@ -121,7 +121,7 @@ Add **each** row (Environment: Production and Preview is fine):
 | `SUPABASE_URL` | Supabase **Project URL** (`https://xxxx.supabase.co`) |
 | `SUPABASE_JWT_SECRET` | Supabase **JWT Secret** |
 | `SUPABASE_SERVICE_ROLE_KEY` | Supabase **service_role** key (optional) |
-| `SQLALCHEMY_DATABASE_URI` | Supabase Database **URI** (with your DB password filled in). If deploy fails on DB, you can omit this for a temporary SQLite fallback only on local machines — production should use Postgres. |
+| `SQLALCHEMY_DATABASE_URI` | Supabase **Database** connection string (URI), **not** the Project URL. Must start with `postgresql://` or `postgres://`. Example: `postgresql://postgres:YOUR_PASSWORD@db.YOUR-REF.supabase.co:5432/postgres`. If you pasted `https://….supabase.co` by mistake, remove it or replace it — the API will fall back to temporary SQLite. |
 
 **Do not add:** `GOOGLE_TTS_API_KEY`, Google OAuth Client ID/Secret.
 
