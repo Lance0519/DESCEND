@@ -1,13 +1,16 @@
 .access {
   min-height: 100svh;
+  min-height: 100dvh;
   display: flex;
   flex-direction: column;
-  padding: 1rem;
+  padding: max(0.75rem, env(safe-area-inset-top)) max(0.75rem, env(safe-area-inset-right))
+    max(0.75rem, env(safe-area-inset-bottom)) max(0.75rem, env(safe-area-inset-left));
 }
 
 .access__toolbar {
   display: flex;
   justify-content: flex-end;
+  margin-bottom: 0.5rem;
 }
 
 .access__card {
@@ -16,16 +19,17 @@
   margin: auto;
   background: var(--surface-card);
   border-radius: calc(var(--radius) + 4px);
-  padding: 2rem 1.5rem;
+  padding: clamp(1.25rem, 4vw, 2rem) clamp(1rem, 3.5vw, 1.5rem);
   border: 1px solid var(--surface-card-border);
   box-shadow: var(--surface-card-shadow);
   backdrop-filter: blur(10px);
 }
 
 .access__card h1 {
-  font-size: 22px;
+  font-size: clamp(1.15rem, 4.5vw, 1.375rem);
   margin-bottom: 1.25rem;
   text-align: center;
+  line-height: 1.35;
 }
 
 .access__btn {
@@ -42,6 +46,7 @@
   font-size: 16px;
   font-weight: 600;
   color: var(--color-text-main);
+  padding: 0.65rem 0.85rem;
 }
 
 .access__btn--primary {
@@ -61,6 +66,7 @@
   color: var(--color-text-muted);
   text-align: center;
   margin: 0 0 1rem;
+  line-height: 1.45;
 }
 
 .access__hint--muted {

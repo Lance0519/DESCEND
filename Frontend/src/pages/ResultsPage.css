@@ -1,15 +1,24 @@
 .results {
   min-height: 100svh;
+  min-height: 100dvh;
   background: transparent;
-  padding: 1rem;
+  padding: max(0.75rem, env(safe-area-inset-top)) max(0.75rem, env(safe-area-inset-right))
+    max(1rem, env(safe-area-inset-bottom)) max(0.75rem, env(safe-area-inset-left));
+  box-sizing: border-box;
 }
 
 .results__toolbar {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 0.5rem;
   max-width: 640px;
   margin: 0 auto 0.75rem;
+  flex-wrap: wrap;
+}
+
+.results__toolbar .lang-toggle {
+  flex-shrink: 0;
 }
 
 .results__account {
@@ -42,18 +51,20 @@
 
 .results__card {
   max-width: 640px;
+  width: 100%;
   margin: 0 auto;
   background: var(--surface-card);
   border-radius: calc(var(--radius) + 4px);
-  padding: 2rem 1.5rem;
+  padding: clamp(1.25rem, 4vw, 2rem) clamp(1rem, 3.5vw, 1.5rem);
   border: 1px solid var(--surface-card-border);
   box-shadow: var(--surface-card-shadow);
   backdrop-filter: blur(10px);
   text-align: center;
+  box-sizing: border-box;
 }
 
 .results__card h1 {
-  font-size: 24px;
+  font-size: clamp(1.2rem, 4.5vw, 1.5rem);
   margin-bottom: 0.65rem;
 }
 
@@ -64,6 +75,8 @@
   padding: 0.35rem 0.75rem;
   border-radius: 999px;
   margin-bottom: 1rem;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .results__source--api {
@@ -84,7 +97,7 @@
 }
 
 .results__percent {
-  font-size: 48px;
+  font-size: clamp(2.25rem, 10vw, 3rem);
   font-weight: 700;
   color: var(--color-primary-dark);
   margin: 0.25rem 0 0.5rem;
@@ -116,6 +129,7 @@
 .results__icons {
   display: flex;
   justify-content: center;
+  flex-wrap: wrap;
   gap: 1rem;
   color: var(--color-primary);
   margin-bottom: 1rem;
@@ -142,10 +156,22 @@
 .results__factors li {
   display: flex;
   justify-content: space-between;
-  gap: 1rem;
+  align-items: flex-start;
+  gap: 0.75rem;
   padding: 0.65rem 0;
   border-bottom: 1px solid var(--color-border);
-  font-size: 16px;
+  font-size: clamp(0.9rem, 3.2vw, 1rem);
+}
+
+.results__factors li span:first-child {
+  min-width: 0;
+  flex: 1;
+  word-break: break-word;
+}
+
+.results__factors li span:last-child {
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .delta-up {
@@ -177,4 +203,16 @@
   border-radius: 8px;
   font-size: 17px;
   font-weight: 700;
+}
+
+@media (max-width: 380px) {
+  .results__icons {
+    gap: 0.65rem;
+  }
+
+  .results__source {
+    font-size: 12px;
+    white-space: normal;
+    line-height: 1.35;
+  }
 }

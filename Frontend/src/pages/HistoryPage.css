@@ -1,6 +1,8 @@
 .history-page {
   min-height: 100svh;
-  padding: 1rem;
+  min-height: 100dvh;
+  padding: max(0.75rem, env(safe-area-inset-top)) max(0.75rem, env(safe-area-inset-right))
+    max(0.75rem, env(safe-area-inset-bottom)) max(0.75rem, env(safe-area-inset-left));
 }
 
 .history-page__toolbar {
@@ -9,6 +11,8 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
 }
 
 .history-page__toolbar a {
@@ -19,11 +23,13 @@
 .history-page__card {
   max-width: 640px;
   margin: 0 auto;
-  background: var(--color-bg-card);
-  border-radius: var(--radius);
-  border: 1px solid var(--color-border);
-  padding: 1.75rem;
+  background: var(--surface-card);
+  border-radius: calc(var(--radius) + 4px);
+  border: 1px solid var(--surface-card-border);
+  padding: clamp(1.25rem, 4vw, 1.75rem);
   text-align: left;
+  box-sizing: border-box;
+  width: 100%;
 }
 
 .history-page__empty {
@@ -44,6 +50,13 @@
   padding: 0.75rem 0;
   border-bottom: 1px solid var(--color-border);
   font-size: 15px;
+}
+
+@media (max-width: 520px) {
+  .history-page__list li {
+    grid-template-columns: 1fr;
+    gap: 0.25rem;
+  }
 }
 
 .history-page__cta {

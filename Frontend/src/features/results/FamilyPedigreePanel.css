@@ -26,13 +26,28 @@
 }
 
 .pedigree-node {
-  min-width: 110px;
+  min-width: min(110px, 42vw);
+  max-width: 100%;
+  flex: 1 1 100px;
   padding: 0.55rem 0.65rem;
   border-radius: 8px;
   border: 1px solid var(--color-border);
   background: var(--color-bg-neutral);
   text-align: center;
   font-size: 13px;
+  box-sizing: border-box;
+}
+
+@media (max-width: 400px) {
+  .pedigree-panel__row {
+    gap: 0.4rem;
+  }
+
+  .pedigree-node {
+    min-width: calc(50% - 0.25rem);
+    flex: 1 1 calc(50% - 0.25rem);
+    font-size: 12px;
+  }
 }
 
 .pedigree-node--yes {

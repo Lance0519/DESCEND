@@ -9,21 +9,31 @@ export function LanguageToggle() {
   const set = (lang: Language) => setLanguage(lang)
 
   return (
-    <div className="lang-toggle" aria-label={t.langLabel}>
-      <Globe size={18} aria-hidden />
+    <div className="lang-toggle" role="group" aria-label={t.langLabel}>
+      <Globe className="lang-toggle__icon" size={16} aria-hidden />
       <button
         type="button"
         className={language === 'tl' ? 'lang-toggle__btn lang-toggle__btn--active' : 'lang-toggle__btn'}
         onClick={() => set('tl')}
+        aria-pressed={language === 'tl'}
+        aria-label="Tagalog"
       >
-        Tagalog
+        <span className="lang-toggle__full">Tagalog</span>
+        <span className="lang-toggle__short" aria-hidden>
+          TL
+        </span>
       </button>
       <button
         type="button"
         className={language === 'en' ? 'lang-toggle__btn lang-toggle__btn--active' : 'lang-toggle__btn'}
         onClick={() => set('en')}
+        aria-pressed={language === 'en'}
+        aria-label="English"
       >
-        English
+        <span className="lang-toggle__full">English</span>
+        <span className="lang-toggle__short" aria-hidden>
+          EN
+        </span>
       </button>
     </div>
   )

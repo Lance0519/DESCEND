@@ -1,36 +1,51 @@
 .assessment-page {
   min-height: 100svh;
+  min-height: 100dvh;
   background: transparent;
   display: flex;
   flex-direction: column;
+  width: 100%;
+  max-width: 100%;
 }
 
 .assessment-page__toolbar {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.75rem 1rem 0;
+  gap: 0.5rem;
+  padding: 0.75rem max(1rem, env(safe-area-inset-right)) 0 max(1rem, env(safe-area-inset-left));
   max-width: 640px;
   width: 100%;
   margin: 0 auto;
+  box-sizing: border-box;
+}
+
+.assessment-page__toolbar .lang-toggle {
+  flex-shrink: 0;
 }
 
 .assessment-page__account {
   color: var(--color-primary-dark);
   font-weight: 600;
-  font-size: 14px;
-  padding: 0.4rem 0.75rem;
+  font-size: 13px;
+  padding: 0.4rem 0.65rem;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.65);
   border: 1px solid var(--surface-card-border);
   text-decoration: none;
+  white-space: nowrap;
+  flex-shrink: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 45%;
 }
 
 .assessment-page--resume {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 1.5rem;
+  padding: max(1rem, env(safe-area-inset-top)) 1rem max(1rem, env(safe-area-inset-bottom));
 }
 
 .resume-card {
@@ -41,7 +56,7 @@
   border: 1px solid var(--surface-card-border);
   box-shadow: var(--surface-card-shadow);
   backdrop-filter: blur(10px);
-  padding: 1.75rem;
+  padding: clamp(1.25rem, 4vw, 1.75rem);
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
@@ -49,7 +64,7 @@
 }
 
 .resume-card h2 {
-  font-size: 22px;
+  font-size: clamp(1.15rem, 4vw, 1.375rem);
   color: var(--color-primary-dark);
 }
 
@@ -57,14 +72,30 @@
   width: 100%;
   max-width: 640px;
   margin: 0 auto;
-  padding: 1rem 1rem 2rem;
+  padding: 1rem max(1rem, env(safe-area-inset-right)) max(2rem, env(safe-area-inset-bottom))
+    max(1rem, env(safe-area-inset-left));
   flex: 1;
+  box-sizing: border-box;
 }
 
 .assessment-page__nav {
   display: flex;
   gap: 0.75rem;
   margin-top: 1.25rem;
+}
+
+@media (max-width: 480px) {
+  .assessment-page__toolbar {
+    flex-wrap: wrap;
+  }
+
+  .assessment-page__nav {
+    flex-direction: column-reverse;
+  }
+
+  .assessment-page__nav .btn {
+    width: 100%;
+  }
 }
 
 .btn {
