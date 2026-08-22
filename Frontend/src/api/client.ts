@@ -62,20 +62,6 @@ export async function predictAssessment(payload: unknown): Promise<PredictionRes
   }
 }
 
-export async function fetchTtsAudio(text: string, language: 'en' | 'tl'): Promise<Blob | null> {
-  try {
-    const res = await fetch(`${API_BASE}/api/tts`, {
-      method: 'POST',
-      headers: authHeaders(),
-      body: JSON.stringify({ text, language }),
-    })
-    if (!res.ok) return null
-    return await res.blob()
-  } catch {
-    return null
-  }
-}
-
 export async function fetchProfile(): Promise<unknown> {
   const res = await fetch(`${API_BASE}/api/profile`, { headers: authHeaders() })
   if (!res.ok) throw new Error('Profile fetch failed')

@@ -47,6 +47,9 @@ export const tl: TranslationDict = {
   accessSignIn: 'Mag-sign in',
   accessRegister: 'Gumawa ng account',
   accessGoogle: 'Magpatuloy gamit ang Google',
+  accessGoogleHint: 'Mag-sign in gamit ang Google (libre). Kailangan naka-enable ang Google provider sa Supabase.',
+  accessGoogleNeedsConfig:
+    'Kailangan ng VITE_SUPABASE_URL at VITE_SUPABASE_ANON_KEY para sa Google. Maaari ka pa ring magpatuloy bilang bisita.',
   accessGuestHint: 'Hindi kailangan ng account. Naka-save ang progreso sa aparatong ito lamang.',
   email: 'Email',
   password: 'Password',

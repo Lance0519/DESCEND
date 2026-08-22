@@ -45,6 +45,9 @@ export const en = {
   accessSignIn: 'Sign in',
   accessRegister: 'Create account',
   accessGoogle: 'Continue with Google',
+  accessGoogleHint: 'Sign in with your Google account (free). Requires Supabase Google provider to be enabled.',
+  accessGoogleNeedsConfig:
+    'Google sign-in needs VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY. You can still continue as guest.',
   accessGuestHint: 'No account needed. Progress is saved on this device only.',
   email: 'Email',
   password: 'Password',

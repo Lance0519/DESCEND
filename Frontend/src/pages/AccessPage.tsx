@@ -45,16 +45,22 @@ export function AccessPage() {
             <UserPlus size={20} aria-hidden />
             {t.accessRegister}
           </button>
+
           {configured ? (
-            <button
-              type="button"
-              className="access__btn access__btn--google"
-              onClick={() => void signInWithGoogle()}
-            >
-              <LogIn size={20} aria-hidden />
-              {t.accessGoogle}
-            </button>
-          ) : null}
+            <>
+              <button
+                type="button"
+                className="access__btn access__btn--google"
+                onClick={() => void signInWithGoogle()}
+              >
+                <LogIn size={20} aria-hidden />
+                {t.accessGoogle}
+              </button>
+              <p className="access__hint">{t.accessGoogleHint}</p>
+            </>
+          ) : (
+            <p className="access__hint access__hint--muted">{t.accessGoogleNeedsConfig}</p>
+          )}
         </motion.main>
       </div>
     </PageBackground>

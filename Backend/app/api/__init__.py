@@ -5,7 +5,7 @@ from flask import Blueprint
 api_bp = Blueprint("api", __name__)
 
 # Import route modules to register sub-blueprints
-from . import admin, assessment, auth, health, profile, tts
+from . import admin, assessment, auth, health, profile
 
 # Register blueprints in priority order
 # Health checks first for uptime monitoring
@@ -14,9 +14,8 @@ api_bp.register_blueprint(health.health_bp)
 api_bp.register_blueprint(auth.auth_bp, url_prefix="/auth")
 # Main assessment functionality
 api_bp.register_blueprint(assessment.assessment_bp)
-# DESCEND profile / history / TTS
+# DESCEND profile / history
 api_bp.register_blueprint(profile.profile_bp)
-api_bp.register_blueprint(tts.tts_bp)
 # Admin operations
 api_bp.register_blueprint(admin.admin_bp)
 
