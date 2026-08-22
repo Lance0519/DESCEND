@@ -1,4 +1,4 @@
-import { Baby, GitBranch, Users } from 'lucide-react'
+import { Baby, Users } from 'lucide-react'
 import type { PredictionResult } from '../../types/prediction'
 import { percentForProjectedKey } from '../../utils/descendantScenarios'
 import './DescendantProjection.css'
@@ -7,7 +7,6 @@ interface Props {
   result: PredictionResult
   title: string
   childrenTitle: string
-  grandchildrenTitle: string
   disclaimer: string
   illustrativeOnly: string
 }
@@ -30,7 +29,6 @@ export function DescendantProjection({
   result,
   title,
   childrenTitle,
-  grandchildrenTitle,
   disclaimer,
   illustrativeOnly,
 }: Props) {
@@ -42,7 +40,6 @@ export function DescendantProjection({
     { key: 'child_female', label: 'Daughter', gender: 'female' as const },
     { key: 'child_male', label: 'Son', gender: 'male' as const },
   ]
-  const grandchildren = fg?.grandchildren ?? []
 
   return (
     <section className="desc-proj">
@@ -67,29 +64,6 @@ export function DescendantProjection({
           )
         })}
       </div>
-
-      {grandchildren.length > 0 ? (
-        <>
-          <h3 className="desc-proj__sub">
-            <GitBranch size={18} aria-hidden /> {grandchildrenTitle}
-          </h3>
-          <div className="desc-proj__grid desc-proj__grid--gc">
-            {grandchildren.map((g) => {
-              const pct = percentForProjectedKey(g.key, scenario)
-              return (
-                <article key={g.key} className={`desc-card ${bandClass(pct)}`}>
-                  <p className="desc-card__label">{g.label}</p>
-                  <p className="desc-card__meta">
-                    {g.parentKey === 'child_female' ? 'via daughter' : 'via son'}
-                  </p>
-                  <p className="desc-card__pct">{pct != null ? `~${Math.round(pct)}%` : '—'}</p>
-                  <p className="desc-card__band">{bandLabel(pct)}</p>
-                </article>
-              )
-            })}
-          </div>
-        </>
-      ) : null}
 
       <p className="desc-proj__disclaimer">{disclaimer}</p>
     </section>

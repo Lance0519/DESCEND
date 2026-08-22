@@ -31,11 +31,10 @@ export const en = {
   bmiLabel: 'Your BMI (computed)',
   bmiHelper: 'Based on the height and weight you entered.',
   pedigreeTitle: 'Family lineage',
-  descendantsTitle: 'Projected descendants',
+  descendantsTitle: 'Projected children',
   childrenTitle: 'Children (illustrative)',
-  grandchildrenTitle: 'Grandchildren (illustrative)',
   descendantsDisclaimer:
-    'Child and grandchild scores are educational projections from your awareness profile — not validated offspring diagnoses.',
+    'Child scores are educational projections from your awareness profile — not validated offspring diagnoses.',
   resumeTitle: 'Continue where you left off?',
   resumeText: 'We saved your answers on this device.',
   resumeContinue: 'Resume',

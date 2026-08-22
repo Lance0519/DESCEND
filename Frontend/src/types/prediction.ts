@@ -29,24 +29,19 @@ export interface ScenarioProbabilities {
     female: number | null
     male: number | null
   }
-  grandchildRisk: {
-    fromDaughter: { female: number | null; male: number | null }
-    fromSon: { female: number | null; male: number | null }
-  }
 }
 
 export interface ProjectedGenerationNode {
   key: string
   label: string
   gender: 'male' | 'female'
-  generation: 4 | 5
+  generation: 4
   isProjected: true
   parentKey?: string
 }
 
 export interface FutureGenerationsPayload {
   children: ProjectedGenerationNode[]
-  grandchildren: ProjectedGenerationNode[]
 }
 
 export interface FamilyLineageNode {

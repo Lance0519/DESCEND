@@ -485,23 +485,22 @@ class TestPredictAssessment:
             assert "scenarioProbabilities" in result
             sp = result["scenarioProbabilities"]
             assert "childRisk" in sp and sp["childRisk"]["female"] is not None
-            assert "grandchildRisk" in sp
+            assert "grandchildRisk" not in sp
             assert "futureGenerations" in result
             fg = result["futureGenerations"]
             assert "children" in fg and len(fg["children"]) == 2
-            assert "grandchildren" in fg and len(fg["grandchildren"]) == 4
+            assert "grandchildren" not in fg
             assert fg["children"][0]["key"] == "child_female"
-            assert fg["grandchildren"][0].get("parentKey") == "child_female"
             assert "modelEvaluation" in result
             assert "scenarioLineageMultiplier" in result
             assert result["scenarioLineageMultiplier"] >= 1.0
 
-    def test_four_prediction_targets(self, app, sample_assessment_payload):
+    def test_two_prediction_targets(self, app, sample_assessment_payload):
         with app.app_context():
             result = predict_assessment(sample_assessment_payload)
-            assert len(result["predictions"]) == 4
+            assert len(result["predictions"]) == 2
             keys = {p["key"] for p in result["predictions"]}
-            assert keys == {"male_child", "female_child", "male_grandchild", "female_grandchild"}
+            assert keys == {"male_child", "female_child"}
 
     def test_probabilities_in_valid_range(self, app, sample_assessment_payload):
         with app.app_context():
@@ -510,12 +509,11 @@ class TestPredictAssessment:
                 assert 0.0 <= pred["probability"] <= 1.0
                 assert pred["riskBand"] in ("Low", "Moderate", "High")
 
-    def test_grandchild_attenuation(self, app, sample_assessment_payload):
+    def test_child_sex_spread(self, app, sample_assessment_payload):
         with app.app_context():
             result = predict_assessment(sample_assessment_payload)
             preds = {p["key"]: p["probability"] for p in result["predictions"]}
-            assert preds["male_grandchild"] <= preds["male_child"]
-            assert preds["female_grandchild"] <= preds["female_child"]
+            assert preds["male_child"] != preds["female_child"]
 
     def test_male_female_child_scenarios_differ(self, app, sample_assessment_payload):
         with app.app_context():

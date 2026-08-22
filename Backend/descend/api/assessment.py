@@ -138,8 +138,6 @@ def _history_export_rows(assessments: List[Assessment]) -> List[dict]:
     prediction_keys = [
         ("male_child", "Male Child"),
         ("female_child", "Female Child"),
-        ("male_grandchild", "Male Grandchild"),
-        ("female_grandchild", "Female Grandchild"),
     ]
 
     for assessment in assessments:

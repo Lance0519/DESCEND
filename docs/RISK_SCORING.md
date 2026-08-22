@@ -177,7 +177,7 @@ Clamp: `delta_early_onset ≤ 0.06`.
 
 ## Scenario projections (heuristic)
 
-Child / grandchild percentages are **not** separately trained. They are communicative projections from the blended respondent score (grandchild factor ~0.92, small male/female spread, lineage multiplier). Do not read them as validated offspring probabilities.
+Child percentages are **not** separately trained. They are communicative projections from the blended respondent score (small male/female spread, lineage multiplier). Do not read them as validated offspring probabilities.
 
 ## Implementation files
 

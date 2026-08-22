@@ -58,11 +58,10 @@ PREDICTION_SCOPE_NOTE = (
     "user_is_male). The displayed respondent percentage blends that ML probability with an "
     "explicit structural susceptibility channel (lineage indices, hereditary load, BMI and "
     "metabolic stress) so pedigree-heavy profiles are not capped by conservatively calibrated "
-    "tree probabilities alone. Child/grandchild percentages are heuristic scenario projections "
-    "from the blended respondent score: grandchild rows are slightly attenuated, male vs female "
-    "scenarios use a small communicative spread, and stronger lineage burden scales all four "
-    "scenarios upward (not separately trained offspring targets). Do not read them as validated "
-    "offspring probabilities."
+    "tree probabilities alone. Child percentages are heuristic scenario projections "
+    "from the blended respondent score: male vs female scenarios use a small communicative "
+    "spread, and stronger lineage burden scales child scenarios upward (not separately trained "
+    "offspring targets). Do not read them as validated offspring probabilities."
 )
 
 # Structural blend: pulls overall susceptibility toward a lineage/metabolic channel when burden
@@ -316,22 +315,13 @@ def build_scenario_probabilities(predictions: list) -> dict:
 
     fc = _prediction_percentage(predictions, "female_child")
     mc = _prediction_percentage(predictions, "male_child")
-    fg = _prediction_percentage(predictions, "female_grandchild")
-    mg = _prediction_percentage(predictions, "male_grandchild")
-    blend = None
-    if fg is not None and mg is not None:
-        blend = round((fg + mg) / 2, 1)
     return {
         "childRisk": {"female": fc, "male": mc},
-        "grandchildRisk": {
-            "fromDaughter": {"female": fg, "male": blend},
-            "fromSon": {"female": blend, "male": mg},
-        },
     }
 
 
 def build_future_generations() -> dict:
-    """Pedigree Gen 4–5 topology only; percentages come from ``scenarioProbabilities``."""
+    """Pedigree Gen 4 topology only; percentages come from ``scenarioProbabilities``."""
 
     children = [
         {
@@ -349,41 +339,7 @@ def build_future_generations() -> dict:
             "isProjected": True,
         },
     ]
-    grandchildren = [
-        {
-            "key": "gc_daughter_female",
-            "label": "Granddaughter",
-            "gender": "female",
-            "generation": 5,
-            "parentKey": "child_female",
-            "isProjected": True,
-        },
-        {
-            "key": "gc_daughter_male",
-            "label": "Grandson",
-            "gender": "male",
-            "generation": 5,
-            "parentKey": "child_female",
-            "isProjected": True,
-        },
-        {
-            "key": "gc_son_female",
-            "label": "Granddaughter",
-            "gender": "female",
-            "generation": 5,
-            "parentKey": "child_male",
-            "isProjected": True,
-        },
-        {
-            "key": "gc_son_male",
-            "label": "Grandson",
-            "gender": "male",
-            "generation": 5,
-            "parentKey": "child_male",
-            "isProjected": True,
-        },
-    ]
-    return {"children": children, "grandchildren": grandchildren}
+    return {"children": children}
 
 
 def risk_band_for_probability(probability: float) -> str:

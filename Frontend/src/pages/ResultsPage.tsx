@@ -79,7 +79,6 @@ export function ResultsPage() {
             result={result}
             title={t.descendantsTitle}
             childrenTitle={t.childrenTitle}
-            grandchildrenTitle={t.grandchildrenTitle}
             disclaimer={t.descendantsDisclaimer}
             illustrativeOnly={t.illustrativeOnly}
           />

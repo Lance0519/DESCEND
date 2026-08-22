@@ -30,8 +30,6 @@ class TargetSpec:
 TARGETS = [
     TargetSpec("male_child", "Male Child", 1, 1),
     TargetSpec("female_child", "Female Child", 1, 0),
-    TargetSpec("male_grandchild", "Male Grandchild", 2, 1),
-    TargetSpec("female_grandchild", "Female Grandchild", 2, 0),
 ]
 
 FAMILY_LABELS = {

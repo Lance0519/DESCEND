@@ -33,11 +33,10 @@ export const tl: TranslationDict = {
   bmiLabel: 'Iyong BMI (kinakalkula)',
   bmiHelper: 'Batay sa taas at timbang na iyong inilagay.',
   pedigreeTitle: 'Angkan ng pamilya',
-  descendantsTitle: 'Tinatayang mga inapo',
+  descendantsTitle: 'Tinatayang mga anak',
   childrenTitle: 'Mga anak (halimbawa)',
-  grandchildrenTitle: 'Mga apo (halimbawa)',
   descendantsDisclaimer:
-    'Ang marka para sa anak at apo ay proyektong pang-edukasyon mula sa iyong profile — hindi opisyal na diyagnosis.',
+    'Ang marka para sa anak ay proyektong pang-edukasyon mula sa iyong profile — hindi opisyal na diyagnosis.',
   resumeTitle: 'Ituloy ang dating pagsusuri?',
   resumeText: 'Nai-save ang iyong mga sagot sa aparatong ito.',
   resumeContinue: 'Ituloy',

@@ -106,7 +106,7 @@ TARGET_DEFINITION = (
 TARGET_SCOPE_NOTE = (
     "The deployed classifier is either ExtraTreesClassifier (interaction-friendly ranking) "
     "or HistGradientBoostingClassifier (boosted-tree tabular modeling). "
-    "Displayed child/grandchild scenario values are heuristic projections from the respondent "
+    "Displayed child scenario values are heuristic projections from the respondent "
     "score, not separately trained targets. Grouped CV uses source_patient_id (or family_id / "
     "source_record_id, first present in the CSV) when multiple rows share a group id; if each "
     "row is its own group, folds approximate stratified splits rather than true family "

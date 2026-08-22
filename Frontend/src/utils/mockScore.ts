@@ -247,7 +247,7 @@ export function mockScore(answers: AssessmentAnswers): PredictionResult {
     },
     ...descendants,
     predictionScopeNote:
-      'Child and grandchild percentages are illustrative projections from your awareness score, not a medical diagnosis.',
+      'Child percentages are illustrative projections from your awareness score, not a medical diagnosis.',
     familyLineage: buildSimpleLineage(answers),
   }
 }
