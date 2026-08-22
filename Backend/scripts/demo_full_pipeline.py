@@ -11,7 +11,7 @@ BACKEND_ROOT = SCRIPT_DIR.parent
 if str(BACKEND_ROOT) not in sys.path:
     sys.path.insert(0, str(BACKEND_ROOT))
 
-from app.ml.modeling import train_model_from_dataset_path
+from descend.ml.modeling import train_model_from_dataset_path
 
 DATASET = BACKEND_ROOT / "ml" / "datasets" / "processed" / "training_dataset.csv"
 MODEL_OUT = BACKEND_ROOT / "models" / "demo_model.json"

@@ -8,7 +8,7 @@ from pathlib import Path
 
 import pytest
 
-from app.ml.feature_builder import (
+from descend.ml.feature_builder import (
     build_base_features,
     build_family_lineage_data,
     build_key_factors,
@@ -18,7 +18,7 @@ from app.ml.feature_builder import (
     derive_family_metrics,
     normalize_family_status,
 )
-from app.ml.modeling import (
+from descend.ml.modeling import (
     EXTRA_TREES_CONFIG,
     FEATURE_COLUMNS,
     GROUP_COLUMN,
@@ -38,7 +38,7 @@ from app.ml.modeling import (
     stratified_group_holdout_split,
     train_model_from_dataset_path,
 )
-from app.ml.predictor import (
+from descend.ml.predictor import (
     RISK_LOW_MAX,
     RISK_MODERATE_MAX,
     _risk_band,
@@ -627,7 +627,7 @@ class TestGetModelEvaluation:
                 tmp_model = Path(tmpdir) / "test_model.json"
                 current_app.config["MODEL_PATH"] = str(tmp_model)
                 try:
-                    from app.ml.predictor import train_model_from_dataset
+                    from descend.ml.predictor import train_model_from_dataset
                     train_model_from_dataset(dataset_path, tmp_model)
 
                     evaluation = get_model_evaluation()
@@ -686,7 +686,7 @@ class TestBuildRecommendations:
 
 class TestRecommendationLlmFallback:
     def test_skips_llm_without_api_key(self, app, monkeypatch):
-        from app.ml.recommendation_llm import maybe_llm_recommendations
+        from descend.ml.recommendation_llm import maybe_llm_recommendations
 
         monkeypatch.delenv("T2DM_LLM_API_KEY", raising=False)
         monkeypatch.delenv("OPENAI_API_KEY", raising=False)

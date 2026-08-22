@@ -21,7 +21,7 @@ if str(_backend) not in sys.path:
 
 from sklearn.model_selection import StratifiedKFold  # noqa: E402
 
-from app.ml.modeling import (  # noqa: E402
+from descend.ml.modeling import (  # noqa: E402
     DEFAULT_RANDOM_SEED,
     FEATURE_COLUMNS_PRUNED_ABLATION,
     FEATURE_COLUMNS_WITH_EXPLICIT_INTERACTIONS,

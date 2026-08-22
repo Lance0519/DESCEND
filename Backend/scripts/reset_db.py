@@ -10,8 +10,8 @@ def reset_database(remove_schema: bool = False) -> None:
     backend_dir = Path(__file__).resolve().parents[1]
     sys.path.insert(0, str(backend_dir))
 
-    from app import create_app
-    from app.extensions import db
+    from descend import create_app
+    from descend.extensions import db
 
     app = create_app()
 

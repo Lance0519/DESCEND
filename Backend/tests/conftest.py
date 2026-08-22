@@ -7,9 +7,9 @@ os.environ.setdefault("SECRET_KEY", "test-secret-key-do-not-use-in-production")
 os.environ.setdefault("SQLALCHEMY_DATABASE_URI", "sqlite:///:memory:")
 os.environ.setdefault("FRONTEND_ORIGIN", "http://localhost:5173")
 
-from app import create_app
-from app.extensions import db as _db
-from app.models import User
+from descend import create_app
+from descend.extensions import db as _db
+from descend.models import User
 
 
 @pytest.fixture(scope="session")

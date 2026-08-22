@@ -4,7 +4,7 @@ import sys
 # Ensure backend package is importable when running this script directly
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from app import create_app
+from descend import create_app
 
 app = create_app()
 app.testing = True

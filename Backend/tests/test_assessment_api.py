@@ -139,7 +139,7 @@ class TestAdminEndpoints:
 
     def test_admin_change_user_role(self, client, admin_token, sample_user, app):
         with app.app_context():
-            from app.models import User
+            from descend.models import User
             user = User.query.filter_by(email="testuser@example.com").first()
             user_id = user.id
 
@@ -151,7 +151,7 @@ class TestAdminEndpoints:
 
     def test_admin_change_user_status(self, client, admin_token, sample_user, app):
         with app.app_context():
-            from app.models import User
+            from descend.models import User
             user = User.query.filter_by(email="testuser@example.com").first()
             user_id = user.id
 
@@ -163,7 +163,7 @@ class TestAdminEndpoints:
 
     def test_admin_reset_user_password(self, client, admin_token, sample_user, app):
         with app.app_context():
-            from app.models import User
+            from descend.models import User
             user = User.query.filter_by(email="testuser@example.com").first()
             user_id = user.id
 

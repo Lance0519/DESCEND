@@ -18,8 +18,8 @@ _BACKEND_ROOT = _SCRIPT_DIR.parent
 if str(_BACKEND_ROOT) not in sys.path:
     sys.path.insert(0, str(_BACKEND_ROOT))
 
-from app.ml.feature_builder import _compute_hereditary_load_index
-from app.ml.graph import derive_family_metrics
+from descend.ml.feature_builder import _compute_hereditary_load_index
+from descend.ml.graph import derive_family_metrics
 
 
 TARGET_LABEL = "respondent"

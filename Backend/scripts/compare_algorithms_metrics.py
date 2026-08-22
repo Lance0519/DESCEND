@@ -9,7 +9,7 @@ _backend = Path(__file__).resolve().parent.parent
 if str(_backend) not in sys.path:
     sys.path.insert(0, str(_backend))
 
-from app.ml.modeling import (
+from descend.ml.modeling import (
     TEST_SET_SIZE,
     compute_crossvalidation_metrics,
     compute_holdout_metrics,

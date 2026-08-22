@@ -35,10 +35,10 @@ def create_app() -> Flask:
         model_path.parent.mkdir(parents=True, exist_ok=True)
         dataset_path.parent.mkdir(parents=True, exist_ok=True)
 
-    # If a MySQL URI is configured, require a reachable MySQL server.
-    # Do not silently fall back to SQLite when MySQL is intended for production.
+    # If a MySQL URI is configured, require a reachable MySQL server locally.
+    # On Vercel, skip hard-fail so mis-set MySQL env cannot crash the function.
     _db_uri = app.config.get("SQLALCHEMY_DATABASE_URI", "")
-    if _db_uri and _db_uri.startswith("mysql"):
+    if _db_uri and _db_uri.startswith("mysql") and not _is_vercel():
         try:
             test_engine = create_engine(_db_uri)
             conn = test_engine.connect()
@@ -76,10 +76,20 @@ def create_app() -> Flask:
         },
     )
 
-    # Register API blueprint with modular routes
-    from .api import api_bp
+    # Build API blueprint fully before attaching it to the app.
+    from .api import api_bp, register_heavy_routes
+
+    try:
+        register_heavy_routes()
+    except Exception:
+        logger.exception("Heavy API routes failed to load")
+        if not _is_vercel():
+            raise
 
     app.register_blueprint(api_bp, url_prefix="/api")
+
+    # Ensure models are registered for create_all even if heavy routes failed.
+    from . import models as _models  # noqa: F401
 
     # Initialize database (do not crash the whole serverless function on Vercel
     # if Postgres is misconfigured — /api/health and /api/predict can still run).

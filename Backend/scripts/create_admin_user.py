@@ -25,10 +25,10 @@ if _backend_root not in sys.path:
 load_dotenv(_backend_dir / ".env.mysql", override=False)
 load_dotenv(_backend_dir / ".env", override=False)
 
-from app import create_app  # noqa: E402
-from app.extensions import db  # noqa: E402
-from app.models import User  # noqa: E402
-from app.api.auth import _normalize_email, _validate_password  # noqa: E402
+from descend import create_app  # noqa: E402
+from descend.extensions import db  # noqa: E402
+from descend.models import User  # noqa: E402
+from descend.api.auth import _normalize_email, _validate_password  # noqa: E402
 
 
 def main() -> int:

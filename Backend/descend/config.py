@@ -23,18 +23,18 @@ DEFAULT_MODEL = MODELS_DIR / "t2dm_risk_model.json"
 DEFAULT_DATASET = INSTANCE_DIR / "datasets" / "uploaded_dataset.csv"
 
 # ============== ENVIRONMENT LOADING ==============
-# Load .env files from backend directory (absolute)
+# Load local .env files only when not on Vercel. On Vercel, dashboard env vars
+# must win — never override them with a bundled .env (override=True is unsafe there).
 env_files = [
     BACKEND_DIR / ".env",
     BACKEND_DIR / ".env.local",
     BACKEND_DIR / ".env.mysql",
 ]
 
-# Later files override earlier; values from these files override inherited OS env
-# so editing backend/.env reliably updates FRONTEND_ORIGIN, SECRET_KEY, etc.
-for env_file in env_files:
-    if env_file.exists():
-        load_dotenv(env_file, override=True)
+if not os.getenv("VERCEL"):
+    for env_file in env_files:
+        if env_file.exists():
+            load_dotenv(env_file, override=True)
 
 
 def _normalize_database_uri(uri: str) -> str:

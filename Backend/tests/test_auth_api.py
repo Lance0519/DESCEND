@@ -32,7 +32,7 @@ class TestRegister:
 
     def test_register_admin_bootstrap(self, client, db, app):
         with app.app_context():
-            from app.models import User
+            from descend.models import User
 
             user = User(name="Existing User", email="existing@example.com", role="user")
             user.set_password("SecurePass123!abc")
@@ -131,7 +131,7 @@ class TestLogin:
     def test_login_disabled_user(self, client, db, sample_user, app):
         user, password = sample_user
         with app.app_context():
-            from app.models import User
+            from descend.models import User
             u = User.query.filter_by(email="testuser@example.com").first()
             u.is_active = False
             db.session.commit()

@@ -8,7 +8,7 @@ from pathlib import Path
 backend_dir = Path(__file__).resolve().parent
 sys.path.insert(0, str(backend_dir))
 
-from app import create_app
+from descend import create_app
 
 if __name__ == "__main__":
     app = create_app()

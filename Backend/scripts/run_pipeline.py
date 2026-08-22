@@ -113,7 +113,7 @@ def step_prepare(raw_csv: Path, training_csv: Path) -> int:
 def step_profile(training_csv: Path) -> dict:
     _section("STEP 2: DATASET PROFILE")
 
-    from app.ml.modeling import (
+    from descend.ml.modeling import (
         FEATURE_COLUMNS,
         GROUP_COLUMN,
         TARGET_COLUMN,
@@ -162,7 +162,7 @@ def step_profile(training_csv: Path) -> dict:
 def step_train_cv(rows: list, seed: int) -> dict:
     _section("STEP 3: 5-FOLD GROUPED STRATIFIED CROSS-VALIDATION")
 
-    from app.ml.modeling import compute_crossvalidation_metrics
+    from descend.ml.modeling import compute_crossvalidation_metrics
 
     cv = compute_crossvalidation_metrics(rows, k=5, seed=seed)
 
@@ -211,7 +211,7 @@ def step_train_cv(rows: list, seed: int) -> dict:
 def step_holdout(rows: list, seed: int) -> dict:
     _section("STEP 4: 20% HOLD-OUT TEST SET VALIDATION")
 
-    from app.ml.modeling import (
+    from descend.ml.modeling import (
         compute_holdout_metrics,
         stratified_group_holdout_split,
         TEST_SET_SIZE,
@@ -251,7 +251,7 @@ def step_holdout(rows: list, seed: int) -> dict:
 def step_leakage(rows: list, cv: dict, seed: int) -> dict:
     _section("STEP 5: LEAKAGE DIAGNOSTICS")
 
-    from app.ml.modeling import _detect_cross_group_duplicates, _run_label_shuffle_check
+    from descend.ml.modeling import _detect_cross_group_duplicates, _run_label_shuffle_check
 
     dup = _detect_cross_group_duplicates(rows)
     print(f"  Cross-group duplicate signatures: {dup['duplicateSignaturesAcrossGroups']}")
@@ -277,7 +277,7 @@ def step_leakage(rows: list, cv: dict, seed: int) -> dict:
 def step_export(rows: list, model_path: Path, seed: int) -> dict:
     _section("STEP 6: TRAIN FINAL MODEL & EXPORT")
 
-    from app.ml.modeling import build_trained_artifact, _build_training_pipeline, _build_xyg, FEATURE_COLUMNS
+    from descend.ml.modeling import build_trained_artifact, _build_training_pipeline, _build_xyg, FEATURE_COLUMNS
     import joblib
 
     artifact = build_trained_artifact(rows, seed=seed)
