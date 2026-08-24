@@ -45,6 +45,36 @@ export const en = {
   resultsBand: 'Awareness band',
   resultsPercent: 'Estimated awareness score',
   resultsFactors: 'What contributed',
+  preventTitle: 'What you can do early',
+  preventLead:
+    'These steps come from diabetes-prevention research. They can lower the chance of Type 2 diabetes over time. They are not a diagnosis or a treatment plan.',
+  preventBasedOnAnswers: 'Based on your answers',
+  preventSourcesTitle: 'Where this guidance comes from',
+  preventClinicianNote:
+    'Pinggang Pinoy is a healthy-eating pattern for adults. If you have other conditions, ask a clinician or dietitian before big diet changes.',
+  preventActivityTitle: 'Move most days',
+  preventActivityText:
+    'Aim for at least 150 minutes a week of moderate activity, such as brisk walking. In the Diabetes Prevention Program, meeting the activity goal still lowered diabetes risk even when the weight goal was missed.',
+  preventWeightTitle: 'A modest weight drop can help',
+  preventWeightText:
+    'If body mass index is high, losing about 5–7% of starting weight through a lower-calorie eating pattern plus activity is a core DPP/ADA target. Many Asian and Filipino guidelines treat overweight from BMI 23.',
+  preventDietTitle: 'Eat in a Pinggang Pinoy pattern',
+  preventDietText:
+    'Fill more of the plate with vegetables and fiber-rich foods, and cut back on sugary drinks and frequent fast food. This follows the FNRI–DOST Filipino plate — not a crash diet.',
+  preventSmokingTitle: 'Avoid tobacco smoke',
+  preventSmokingText:
+    'Not smoking, and staying away from secondhand smoke, supports heart health and lowers long-term Type 2 diabetes risk.',
+  preventSleepTitle: 'Protect sleep',
+  preventSleepText:
+    'Aim for about 7 hours of sleep when you can. Very short sleep is linked with higher diabetes risk; a regular sleep routine is a practical first step.',
+  preventScreeningTitle: 'Talk with a clinician',
+  preventScreeningText:
+    'DESCEND is an educational score, not a diagnosis. Ask about fasting glucose or HbA1c screening, especially if a parent or sibling has Type 2 diabetes.',
+  preventSourceAda: 'ADA Standards of Care (2025) — Prevention or delay of diabetes (open PMC)',
+  preventSourceDpp: 'Diabetes Prevention Program trial (Knowler et al., NEJM 2002) — 58% lower incidence with intensive lifestyle over 3 years',
+  preventSourceCdc: 'CDC National Diabetes Prevention Program',
+  preventSourceWho: 'WHO diabetes fact sheet — diet and physical activity',
+  preventSourcePinggang: 'FNRI–DOST Pinggang Pinoy (with DOH, WHO, and NNC)',
   resultsDisclaimer:
     'This is an educational awareness score, not a diagnosis. Talk with a healthcare professional about any concerns.',
   illustrativeOnly: 'Illustrative only',

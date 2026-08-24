@@ -47,6 +47,36 @@ export const tl: TranslationDict = {
   resultsBand: 'Antas ng kamalayan',
   resultsPercent: 'Tinatayang marka',
   resultsFactors: 'Mga nakatulong na salik',
+  preventTitle: 'Ano ang maaari mong gawin nang maaga',
+  preventLead:
+    'Ang mga hakbang na ito ay mula sa pananaliksik sa pag-iwas sa diabetes. Maaari nitong bawasan ang tsansa ng Type 2 diabetes sa paglipas ng panahon. Hindi ito diyagnosis o plano ng gamutan.',
+  preventBasedOnAnswers: 'Batay sa iyong mga sagot',
+  preventSourcesTitle: 'Saan nanggaling ang gabay na ito',
+  preventClinicianNote:
+    'Ang Pinggang Pinoy ay pattern ng malusog na pagkain para sa mga adulto. Kung may iba pang sakit, kumonsulta sa clinician o dietitian bago magbago nang malaki ang diyeta.',
+  preventActivityTitle: 'Gumalaw nang madalas',
+  preventActivityText:
+    'Layunin: hindi bababa sa 150 minuto kada linggo ng katamtamang aktibidad, tulad ng mabilis na paglalakad. Sa Diabetes Prevention Program, nakatulong pa rin ang activity goal kahit hindi naabot ang weight goal.',
+  preventWeightTitle: 'Makakatulong ang katamtamang pagbawas ng timbang',
+  preventWeightText:
+    'Kung mataas ang BMI, ang pagbawas ng humigit-kumulang 5–7% ng panimulang timbang sa pamamagitan ng mas kaunting calorie at aktibidad ay pangunahing target ng DPP/ADA. Maraming Asian at Filipino na gabay ang tumuturing na overweight mula BMI 23.',
+  preventDietTitle: 'Kumain ayon sa Pinggang Pinoy',
+  preventDietText:
+    'Dagdagan ang gulay at pagkaing may fiber, bawasan ang inuming may asukal at madalas na fast food. Ito ay ayon sa FNRI–DOST Filipino plate — hindi crash diet.',
+  preventSmokingTitle: 'Iwasan ang usok ng tabako',
+  preventSmokingText:
+    'Ang hindi paninigarilyo at pag-iwas sa secondhand smoke ay nakakatulong sa puso at nagpapababa ng pangmatagalang panganib sa Type 2 diabetes.',
+  preventSleepTitle: 'Alagaan ang tulog',
+  preventSleepText:
+    'Layunin: mga 7 oras ng tulog kung maaari. Ang sobrang maikling tulog ay nauugnay sa mas mataas na panganib sa diabetes; ang regular na oras ng tulog ay magandang unang hakbang.',
+  preventScreeningTitle: 'Makipag-usap sa clinician',
+  preventScreeningText:
+    'Ang DESCEND ay markang pang-edukasyon, hindi diyagnosis. Magtanong tungkol sa fasting glucose o HbA1c, lalo na kung may Type 2 diabetes ang magulang o kapatid.',
+  preventSourceAda: 'ADA Standards of Care (2025) — Pag-iwas o pagkaantala ng diabetes (open PMC)',
+  preventSourceDpp: 'Diabetes Prevention Program (Knowler et al., NEJM 2002) — 58% na mas mababang incidence sa intensive lifestyle sa loob ng 3 taon',
+  preventSourceCdc: 'CDC National Diabetes Prevention Program',
+  preventSourceWho: 'WHO diabetes fact sheet — diyeta at physical activity',
+  preventSourcePinggang: 'FNRI–DOST Pinggang Pinoy (kasama ang DOH, WHO, at NNC)',
   resultsDisclaimer:
     'Ito ay marka para sa edukasyon at kamalayan, hindi diyagnosis. Makipag-usap sa propesyonal sa kalusugan kung may pag-aalala.',
   illustrativeOnly: 'Halimbawa lamang',

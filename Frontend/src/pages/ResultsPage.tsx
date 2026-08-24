@@ -6,7 +6,9 @@ import { useAssessment } from '../context/AssessmentContext'
 import { useAuth } from '../context/AuthContext'
 import { useLanguage } from '../context/LanguageContext'
 import { DescendantProjection } from '../features/results/DescendantProjection'
+import { PreventionPanel } from '../features/results/PreventionPanel'
 import { FamilyPedigreePanel } from '../features/results/FamilyPedigreePanel'
+import { preventionBmi } from '../data/preventionTips'
 import { clearDraft } from '../lib/draftStorage'
 import './ResultsPage.css'
 
@@ -110,6 +112,8 @@ export function ResultsPage() {
                 </li>
               ))}
           </ul>
+
+          <PreventionPanel answers={answers} bmi={preventionBmi(answers, result.bmi)} />
 
           {result.predictionScopeNote ? (
             <section className="results__scope-block">
