@@ -40,7 +40,7 @@ export function AuthCallbackPage() {
       if (cancelled) return
       if (data.session?.access_token) {
         sessionStorage.setItem('descend-supabase-access-token', data.session.access_token)
-        navigate('/assessment', { replace: true })
+        navigate('/dashboard', { replace: true })
         return
       }
       setMessage('Could not complete Google sign-in.')

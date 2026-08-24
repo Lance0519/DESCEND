@@ -22,7 +22,7 @@ export function LoginPage() {
     try {
       if (!configured) throw new Error('Supabase is not configured. You can continue as guest.')
       await signIn(email, password)
-      navigate('/assessment')
+      navigate('/dashboard')
     } catch (err) {
       setError(err instanceof Error ? err.message : t.errorRetry)
     } finally {

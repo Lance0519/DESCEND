@@ -125,7 +125,7 @@ export function ProfilePage() {
           </form>
           {message ? <p className="profile-page__msg">{message}</p> : null}
           <div className="profile-page__links">
-            <Link to="/history">{t.openHistory}</Link>
+            <Link to="/dashboard">{t.openHistory}</Link>
             <Link to="/assessment">{t.retake}</Link>
           </div>
         </main>

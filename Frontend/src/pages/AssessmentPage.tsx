@@ -22,6 +22,7 @@ import {
   type NumberFieldError,
 } from '../lib/assessmentValidation'
 import { computeBmi, type AnswerKey, type AssessmentAnswers } from '../types/assessment'
+import { persistAssessmentRecord } from '../api/assessmentRecords'
 import { PredictApiError, estimateAssessment, mapDiagnosedPayload, predictAssessment } from '../api/client'
 import { mapPayload } from '../api/mapPayload'
 import { mockScore } from '../utils/mockScore'
@@ -247,6 +248,14 @@ export function AssessmentPage() {
                   } catch {
                     // Local management path still proceeds if the save/estimate call fails.
                   }
+                  if (user) {
+                    void persistAssessmentRecord({
+                      userId: user.id,
+                      riskScore: null,
+                      riskTier: null,
+                      preDiagnosed: true,
+                    })
+                  }
                   clearDraft()
                   navigate('/management', { replace: true })
                   setGateSubmitting(false)
@@ -395,11 +404,32 @@ export function AssessmentPage() {
       try {
         const apiResult = await predictAssessment(payload)
         setResult(apiResult)
+        if (user) {
+          void persistAssessmentRecord({
+            userId: user.id,
+            riskScore: apiResult.percentage,
+            riskTier: apiResult.riskBand,
+            preDiagnosed: false,
+            answers: payload,
+            result: apiResult,
+          })
+        }
         clearDraft()
         navigate('/results')
       } catch (err) {
         if (import.meta.env.DEV) {
-          setResult(mockScore(scoredAnswers))
+          const localResult = mockScore(scoredAnswers)
+          setResult(localResult)
+          if (user) {
+            void persistAssessmentRecord({
+              userId: user.id,
+              riskScore: localResult.percentage,
+              riskTier: localResult.riskBand,
+              preDiagnosed: false,
+              answers: payload,
+              result: localResult,
+            })
+          }
           clearDraft()
           navigate('/results')
           return
