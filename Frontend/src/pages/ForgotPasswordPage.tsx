@@ -1,36 +1,28 @@
 import { useState, type FormEvent } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { UserPlus } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { KeyRound } from 'lucide-react'
 import { LanguageToggle } from '../components/LanguageToggle'
 import { PageBackground } from '../components/PageBackground'
 import { useAuth } from '../context/AuthContext'
 import { useLanguage } from '../context/LanguageContext'
 import './AuthForm.css'
 
-export function RegisterPage() {
+export function ForgotPasswordPage() {
   const { t } = useLanguage()
-  const { signUp, configured } = useAuth()
-  const navigate = useNavigate()
+  const { sendPasswordReset, configured } = useAuth()
   const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [displayName, setDisplayName] = useState('')
   const [error, setError] = useState('')
-  const [info, setInfo] = useState('')
+  const [sent, setSent] = useState(false)
   const [busy, setBusy] = useState(false)
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault()
     setBusy(true)
     setError('')
-    setInfo('')
     try {
       if (!configured) throw new Error('Supabase is not configured. You can continue as guest.')
-      const { needsEmailConfirm } = await signUp(email, password, displayName)
-      if (needsEmailConfirm) {
-        setInfo(`${t.checkEmailTitle}. ${t.checkEmailText}`)
-        return
-      }
-      navigate('/dashboard')
+      await sendPasswordReset(email)
+      setSent(true)
     } catch (err) {
       setError(err instanceof Error ? err.message : t.errorRetry)
     } finally {
@@ -44,30 +36,17 @@ export function RegisterPage() {
         <LanguageToggle />
         <form className="auth-form" onSubmit={(e) => void onSubmit(e)}>
           <h1>
-            <UserPlus size={22} aria-hidden /> {t.accessRegister}
+            <KeyRound size={22} aria-hidden /> {t.forgotTitle}
           </h1>
-          <label>
-            {t.displayName}
-            <input value={displayName} onChange={(e) => setDisplayName(e.target.value)} />
-          </label>
+          <p className="auth-form__hint">{t.forgotHelp}</p>
           <label>
             {t.email}
             <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
           </label>
-          <label>
-            {t.password}
-            <input
-              type="password"
-              required
-              minLength={6}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </label>
           {error ? <p className="auth-form__error">{error}</p> : null}
-          {info ? <p className="auth-form__ok">{info}</p> : null}
-          <button type="submit" disabled={busy}>
-            {t.registerSubmit}
+          {sent ? <p className="auth-form__ok">{t.forgotSent}</p> : null}
+          <button type="submit" disabled={busy || sent}>
+            {t.forgotSubmit}
           </button>
           <p className="auth-form__links">
             <Link to="/login">{t.accessSignIn}</Link>

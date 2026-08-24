@@ -26,6 +26,23 @@
 .auth-form h1 {
   font-size: clamp(1.15rem, 4.5vw, 1.375rem);
   margin-bottom: 0.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.auth-form__hint {
+  color: var(--color-text-muted);
+  font-size: 14px;
+  text-align: left;
+}
+
+.auth-form__ok {
+  color: var(--color-primary-dark);
+  background: var(--color-primary-light);
+  padding: 0.65rem;
+  border-radius: 8px;
+  font-size: 14px;
 }
 
 .auth-form label {

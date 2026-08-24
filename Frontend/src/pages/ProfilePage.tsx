@@ -1,10 +1,12 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
+import { LayoutDashboard, LogOut, Save, Shield, UserRound } from 'lucide-react'
 import { LanguageToggle } from '../components/LanguageToggle'
 import { PageBackground } from '../components/PageBackground'
+import { persistProfileToSupabase } from '../api/admin'
+import { fetchProfile, patchProfile } from '../api/client'
 import { useAuth } from '../context/AuthContext'
 import { useLanguage } from '../context/LanguageContext'
-import { fetchProfile, patchProfile } from '../api/client'
 import './ProfilePage.css'
 
 interface ProfileData {
@@ -18,7 +20,7 @@ interface ProfileData {
 
 export function ProfilePage() {
   const { t, language, setLanguage } = useLanguage()
-  const { user, signOut, loading, configured } = useAuth()
+  const { user, signOut, loading, configured, isAdmin, refreshSession } = useAuth()
   const navigate = useNavigate()
   const [profile, setProfile] = useState<ProfileData>({})
   const [message, setMessage] = useState('')
@@ -32,13 +34,16 @@ export function ProfilePage() {
           display_name: user.displayName ?? '',
           email: user.email ?? '',
           avatar_url: user.avatarUrl ?? '',
-          preferred_lang: language,
+          preferred_lang: user.preferredLang ?? language,
+          sex: user.preferredSex ?? '',
+          age: user.preferredAge,
         })
       })
   }, [user, language])
 
   if (loading) return null
   if (!user) return <Navigate to="/access" replace />
+  const signedIn = user
 
   async function onSave(e: FormEvent) {
     e.preventDefault()
@@ -51,11 +56,20 @@ export function ProfilePage() {
           sex: profile.sex,
           age: profile.age,
         })
+        await persistProfileToSupabase({
+          userId: signedIn.id,
+          email: signedIn.email,
+          displayName: profile.display_name,
+          preferredLang: profile.preferred_lang ?? language,
+          sex: profile.sex,
+          age: profile.age ?? null,
+        })
       }
       if (profile.preferred_lang === 'en' || profile.preferred_lang === 'tl') {
         setLanguage(profile.preferred_lang)
       }
-      setMessage('Saved')
+      await refreshSession()
+      setMessage(t.profileSaved)
     } catch (err) {
       setMessage(err instanceof Error ? err.message : t.errorRetry)
     }
@@ -67,11 +81,14 @@ export function ProfilePage() {
         <div className="profile-page__toolbar">
           <LanguageToggle />
           <button type="button" className="profile-page__signout" onClick={() => void signOut().then(() => navigate('/'))}>
+            <LogOut size={18} aria-hidden />
             {t.signOut}
           </button>
         </div>
         <main className="profile-page__card">
-          <h1>{t.profileTitle}</h1>
+          <h1>
+            <UserRound size={24} aria-hidden /> {t.profileTitle}
+          </h1>
           {profile.avatar_url ? (
             <img className="profile-page__avatar" src={profile.avatar_url} alt="" />
           ) : null}
@@ -121,12 +138,21 @@ export function ProfilePage() {
                 <option value="en">English</option>
               </select>
             </label>
-            <button type="submit">{t.profileSave}</button>
+            <button type="submit">
+              <Save size={18} aria-hidden /> {t.profileSave}
+            </button>
           </form>
           {message ? <p className="profile-page__msg">{message}</p> : null}
           <div className="profile-page__links">
-            <Link to="/dashboard">{t.openHistory}</Link>
+            <Link to="/dashboard">
+              <LayoutDashboard size={16} aria-hidden /> {t.openHistory}
+            </Link>
             <Link to="/assessment">{t.retake}</Link>
+            {isAdmin ? (
+              <Link to="/admin">
+                <Shield size={16} aria-hidden /> {t.adminNav}
+              </Link>
+            ) : null}
           </div>
         </main>
       </div>

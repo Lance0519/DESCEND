@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { LogIn } from 'lucide-react'
 import { LanguageToggle } from '../components/LanguageToggle'
 import { PageBackground } from '../components/PageBackground'
 import { useAuth } from '../context/AuthContext'
@@ -24,7 +25,8 @@ export function LoginPage() {
       await signIn(email, password)
       navigate('/dashboard')
     } catch (err) {
-      setError(err instanceof Error ? err.message : t.errorRetry)
+      const raw = err instanceof Error ? err.message : t.errorRetry
+      setError(raw === 'disabled' ? t.accountDisabled : raw)
     } finally {
       setBusy(false)
     }
@@ -35,7 +37,9 @@ export function LoginPage() {
       <div className="auth-form-page">
         <LanguageToggle />
         <form className="auth-form" onSubmit={(e) => void onSubmit(e)}>
-          <h1>{t.accessSignIn}</h1>
+          <h1>
+            <LogIn size={22} aria-hidden /> {t.accessSignIn}
+          </h1>
           <label>
             {t.email}
             <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
@@ -55,6 +59,7 @@ export function LoginPage() {
             {t.signInSubmit}
           </button>
           <p className="auth-form__links">
+            <Link to="/forgot-password">{t.forgotPassword}</Link>
             <Link to="/register">{t.accessRegister}</Link>
             <Link to="/access">{t.accessGuest}</Link>
           </p>

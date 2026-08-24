@@ -34,9 +34,14 @@ export function ResultsPage() {
         <div className="results__toolbar">
           <LanguageToggle />
           {user ? (
-            <Link to="/account" className="results__account">
-              {t.accountNav}
-            </Link>
+            <>
+              <Link to="/dashboard" className="results__account">
+                {t.dashboardTitle}
+              </Link>
+              <Link to="/account" className="results__account">
+                {t.accountNav}
+              </Link>
+            </>
           ) : null}
         </div>
         <main className="results__card">

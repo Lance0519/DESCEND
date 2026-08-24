@@ -64,6 +64,16 @@ export function AssessmentPage() {
   const [onsetError, setOnsetError] = useState<string | null>(null)
   const [gateSubmitting, setGateSubmitting] = useState(false)
 
+  useEffect(() => {
+    if (!user) return
+    if (answers.age == null && user.preferredAge != null) {
+      setAnswer('age', user.preferredAge)
+    }
+    if (!answers.sex && (user.preferredSex === 'male' || user.preferredSex === 'female')) {
+      setAnswer('sex', user.preferredSex)
+    }
+  }, [user, answers.age, answers.sex, setAnswer])
+
   const current = flow.current
 
   useEffect(() => {

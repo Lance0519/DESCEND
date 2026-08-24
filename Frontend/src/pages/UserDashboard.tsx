@@ -55,7 +55,7 @@ function tierClass(tier: string | null): string {
 
 export function UserDashboard() {
   const { t, language } = useLanguage()
-  const { user, signOut, loading: authLoading } = useAuth()
+  const { user, signOut, loading: authLoading, isAdmin } = useAuth()
   const navigate = useNavigate()
   const [records, setRecords] = useState<AssessmentRecord[]>([])
   const [loading, setLoading] = useState(true)
@@ -100,6 +100,12 @@ export function UserDashboard() {
               <UserRound size={18} aria-hidden />
               {t.accountNav}
             </Link>
+            {isAdmin ? (
+              <Link className="user-dash__text-link" to="/admin">
+                <Shield size={18} aria-hidden />
+                {t.adminNav}
+              </Link>
+            ) : null}
             <button type="button" className="user-dash__signout" onClick={() => void onSignOut()}>
               <LogOut size={18} aria-hidden />
               {t.signOut}

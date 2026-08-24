@@ -13,6 +13,9 @@ import { ProfilePage } from './pages/ProfilePage'
 import { RegisterPage } from './pages/RegisterPage'
 import { ResultsPage } from './pages/ResultsPage'
 import { UserDashboard } from './pages/UserDashboard'
+import { AdminDashboard } from './pages/AdminDashboard'
+import { ForgotPasswordPage } from './pages/ForgotPasswordPage'
+import { ResetPasswordPage } from './pages/ResetPasswordPage'
 
 export default function App() {
   return (
@@ -25,12 +28,15 @@ export default function App() {
               <Route path="/access" element={<AccessPage />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
+              <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+              <Route path="/reset-password" element={<ResetPasswordPage />} />
               <Route path="/auth/callback" element={<AuthCallbackPage />} />
               <Route path="/assessment" element={<AssessmentPage />} />
               <Route path="/management" element={<ManagementPage />} />
               <Route path="/results" element={<ResultsPage />} />
               <Route path="/account" element={<ProfilePage />} />
               <Route path="/dashboard" element={<UserDashboard />} />
+              <Route path="/admin" element={<AdminDashboard />} />
               <Route path="/history" element={<HistoryPage />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
