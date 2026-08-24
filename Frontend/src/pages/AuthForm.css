@@ -3,7 +3,7 @@
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
+  align-items: stretch;
   padding: max(0.75rem, env(safe-area-inset-top)) max(0.75rem, env(safe-area-inset-right))
     max(0.75rem, env(safe-area-inset-bottom)) max(0.75rem, env(safe-area-inset-left));
   gap: 1rem;
@@ -64,7 +64,7 @@
   box-sizing: border-box;
 }
 
-.auth-form button {
+.auth-form button[type='submit'] {
   min-height: var(--touch-min);
   border: none;
   border-radius: 10px;
@@ -92,4 +92,17 @@
 
 .auth-form__links a {
   color: var(--color-primary-dark);
+}
+
+.auth-form__submit-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--touch-min);
+  border-radius: 10px;
+  background: var(--color-primary);
+  color: #fff;
+  font-weight: 700;
+  font-size: 16px;
+  text-decoration: none;
 }

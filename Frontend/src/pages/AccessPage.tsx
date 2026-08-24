@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion'
 import { LogIn, UserPlus, UserRound } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
-import { LanguageToggle } from '../components/LanguageToggle'
+import { AuthNavBar } from '../components/AuthNavBar'
 import { PageBackground } from '../components/PageBackground'
 import { useAuth } from '../context/AuthContext'
 import { useLanguage } from '../context/LanguageContext'
@@ -21,7 +21,7 @@ export function AccessPage() {
     <PageBackground>
       <div className="access">
         <div className="access__toolbar">
-          <LanguageToggle />
+          <AuthNavBar backTo="/" showHome={false} />
         </div>
         <motion.main
           className="access__card"
@@ -64,7 +64,7 @@ export function AccessPage() {
               <p className="access__hint">{t.accessGoogleHint}</p>
             </>
           ) : null}
-          {googleEnabled && !configured ? (
+          {import.meta.env.DEV && googleEnabled && !configured ? (
             <p className="access__hint access__hint--muted">{t.accessGoogleNeedsConfig}</p>
           ) : null}
         </motion.main>

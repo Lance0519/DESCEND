@@ -1,10 +1,11 @@
 import { useState, type FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { LogIn } from 'lucide-react'
-import { LanguageToggle } from '../components/LanguageToggle'
+import { AuthNavBar } from '../components/AuthNavBar'
 import { PageBackground } from '../components/PageBackground'
 import { useAuth } from '../context/AuthContext'
 import { useLanguage } from '../context/LanguageContext'
+import { authErrorMessage } from '../lib/authErrors'
 import './AuthForm.css'
 
 export function LoginPage() {
@@ -25,8 +26,7 @@ export function LoginPage() {
       await signIn(email, password)
       navigate('/dashboard')
     } catch (err) {
-      const raw = err instanceof Error ? err.message : t.errorRetry
-      setError(raw === 'disabled' ? t.accountDisabled : raw)
+      setError(authErrorMessage(err, t))
     } finally {
       setBusy(false)
     }
@@ -35,7 +35,7 @@ export function LoginPage() {
   return (
     <PageBackground>
       <div className="auth-form-page">
-        <LanguageToggle />
+        <AuthNavBar backTo="/access" />
         <form className="auth-form" onSubmit={(e) => void onSubmit(e)}>
           <h1>
             <LogIn size={22} aria-hidden /> {t.accessSignIn}
@@ -56,7 +56,7 @@ export function LoginPage() {
           </label>
           {error ? <p className="auth-form__error">{error}</p> : null}
           <button type="submit" disabled={busy}>
-            {t.signInSubmit}
+            {busy ? t.signingIn : t.signInSubmit}
           </button>
           <p className="auth-form__links">
             <Link to="/forgot-password">{t.forgotPassword}</Link>

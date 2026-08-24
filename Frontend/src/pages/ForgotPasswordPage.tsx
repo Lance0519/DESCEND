@@ -1,10 +1,11 @@
 import { useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
 import { KeyRound } from 'lucide-react'
-import { LanguageToggle } from '../components/LanguageToggle'
+import { AuthNavBar } from '../components/AuthNavBar'
 import { PageBackground } from '../components/PageBackground'
 import { useAuth } from '../context/AuthContext'
 import { useLanguage } from '../context/LanguageContext'
+import { authErrorMessage } from '../lib/authErrors'
 import './AuthForm.css'
 
 export function ForgotPasswordPage() {
@@ -24,7 +25,7 @@ export function ForgotPasswordPage() {
       await sendPasswordReset(email)
       setSent(true)
     } catch (err) {
-      setError(err instanceof Error ? err.message : t.errorRetry)
+      setError(authErrorMessage(err, t))
     } finally {
       setBusy(false)
     }
@@ -33,7 +34,7 @@ export function ForgotPasswordPage() {
   return (
     <PageBackground>
       <div className="auth-form-page">
-        <LanguageToggle />
+        <AuthNavBar backTo="/login" />
         <form className="auth-form" onSubmit={(e) => void onSubmit(e)}>
           <h1>
             <KeyRound size={22} aria-hidden /> {t.forgotTitle}
@@ -46,7 +47,7 @@ export function ForgotPasswordPage() {
           {error ? <p className="auth-form__error">{error}</p> : null}
           {sent ? <p className="auth-form__ok">{t.forgotSent}</p> : null}
           <button type="submit" disabled={busy || sent}>
-            {t.forgotSubmit}
+            {busy ? t.sendingReset : t.forgotSubmit}
           </button>
           <p className="auth-form__links">
             <Link to="/login">{t.accessSignIn}</Link>

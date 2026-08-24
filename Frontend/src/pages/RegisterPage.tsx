@@ -1,10 +1,11 @@
 import { useState, type FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { UserPlus } from 'lucide-react'
-import { LanguageToggle } from '../components/LanguageToggle'
+import { AuthNavBar } from '../components/AuthNavBar'
 import { PageBackground } from '../components/PageBackground'
 import { useAuth } from '../context/AuthContext'
 import { useLanguage } from '../context/LanguageContext'
+import { authErrorMessage } from '../lib/authErrors'
 import './AuthForm.css'
 
 export function RegisterPage() {
@@ -32,7 +33,7 @@ export function RegisterPage() {
       }
       navigate('/dashboard')
     } catch (err) {
-      setError(err instanceof Error ? err.message : t.errorRetry)
+      setError(authErrorMessage(err, t))
     } finally {
       setBusy(false)
     }
@@ -41,7 +42,7 @@ export function RegisterPage() {
   return (
     <PageBackground>
       <div className="auth-form-page">
-        <LanguageToggle />
+        <AuthNavBar backTo="/access" />
         <form className="auth-form" onSubmit={(e) => void onSubmit(e)}>
           <h1>
             <UserPlus size={22} aria-hidden /> {t.accessRegister}
@@ -67,7 +68,7 @@ export function RegisterPage() {
           {error ? <p className="auth-form__error">{error}</p> : null}
           {info ? <p className="auth-form__ok">{info}</p> : null}
           <button type="submit" disabled={busy}>
-            {t.registerSubmit}
+            {busy ? t.creatingAccount : t.registerSubmit}
           </button>
           <p className="auth-form__links">
             <Link to="/login">{t.accessSignIn}</Link>
