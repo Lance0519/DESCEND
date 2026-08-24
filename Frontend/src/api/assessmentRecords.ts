@@ -110,9 +110,9 @@ export async function persistAssessmentRecord(input: {
   preDiagnosed: boolean
   answers?: unknown
   result?: unknown
-}): Promise<void> {
+}): Promise<boolean> {
   const supabase = getSupabase()
-  if (!supabase) return
+  if (!supabase) return false
 
   try {
     const dedicated = {
@@ -123,10 +123,10 @@ export async function persistAssessmentRecord(input: {
     }
 
     const { error: viewError } = await supabase.from('assessment_records').insert(dedicated)
-    if (!viewError) return
+    if (!viewError) return true
 
     const { error: namedError } = await supabase.from('AssessmentRecord').insert(dedicated)
-    if (!namedError) return
+    if (!namedError) return true
 
     const { error: assessmentError } = await supabase.from('assessments').insert({
       user_id: input.userId,
@@ -136,9 +136,9 @@ export async function persistAssessmentRecord(input: {
       answers: input.answers ?? {},
       result: input.result ?? {},
     })
-    if (!assessmentError) return
+    if (!assessmentError) return true
 
-    await supabase.from('patient_survey_records').insert({
+    const { error: surveyError } = await supabase.from('patient_survey_records').insert({
       user_id: input.userId,
       diagnosed_t2dm: input.preDiagnosed,
       risk_percentage: input.riskScore,
@@ -146,7 +146,8 @@ export async function persistAssessmentRecord(input: {
       answers_json: input.answers ?? {},
       result_json: input.result ?? {},
     })
+    return !surveyError
   } catch {
-    // Persistence is best-effort; the dashboard can still load existing rows.
+    return false
   }
 }

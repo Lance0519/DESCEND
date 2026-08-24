@@ -414,32 +414,12 @@ export function AssessmentPage() {
       try {
         const apiResult = await predictAssessment(payload)
         setResult(apiResult)
-        if (user) {
-          void persistAssessmentRecord({
-            userId: user.id,
-            riskScore: apiResult.percentage,
-            riskTier: apiResult.riskBand,
-            preDiagnosed: false,
-            answers: payload,
-            result: apiResult,
-          })
-        }
         clearDraft()
         navigate('/results')
       } catch (err) {
         if (import.meta.env.DEV) {
           const localResult = mockScore(scoredAnswers)
           setResult(localResult)
-          if (user) {
-            void persistAssessmentRecord({
-              userId: user.id,
-              riskScore: localResult.percentage,
-              riskTier: localResult.riskBand,
-              preDiagnosed: false,
-              answers: payload,
-              result: localResult,
-            })
-          }
           clearDraft()
           navigate('/results')
           return

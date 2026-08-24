@@ -196,12 +196,73 @@
 .results__retake {
   width: 100%;
   min-height: 52px;
-  margin-top: 1.5rem;
+  margin-top: 0;
   background: var(--color-primary);
   color: #fff;
   border: none;
   border-radius: 8px;
   font-size: 17px;
+  font-weight: 700;
+}
+
+.results__print-meta {
+  display: none;
+}
+
+.results__save {
+  margin-top: 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  background: var(--color-bg-neutral);
+  border: 1px solid var(--color-border);
+  font-size: 14px;
+  text-align: left;
+  line-height: 1.45;
+}
+
+.results__save--ok {
+  background: var(--color-primary-light);
+  border-color: var(--color-primary-border);
+  color: var(--color-primary-dark);
+}
+
+.results__save--fail {
+  color: var(--color-text-main);
+}
+
+.results__save a,
+.results__text-btn {
+  color: var(--color-primary-dark);
+  font-weight: 700;
+}
+
+.results__text-btn {
+  margin-top: 0.4rem;
+  border: none;
+  background: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+.results__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  margin-top: 1.5rem;
+}
+
+.results__secondary {
+  width: 100%;
+  min-height: 52px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  border-radius: 8px;
+  border: 1.5px solid var(--surface-card-border);
+  background: rgba(255, 255, 255, 0.78);
+  color: var(--color-text-main);
+  font-size: 16px;
   font-weight: 700;
 }
 
@@ -214,5 +275,57 @@
     font-size: 12px;
     white-space: normal;
     line-height: 1.35;
+  }
+}
+
+@media print {
+  @page {
+    size: A4;
+    margin: 12mm;
+  }
+
+  .page-bg,
+  .page-bg__content {
+    background: #fff !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+  }
+
+  .page-bg__photo,
+  .page-bg__scrim,
+  .results__no-print,
+  .confirm-dialog {
+    display: none !important;
+  }
+
+  .results {
+    padding: 0;
+    min-height: 0;
+  }
+
+  .results__card {
+    box-shadow: none;
+    border: none;
+    backdrop-filter: none;
+    background: #fff;
+    max-width: none;
+    padding: 0;
+  }
+
+  .results__print-meta {
+    display: block;
+    color: #4b5563;
+    font-size: 12px;
+    margin-bottom: 0.75rem;
+  }
+
+  .results__percent {
+    font-size: 2rem;
+  }
+
+  .prevent__tip,
+  .prevent__sources,
+  .results__disclaimer {
+    break-inside: avoid;
   }
 }
