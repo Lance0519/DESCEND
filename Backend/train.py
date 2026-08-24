@@ -7,6 +7,7 @@ directly via importlib to avoid Flask app factory side-effects.
 Usage:
     python train.py
     python train.py --dataset ml/datasets/processed/training_dataset.csv
+    python train.py --dataset ml/datasets/processed/training_dataset_filipino_488.csv
     python train.py --dataset path/to/dataset.csv --model path/to/model.json --seed 42
 """
 
@@ -23,7 +24,7 @@ sys.path.insert(0, str(backend_dir))
 
 
 def _load_modeling_module():
-    module_path = backend_dir / "app" / "ml" / "modeling.py"
+    module_path = backend_dir / "descend" / "ml" / "modeling.py"
     spec = importlib.util.spec_from_file_location("t2dm_modeling", module_path)
     if spec is None or spec.loader is None:
         raise RuntimeError(f"Unable to load modeling module from {module_path}")

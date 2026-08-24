@@ -397,9 +397,23 @@ def main() -> int:
 
     training_csv = args.training_csv or datasets_dir / "processed" / "training_dataset.csv"
     model_path = args.model_path or models_dir / "t2dm_risk_model.json"
+    skip_prepare = args.skip_prepare
 
-    if args.raw_csv is None:
-        raw_csv = resolve_raw_survey_csv(datasets_dir)
+    if skip_prepare:
+        raw_csv = args.raw_csv.resolve() if args.raw_csv else None
+    elif args.raw_csv is None:
+        try:
+            raw_csv = resolve_raw_survey_csv(datasets_dir)
+        except FileNotFoundError:
+            if training_csv.exists():
+                print(
+                    "  Raw survey CSV not found. Using existing processed file:\n"
+                    f"  {training_csv}"
+                )
+                skip_prepare = True
+                raw_csv = None
+            else:
+                raise
     else:
         raw_csv = args.raw_csv.resolve()
 
@@ -411,7 +425,10 @@ def main() -> int:
     start = time.time()
 
     # Step 1
-    if not args.skip_prepare:
+    if not skip_prepare:
+        if raw_csv is None:
+            print("\n  ERROR: Raw CSV path is missing and --skip-prepare was not set.")
+            return 1
         step_prepare(raw_csv, training_csv)
     else:
         print(f"\n  [SKIPPED] Step 1: Using existing training CSV: {training_csv}")

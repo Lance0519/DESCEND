@@ -489,9 +489,19 @@ if __name__ == "__main__":
     from dataset_paths import resolve_raw_survey_csv
 
     _datasets = Path(__file__).resolve().parents[1] / "ml" / "datasets"
-    raw_dataset = resolve_raw_survey_csv(_datasets)
     training_dataset = (
         Path(__file__).resolve().parents[1] / "ml" / "datasets" / "processed" / "training_dataset.csv"
     )
+    try:
+        raw_dataset = resolve_raw_survey_csv(_datasets)
+    except FileNotFoundError as exc:
+        print(str(exc))
+        print(
+            "\nTo train the existing processed CSV instead, from Backend run:\n"
+            "  python train.py\n"
+            "or:\n"
+            "  python train.py --dataset ml/datasets/processed/training_dataset_filipino_488.csv"
+        )
+        raise SystemExit(1) from exc
 
     prepare_training_dataset(raw_dataset, training_dataset)

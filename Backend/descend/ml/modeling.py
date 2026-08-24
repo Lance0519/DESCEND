@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import csv
+import hashlib
 import json
 import math
 import os
@@ -208,6 +209,18 @@ def sigmoid(value: float) -> float:
 
 def safe_float(value: str) -> float:
     return float(str(value).strip())
+
+
+def parse_group_id(value, fallback: int) -> int:
+    """Stable integer group id from numeric CSV cells or string IDs like PAT-0234."""
+    text = str(value).strip()
+    if not text:
+        return fallback
+    try:
+        return int(float(text))
+    except ValueError:
+        digest = hashlib.md5(text.encode("utf-8")).hexdigest()
+        return int(digest[:8], 16)
 
 
 def top_features(coefficients: dict[str, float], limit: int = 6) -> list[dict]:
@@ -1452,7 +1465,7 @@ def read_dataset_rows(dataset_path: Path, include_warnings: bool = False):
                     parsed[feature] = float(DEFAULT_FEATURE_MEANS.get(feature, 0.0))
             parsed[TARGET_COLUMN] = int(safe_float(row[TARGET_COLUMN]))
             if group_source_column:
-                parsed[GROUP_COLUMN] = int(safe_float(row[group_source_column]))
+                parsed[GROUP_COLUMN] = parse_group_id(row[group_source_column], row_index)
             else:
                 parsed[GROUP_COLUMN] = row_index
             _populate_clinical_interaction_features(parsed)
