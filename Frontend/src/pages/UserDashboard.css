@@ -127,13 +127,112 @@
 }
 
 .user-dash__item {
-  display: grid;
-  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.4fr);
-  gap: 0.75rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
   padding: 0.9rem 1rem;
   border: 1px solid var(--surface-card-border);
   border-radius: 12px;
   background: rgba(255, 255, 255, 0.72);
+}
+
+.user-dash__item-main {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.4fr);
+  gap: 0.75rem 1rem;
+}
+
+.user-dash__item-title {
+  margin: 0.25rem 0 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-primary-dark);
+}
+
+.user-dash__item-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.user-dash__action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  min-height: var(--touch-min);
+  padding: 0 0.8rem;
+  border-radius: 8px;
+  border: 1px solid var(--color-border);
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--color-text-main);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.user-dash__action:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.user-dash__action--danger {
+  color: #7f1d1d;
+  border-color: #f1c5c5;
+}
+
+.user-dash__detail {
+  border-top: 1px solid var(--color-border);
+  padding-top: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.user-dash__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 14px;
+  color: var(--color-text-muted);
+}
+
+.user-dash__field input,
+.user-dash__field textarea {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 0.65rem 0.75rem;
+  font: inherit;
+  color: var(--color-text-main);
+  background: #fff;
+}
+
+.user-dash__field textarea {
+  resize: vertical;
+  min-height: 84px;
+}
+
+.user-dash__edit-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.user-dash__notes {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin: 0;
+  color: var(--color-text-main);
+  line-height: 1.45;
+}
+
+.user-dash__create-hint {
+  margin: 1.1rem 0 0.55rem;
+  color: var(--color-text-muted);
+  font-size: 14px;
 }
 
 .user-dash__date,
@@ -226,7 +325,7 @@
 }
 
 @media (max-width: 640px) {
-  .user-dash__item,
+  .user-dash__item-main,
   .user-dash__metrics {
     grid-template-columns: 1fr;
   }

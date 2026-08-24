@@ -1,12 +1,14 @@
 import { getSupabase } from '../lib/supabaseClient'
-import type { AssessmentRecord } from '../types/assessmentRecord'
+import type { AssessmentRecord, AssessmentSourceTable } from '../types/assessmentRecord'
 
 const TABLE_CANDIDATES = [
-  'AssessmentRecord',
   'assessment_records',
+  'AssessmentRecord',
   'patient_survey_records',
   'assessments',
 ] as const
+
+type CandidateTable = (typeof TABLE_CANDIDATES)[number]
 
 function asBoolean(value: unknown): boolean {
   if (typeof value === 'boolean') return value
@@ -36,10 +38,44 @@ function nestedObject(value: unknown): Record<string, unknown> {
   return value && typeof value === 'object' ? (value as Record<string, unknown>) : {}
 }
 
-export function mapAssessmentRecord(row: Record<string, unknown>): AssessmentRecord {
+function resolveSource(
+  displayId: string,
+  table: CandidateTable,
+): { sourceTable: AssessmentSourceTable | null; sourceId: string | null } {
+  if (table === 'assessments') {
+    return { sourceTable: 'assessments', sourceId: displayId || null }
+  }
+  if (table === 'patient_survey_records') {
+    return { sourceTable: 'patient_survey_records', sourceId: displayId || null }
+  }
+
+  if (displayId.startsWith('psr-')) {
+    return { sourceTable: 'patient_survey_records', sourceId: displayId.slice(4) }
+  }
+  if (displayId.startsWith('asm-')) {
+    return { sourceTable: 'assessments', sourceId: displayId.slice(4) }
+  }
+  return { sourceTable: null, sourceId: null }
+}
+
+export function mapAssessmentRecord(
+  row: Record<string, unknown>,
+  table: CandidateTable = 'assessment_records',
+): AssessmentRecord {
   const result = nestedObject(row.result ?? row.result_json)
+  const displayId = String(row.id ?? '')
+  const { sourceTable, sourceId } = resolveSource(displayId, table)
+  const label =
+    asString(row.label) ??
+    asString(result.dashboardLabel) ??
+    asString(result.label)
+  const notes =
+    asString(row.notes) ??
+    asString(result.dashboardNotes) ??
+    asString(result.notes)
+
   return {
-    id: String(row.id ?? ''),
+    id: displayId,
     user_id: String(row.user_id ?? ''),
     created_at: String(row.created_at ?? ''),
     risk_score: asNumber(
@@ -51,6 +87,10 @@ export function mapAssessmentRecord(row: Record<string, unknown>): AssessmentRec
     pre_diagnosed: asBoolean(
       row.pre_diagnosed ?? row.diagnosed_t2dm ?? row.diagnosedT2dm ?? result.diagnosed,
     ),
+    label,
+    notes,
+    sourceTable,
+    sourceId,
   }
 }
 
@@ -83,14 +123,14 @@ export async function fetchAssessmentRecords(userId: string): Promise<Assessment
 
     anyTableAvailable = true
     for (const raw of data ?? []) {
-      const record = mapAssessmentRecord(raw as Record<string, unknown>)
+      const record = mapAssessmentRecord(raw as Record<string, unknown>, table)
       const key = record.id || `${record.created_at}|${record.risk_score}|${record.pre_diagnosed}`
       if (seen.has(key)) continue
       seen.add(key)
       collected.push(record)
     }
 
-    if (table === 'AssessmentRecord' || table === 'assessment_records') {
+    if (table === 'assessment_records' || table === 'AssessmentRecord') {
       break
     }
   }
@@ -110,6 +150,8 @@ export async function persistAssessmentRecord(input: {
   preDiagnosed: boolean
   answers?: unknown
   result?: unknown
+  label?: string | null
+  notes?: string | null
 }): Promise<boolean> {
   const supabase = getSupabase()
   if (!supabase) return false
@@ -120,6 +162,8 @@ export async function persistAssessmentRecord(input: {
       risk_score: input.riskScore,
       risk_tier: input.riskTier,
       pre_diagnosed: input.preDiagnosed,
+      label: input.label ?? null,
+      notes: input.notes ?? null,
     }
 
     const { error: viewError } = await supabase.from('assessment_records').insert(dedicated)
@@ -135,6 +179,8 @@ export async function persistAssessmentRecord(input: {
       diagnosed_t2dm: input.preDiagnosed,
       answers: input.answers ?? {},
       result: input.result ?? {},
+      label: input.label ?? null,
+      notes: input.notes ?? null,
     })
     if (!assessmentError) return true
 
@@ -145,9 +191,78 @@ export async function persistAssessmentRecord(input: {
       risk_band: input.riskTier,
       answers_json: input.answers ?? {},
       result_json: input.result ?? {},
+      label: input.label ?? null,
+      notes: input.notes ?? null,
     })
     return !surveyError
   } catch {
     return false
   }
+}
+
+export async function updateAssessmentRecord(
+  userId: string,
+  record: AssessmentRecord,
+  patch: { label?: string | null; notes?: string | null },
+): Promise<boolean> {
+  const supabase = getSupabase()
+  if (!supabase || !record.sourceTable || !record.sourceId) return false
+
+  const nextLabel = patch.label !== undefined ? patch.label?.trim() || null : undefined
+  const nextNotes = patch.notes !== undefined ? patch.notes?.trim() || null : undefined
+  if (nextLabel === undefined && nextNotes === undefined) return true
+
+  const columnPayload: Record<string, string | null> = {}
+  if (nextLabel !== undefined) columnPayload.label = nextLabel
+  if (nextNotes !== undefined) columnPayload.notes = nextNotes
+
+  const { error } = await supabase
+    .from(record.sourceTable)
+    .update(columnPayload)
+    .eq('id', record.sourceId)
+    .eq('user_id', userId)
+
+  if (!error) return true
+
+  // Fallback when label/notes columns are not migrated yet: merge into JSON result.
+  const jsonColumn = record.sourceTable === 'assessments' ? 'result' : 'result_json'
+  const { data, error: readError } = await supabase
+    .from(record.sourceTable)
+    .select(jsonColumn)
+    .eq('id', record.sourceId)
+    .eq('user_id', userId)
+    .maybeSingle()
+
+  if (readError || !data) return false
+
+  const current = nestedObject((data as Record<string, unknown>)[jsonColumn])
+  const merged = {
+    ...current,
+    ...(nextLabel !== undefined ? { dashboardLabel: nextLabel } : {}),
+    ...(nextNotes !== undefined ? { dashboardNotes: nextNotes } : {}),
+  }
+
+  const { error: jsonError } = await supabase
+    .from(record.sourceTable)
+    .update({ [jsonColumn]: merged })
+    .eq('id', record.sourceId)
+    .eq('user_id', userId)
+
+  return !jsonError
+}
+
+export async function deleteAssessmentRecord(
+  userId: string,
+  record: AssessmentRecord,
+): Promise<boolean> {
+  const supabase = getSupabase()
+  if (!supabase || !record.sourceTable || !record.sourceId) return false
+
+  const { error } = await supabase
+    .from(record.sourceTable)
+    .delete()
+    .eq('id', record.sourceId)
+    .eq('user_id', userId)
+
+  return !error
 }

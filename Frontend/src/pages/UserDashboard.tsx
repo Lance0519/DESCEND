@@ -10,15 +10,22 @@ import {
   LayoutDashboard,
   LoaderCircle,
   LogOut,
+  Pencil,
   Shield,
   Stethoscope,
+  Trash2,
   UserRound,
 } from 'lucide-react'
+import { ConfirmDialog } from '../components/ConfirmDialog'
 import { LanguageToggle } from '../components/LanguageToggle'
 import { PageBackground } from '../components/PageBackground'
 import { useAuth } from '../context/AuthContext'
 import { useLanguage } from '../context/LanguageContext'
-import { fetchAssessmentRecords } from '../api/assessmentRecords'
+import {
+  deleteAssessmentRecord,
+  fetchAssessmentRecords,
+  updateAssessmentRecord,
+} from '../api/assessmentRecords'
 import type { AssessmentRecord } from '../types/assessmentRecord'
 import type { Language } from '../types/assessment'
 import type { RiskBand } from '../types/prediction'
@@ -60,6 +67,13 @@ export function UserDashboard() {
   const [records, setRecords] = useState<AssessmentRecord[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [actionError, setActionError] = useState('')
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [draftLabel, setDraftLabel] = useState('')
+  const [draftNotes, setDraftNotes] = useState('')
+  const [savingId, setSavingId] = useState<string | null>(null)
+  const [pendingDelete, setPendingDelete] = useState<AssessmentRecord | null>(null)
+  const [expandedId, setExpandedId] = useState<string | null>(null)
 
   const loadRecords = useCallback(async () => {
     if (!user) return
@@ -83,6 +97,64 @@ export function UserDashboard() {
   async function onSignOut() {
     await signOut()
     navigate('/', { replace: true })
+  }
+
+  function beginEdit(record: AssessmentRecord) {
+    setActionError('')
+    setEditingId(record.id)
+    setExpandedId(record.id)
+    setDraftLabel(record.label ?? '')
+    setDraftNotes(record.notes ?? '')
+  }
+
+  function cancelEdit() {
+    setEditingId(null)
+    setDraftLabel('')
+    setDraftNotes('')
+  }
+
+  async function saveEdit(record: AssessmentRecord) {
+    if (!user) return
+    setSavingId(record.id)
+    setActionError('')
+    const ok = await updateAssessmentRecord(user.id, record, {
+      label: draftLabel,
+      notes: draftNotes,
+    })
+    setSavingId(null)
+    if (!ok) {
+      setActionError(t.dashboardActionFailed)
+      return
+    }
+    setRecords((prev) =>
+      prev.map((row) =>
+        row.id === record.id
+          ? {
+              ...row,
+              label: draftLabel.trim() || null,
+              notes: draftNotes.trim() || null,
+            }
+          : row,
+      ),
+    )
+    cancelEdit()
+  }
+
+  async function confirmDelete() {
+    if (!user || !pendingDelete) return
+    const target = pendingDelete
+    setPendingDelete(null)
+    setSavingId(target.id)
+    setActionError('')
+    const ok = await deleteAssessmentRecord(user.id, target)
+    setSavingId(null)
+    if (!ok) {
+      setActionError(t.dashboardActionFailed)
+      return
+    }
+    setRecords((prev) => prev.filter((row) => row.id !== target.id))
+    if (editingId === target.id) cancelEdit()
+    if (expandedId === target.id) setExpandedId(null)
   }
 
   if (authLoading) return null
@@ -149,6 +221,15 @@ export function UserDashboard() {
             </div>
           ) : null}
 
+          {actionError ? (
+            <div className="user-dash__error" role="alert">
+              <p>
+                <AlertCircle size={18} aria-hidden />
+                {actionError}
+              </p>
+            </div>
+          ) : null}
+
           {!loading && !error && records.length === 0 ? (
             <p className="user-dash__empty">
               <Inbox size={22} aria-hidden />
@@ -158,54 +239,169 @@ export function UserDashboard() {
 
           {!loading && !error && records.length > 0 ? (
             <ul className="user-dash__list">
-              {records.map((record) => (
-                <li key={record.id || record.created_at} className="user-dash__item">
-                  <div className="user-dash__date">
-                    <CalendarDays size={18} aria-hidden />
-                    <div>
-                      <span className="user-dash__label">{t.dashboardDateLabel}</span>
-                      <strong>{formatAssessmentDate(record.created_at, language)}</strong>
-                    </div>
-                  </div>
+              {records.map((record) => {
+                const isEditing = editingId === record.id
+                const isExpanded = expandedId === record.id || isEditing
+                const canMutate = Boolean(record.sourceTable && record.sourceId)
+                const title = record.label?.trim() || t.dashboardUntitled
 
-                  {record.pre_diagnosed ? (
-                    <div className="user-dash__mgmt">
-                      <Stethoscope size={18} aria-hidden />
-                      <span>{t.dashboardManagementMode}</span>
-                    </div>
-                  ) : (
-                    <div className="user-dash__metrics">
-                      <div>
-                        <span className="user-dash__label">
-                          <Gauge size={16} aria-hidden />
-                          {t.dashboardRiskScore}
-                        </span>
-                        <strong>{formatRiskScore(record.risk_score, language)}</strong>
+                return (
+                  <li key={record.id || record.created_at} className="user-dash__item">
+                    <div className="user-dash__item-main">
+                      <div className="user-dash__date">
+                        <CalendarDays size={18} aria-hidden />
+                        <div>
+                          <span className="user-dash__label">{t.dashboardDateLabel}</span>
+                          <strong>{formatAssessmentDate(record.created_at, language)}</strong>
+                          <p className="user-dash__item-title">{title}</p>
+                        </div>
                       </div>
-                      <div>
-                        <span className="user-dash__label">
-                          <Shield size={16} aria-hidden />
-                          {t.dashboardRiskTier}
-                        </span>
-                        <span className={`user-dash__tier ${tierClass(record.risk_tier)}`}>
-                          {record.risk_tier && isRiskBand(record.risk_tier)
-                            ? t.bands[record.risk_tier]
-                            : (record.risk_tier ?? '—')}
-                        </span>
-                      </div>
+
+                      {record.pre_diagnosed ? (
+                        <div className="user-dash__mgmt">
+                          <Stethoscope size={18} aria-hidden />
+                          <span>{t.dashboardManagementMode}</span>
+                        </div>
+                      ) : (
+                        <div className="user-dash__metrics">
+                          <div>
+                            <span className="user-dash__label">
+                              <Gauge size={16} aria-hidden />
+                              {t.dashboardRiskScore}
+                            </span>
+                            <strong>{formatRiskScore(record.risk_score, language)}</strong>
+                          </div>
+                          <div>
+                            <span className="user-dash__label">
+                              <Shield size={16} aria-hidden />
+                              {t.dashboardRiskTier}
+                            </span>
+                            <span className={`user-dash__tier ${tierClass(record.risk_tier)}`}>
+                              {record.risk_tier && isRiskBand(record.risk_tier)
+                                ? t.bands[record.risk_tier]
+                                : (record.risk_tier ?? '—')}
+                            </span>
+                          </div>
+                        </div>
+                      )}
                     </div>
-                  )}
-                </li>
-              ))}
+
+                    <div className="user-dash__item-actions">
+                      <button
+                        type="button"
+                        className="user-dash__action"
+                        onClick={() =>
+                          setExpandedId((current) => (current === record.id ? null : record.id))
+                        }
+                      >
+                        {t.dashboardView}
+                      </button>
+                      {canMutate ? (
+                        <>
+                          <button
+                            type="button"
+                            className="user-dash__action"
+                            onClick={() => beginEdit(record)}
+                            disabled={savingId === record.id}
+                          >
+                            <Pencil size={16} aria-hidden />
+                            {t.dashboardEdit}
+                          </button>
+                          <button
+                            type="button"
+                            className="user-dash__action user-dash__action--danger"
+                            onClick={() => setPendingDelete(record)}
+                            disabled={savingId === record.id}
+                          >
+                            <Trash2 size={16} aria-hidden />
+                            {t.dashboardDelete}
+                          </button>
+                        </>
+                      ) : null}
+                    </div>
+
+                    {isExpanded ? (
+                      <div className="user-dash__detail">
+                        {isEditing ? (
+                          <>
+                            <label className="user-dash__field">
+                              <span>{t.dashboardLabel}</span>
+                              <input
+                                type="text"
+                                value={draftLabel}
+                                onChange={(e) => setDraftLabel(e.target.value)}
+                                placeholder={t.dashboardLabelPlaceholder}
+                                maxLength={120}
+                              />
+                            </label>
+                            <label className="user-dash__field">
+                              <span>{t.dashboardNotes}</span>
+                              <textarea
+                                value={draftNotes}
+                                onChange={(e) => setDraftNotes(e.target.value)}
+                                placeholder={t.dashboardNotesPlaceholder}
+                                rows={3}
+                                maxLength={1000}
+                              />
+                            </label>
+                            <div className="user-dash__edit-actions">
+                              <button
+                                type="button"
+                                className="user-dash__retry"
+                                disabled={savingId === record.id}
+                                onClick={() => void saveEdit(record)}
+                              >
+                                {savingId === record.id ? t.dashboardLoading : t.dashboardSaveEdit}
+                              </button>
+                              <button
+                                type="button"
+                                className="user-dash__action"
+                                disabled={savingId === record.id}
+                                onClick={cancelEdit}
+                              >
+                                {t.dashboardCancelEdit}
+                              </button>
+                            </div>
+                          </>
+                        ) : (
+                          <>
+                            <p>
+                              <span className="user-dash__label">{t.dashboardLabel}</span>
+                              <strong> {title}</strong>
+                            </p>
+                            <p className="user-dash__notes">
+                              <span className="user-dash__label">{t.dashboardNotes}</span>
+                              <span>{record.notes?.trim() || '—'}</span>
+                            </p>
+                          </>
+                        )}
+                      </div>
+                    ) : null}
+                  </li>
+                )
+              })}
             </ul>
           ) : null}
 
+          <p className="user-dash__create-hint">{t.dashboardCreateHint}</p>
           <Link className="user-dash__cta" to="/assessment">
             <ClipboardPlus size={20} aria-hidden />
             {t.dashboardNewAssessment}
           </Link>
         </motion.main>
       </div>
+
+      {pendingDelete ? (
+        <ConfirmDialog
+          title={t.dashboardDeleteTitle}
+          text={t.dashboardDeleteText}
+          confirmLabel={t.dashboardDeleteConfirm}
+          cancelLabel={t.dashboardCancelEdit}
+          danger
+          onCancel={() => setPendingDelete(null)}
+          onConfirm={() => void confirmDelete()}
+        />
+      ) : null}
     </PageBackground>
   )
 }
