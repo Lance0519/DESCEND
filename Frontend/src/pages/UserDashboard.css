@@ -216,6 +216,7 @@
 .user-dash__item-actions {
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
   gap: 0.45rem;
   padding-top: 0.75rem;
   border-top: 1px solid var(--color-border);
