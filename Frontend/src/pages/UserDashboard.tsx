@@ -247,31 +247,37 @@ export function UserDashboard() {
 
                 return (
                   <li key={record.id || record.created_at} className="user-dash__item">
+                    <p className="user-dash__item-title">{title}</p>
+
                     <div className="user-dash__item-main">
-                      <div className="user-dash__date">
-                        <CalendarDays size={18} aria-hidden />
-                        <div>
-                          <span className="user-dash__label">{t.dashboardDateLabel}</span>
-                          <strong>{formatAssessmentDate(record.created_at, language)}</strong>
-                          <p className="user-dash__item-title">{title}</p>
-                        </div>
+                      <div className="user-dash__meta">
+                        <span className="user-dash__label">
+                          <CalendarDays size={16} aria-hidden />
+                          {t.dashboardDateLabel}
+                        </span>
+                        <strong>{formatAssessmentDate(record.created_at, language)}</strong>
                       </div>
 
                       {record.pre_diagnosed ? (
-                        <div className="user-dash__mgmt">
-                          <Stethoscope size={18} aria-hidden />
-                          <span>{t.dashboardManagementMode}</span>
+                        <div className="user-dash__meta user-dash__meta--wide">
+                          <span className="user-dash__label">
+                            <Stethoscope size={16} aria-hidden />
+                            {t.dashboardRiskTier}
+                          </span>
+                          <span className="user-dash__tier user-dash__tier--low">
+                            {t.dashboardManagementMode}
+                          </span>
                         </div>
                       ) : (
-                        <div className="user-dash__metrics">
-                          <div>
+                        <>
+                          <div className="user-dash__meta">
                             <span className="user-dash__label">
                               <Gauge size={16} aria-hidden />
                               {t.dashboardRiskScore}
                             </span>
                             <strong>{formatRiskScore(record.risk_score, language)}</strong>
                           </div>
-                          <div>
+                          <div className="user-dash__meta">
                             <span className="user-dash__label">
                               <Shield size={16} aria-hidden />
                               {t.dashboardRiskTier}
@@ -282,7 +288,7 @@ export function UserDashboard() {
                                 : (record.risk_tier ?? '—')}
                             </span>
                           </div>
-                        </div>
+                        </>
                       )}
                     </div>
 
