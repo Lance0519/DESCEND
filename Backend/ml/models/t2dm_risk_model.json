@@ -103,7 +103,7 @@
       "scoring": "average_precision",
       "note": null
     },
-    "trainedAt": "2026-08-24T08:48:47.673822+00:00",
+    "trainedAt": "2026-08-24T08:52:31.615627+00:00",
     "datasetRows": 488,
     "cvTrainRows": 390,
     "cvTestRows": 98,
