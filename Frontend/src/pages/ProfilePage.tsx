@@ -4,7 +4,6 @@ import { LayoutDashboard, LogOut, Save, Shield, UserRound } from 'lucide-react'
 import { LanguageToggle } from '../components/LanguageToggle'
 import { PageBackground } from '../components/PageBackground'
 import { persistProfileToSupabase } from '../api/admin'
-import { patchProfile } from '../api/client'
 import { useAuth } from '../context/AuthContext'
 import { fetchOwnProfile } from '../lib/ensureProfile'
 import { useLanguage } from '../context/LanguageContext'
@@ -57,16 +56,6 @@ export function ProfilePage() {
           sex: profile.sex,
           age: profile.age ?? null,
         })
-        try {
-          await patchProfile({
-            display_name: profile.display_name,
-            preferred_lang: profile.preferred_lang ?? language,
-            sex: profile.sex,
-            age: profile.age,
-          })
-        } catch {
-          /* Flask profile is optional; Supabase is the account record. */
-        }
       }
       if (profile.preferred_lang === 'en' || profile.preferred_lang === 'tl') {
         setLanguage(profile.preferred_lang)

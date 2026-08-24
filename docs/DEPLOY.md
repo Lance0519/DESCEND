@@ -46,6 +46,8 @@ Open **Project Settings** (gear) → **API**.
 | **service_role** `secret` key | long `eyJ...` key labeled **service_role** | Vercel `SUPABASE_SERVICE_ROLE_KEY` only (optional but useful) |
 | **JWT Secret** | under JWT Settings / Legacy JWT secret | Vercel `SUPABASE_JWT_SECRET` |
 
+If your Supabase project uses **JWT Signing Keys** (asymmetric), keep `SUPABASE_URL` set on Vercel — the API can verify tokens via JWKS even without the legacy secret.
+
 Also get the **database connection string**:
 
 1. **Project Settings** → **Database** → **Connection string** → URI.
