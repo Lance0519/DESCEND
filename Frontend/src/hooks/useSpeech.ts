@@ -1,4 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import {
+  isAzureSpeechConfigured,
+  speakAzureText,
+  stopAzureSpeech,
+} from '../components/AzureSpeechPlayer'
 import type { Language } from '../types/assessment'
 
 function pickVoice(language: Language): SpeechSynthesisVoice | null {
@@ -45,7 +50,6 @@ function waitForVoices(): Promise<SpeechSynthesisVoice[]> {
       resolve(window.speechSynthesis.getVoices())
     }
     window.speechSynthesis.addEventListener('voiceschanged', onChange)
-    // Safety timeout if voiceschanged never fires
     window.setTimeout(() => {
       window.speechSynthesis.removeEventListener('voiceschanged', onChange)
       resolve(window.speechSynthesis.getVoices())
@@ -58,6 +62,7 @@ export function useSpeech(language: Language) {
   const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null)
 
   const cancel = useCallback(() => {
+    stopAzureSpeech()
     if (typeof window !== 'undefined' && window.speechSynthesis) {
       window.speechSynthesis.cancel()
     }
@@ -65,15 +70,9 @@ export function useSpeech(language: Language) {
     setSpeaking(false)
   }, [])
 
-  useEffect(() => {
-    void waitForVoices()
-    return () => cancel()
-  }, [cancel])
-
-  const speak = useCallback(
+  const speakBrowser = useCallback(
     async (text: string) => {
-      if (!text.trim() || typeof window === 'undefined' || !window.speechSynthesis) return
-      cancel()
+      if (typeof window === 'undefined' || !window.speechSynthesis) return
       await waitForVoices()
 
       const utterance = new SpeechSynthesisUtterance(text)
@@ -88,7 +87,34 @@ export function useSpeech(language: Language) {
       setSpeaking(true)
       window.speechSynthesis.speak(utterance)
     },
-    [cancel, language],
+    [language],
+  )
+
+  useEffect(() => {
+    void waitForVoices()
+    return () => cancel()
+  }, [cancel])
+
+  const speak = useCallback(
+    async (text: string) => {
+      const trimmed = text.trim()
+      if (!trimmed) return
+      cancel()
+
+      if (language === 'tl' && isAzureSpeechConfigured()) {
+        setSpeaking(true)
+        try {
+          await speakAzureText(trimmed)
+          setSpeaking(false)
+          return
+        } catch {
+          setSpeaking(false)
+        }
+      }
+
+      await speakBrowser(trimmed)
+    },
+    [cancel, language, speakBrowser],
   )
 
   return { speak, cancel, speaking }
