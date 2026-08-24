@@ -1,11 +1,29 @@
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { PageBackground } from '../components/PageBackground'
+import { useLanguage } from '../context/LanguageContext'
+import { ensureUserProfile } from '../lib/ensureProfile'
 import { getSupabase } from '../lib/supabaseClient'
+import type { EmailOtpType } from '@supabase/supabase-js'
+
+const OTP_TYPES: EmailOtpType[] = [
+  'signup',
+  'invite',
+  'magiclink',
+  'recovery',
+  'email_change',
+  'email',
+]
+
+function asOtpType(value: string | null): EmailOtpType | null {
+  if (!value) return null
+  return OTP_TYPES.includes(value as EmailOtpType) ? (value as EmailOtpType) : null
+}
 
 export function AuthCallbackPage() {
   const navigate = useNavigate()
-  const [message, setMessage] = useState('Signing you in…')
+  const { t } = useLanguage()
+  const [message, setMessage] = useState(t.callbackSigningIn)
 
   useEffect(() => {
     const sb = getSupabase()
@@ -17,19 +35,26 @@ export function AuthCallbackPage() {
     let cancelled = false
 
     async function finish() {
-      // Prefer exchange if URL has OAuth params; otherwise read existing session
       const url = new URL(window.location.href)
+      const tokenHash = url.searchParams.get('token_hash')
+      const otpType = asOtpType(url.searchParams.get('type'))
       const hasCode = url.searchParams.has('code') || url.hash.includes('access_token')
 
-      if (hasCode) {
+      if (tokenHash && otpType) {
+        const { error } = await sb!.auth.verifyOtp({ token_hash: tokenHash, type: otpType })
+        if (error && !cancelled) {
+          setMessage(error.message || t.callbackFailed)
+          window.setTimeout(() => navigate('/access', { replace: true }), 2500)
+          return
+        }
+      } else if (hasCode) {
         const { error } = await sb!.auth.exchangeCodeForSession(window.location.href)
         if (error) {
-          // Some flows already have a session via detectSessionInUrl
           const { data } = await sb!.auth.getSession()
           if (!data.session) {
             if (!cancelled) {
-              setMessage(error.message)
-              window.setTimeout(() => navigate('/access', { replace: true }), 1500)
+              setMessage(error.message || t.callbackFailed)
+              window.setTimeout(() => navigate('/access', { replace: true }), 2500)
             }
             return
           }
@@ -38,24 +63,35 @@ export function AuthCallbackPage() {
 
       const { data } = await sb!.auth.getSession()
       if (cancelled) return
-      if (data.session?.access_token) {
-        sessionStorage.setItem('descend-supabase-access-token', data.session.access_token)
-        navigate('/dashboard', { replace: true })
+      const session = data.session
+      if (session?.access_token && session.user) {
+        sessionStorage.setItem('descend-supabase-access-token', session.access_token)
+        const meta = session.user.user_metadata ?? {}
+        await ensureUserProfile({
+          id: session.user.id,
+          email: session.user.email,
+          displayName: String(meta.full_name ?? meta.name ?? ''),
+        })
+        const next = otpType === 'recovery' ? '/reset-password' : '/dashboard'
+        navigate(next, { replace: true })
         return
       }
-      setMessage('Could not complete Google sign-in.')
-      window.setTimeout(() => navigate('/access', { replace: true }), 1500)
+      setMessage(t.callbackFailed)
+      window.setTimeout(() => navigate('/access', { replace: true }), 2500)
     }
 
     void finish()
     return () => {
       cancelled = true
     }
-  }, [navigate])
+  }, [navigate, t.callbackFailed, t.callbackSigningIn])
 
   return (
     <PageBackground>
-      <p style={{ padding: '2rem', textAlign: 'center', color: 'var(--color-text-muted)' }}>{message}</p>
+      <div style={{ padding: '2rem', textAlign: 'center' }}>
+        <p style={{ color: 'var(--color-text-muted)' }}>{message}</p>
+        <Link to="/access">{t.callbackCancel}</Link>
+      </div>
     </PageBackground>
   )
 }

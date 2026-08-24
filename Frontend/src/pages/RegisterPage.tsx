@@ -14,6 +14,7 @@ export function RegisterPage() {
   const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [confirm, setConfirm] = useState('')
   const [displayName, setDisplayName] = useState('')
   const [error, setError] = useState('')
   const [info, setInfo] = useState('')
@@ -25,10 +26,14 @@ export function RegisterPage() {
     setError('')
     setInfo('')
     try {
-      if (!configured) throw new Error('Supabase is not configured. You can continue as guest.')
+      if (password !== confirm) {
+        setError(t.passwordMismatch)
+        return
+      }
+      if (!configured) throw new Error('Supabase is not configured')
       const { needsEmailConfirm } = await signUp(email, password, displayName)
       if (needsEmailConfirm) {
-        setInfo(`${t.checkEmailTitle}. ${t.checkEmailText}`)
+        setInfo(`${t.checkEmailTitle}. ${t.checkEmailText} ${t.checkEmailNext}`)
         return
       }
       navigate('/dashboard')
@@ -65,11 +70,29 @@ export function RegisterPage() {
               onChange={(e) => setPassword(e.target.value)}
             />
           </label>
+          <label>
+            {t.confirmPassword}
+            <input
+              type="password"
+              required
+              minLength={6}
+              value={confirm}
+              onChange={(e) => setConfirm(e.target.value)}
+            />
+          </label>
           {error ? <p className="auth-form__error">{error}</p> : null}
-          {info ? <p className="auth-form__ok">{info}</p> : null}
-          <button type="submit" disabled={busy}>
-            {busy ? t.creatingAccount : t.registerSubmit}
-          </button>
+          {info ? (
+            <>
+              <p className="auth-form__ok">{info}</p>
+              <Link to="/login" className="auth-form__submit-link">
+                {t.goToSignIn}
+              </Link>
+            </>
+          ) : (
+            <button type="submit" disabled={busy}>
+              {busy ? t.creatingAccount : t.registerSubmit}
+            </button>
+          )}
           <p className="auth-form__links">
             <Link to="/login">{t.accessSignIn}</Link>
             <Link to="/access">{t.accessGuest}</Link>

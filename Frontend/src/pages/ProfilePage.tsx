@@ -4,8 +4,9 @@ import { LayoutDashboard, LogOut, Save, Shield, UserRound } from 'lucide-react'
 import { LanguageToggle } from '../components/LanguageToggle'
 import { PageBackground } from '../components/PageBackground'
 import { persistProfileToSupabase } from '../api/admin'
-import { fetchProfile, patchProfile } from '../api/client'
+import { patchProfile } from '../api/client'
 import { useAuth } from '../context/AuthContext'
+import { fetchOwnProfile } from '../lib/ensureProfile'
 import { useLanguage } from '../context/LanguageContext'
 import './ProfilePage.css'
 
@@ -27,18 +28,16 @@ export function ProfilePage() {
 
   useEffect(() => {
     if (!user) return
-    void fetchProfile()
-      .then((data) => setProfile(data as ProfileData))
-      .catch(() => {
-        setProfile({
-          display_name: user.displayName ?? '',
-          email: user.email ?? '',
-          avatar_url: user.avatarUrl ?? '',
-          preferred_lang: user.preferredLang ?? language,
-          sex: user.preferredSex ?? '',
-          age: user.preferredAge,
-        })
+    void fetchOwnProfile(user.id).then((data) => {
+      setProfile({
+        display_name: data?.display_name || user.displayName || '',
+        email: data?.email || user.email || '',
+        avatar_url: data?.avatar_url || user.avatarUrl || '',
+        preferred_lang: data?.preferred_lang || user.preferredLang || language,
+        sex: data?.sex || user.preferredSex || '',
+        age: data?.age ?? user.preferredAge,
       })
+    })
   }, [user, language])
 
   if (loading) return null
@@ -50,12 +49,6 @@ export function ProfilePage() {
     setMessage('')
     try {
       if (configured) {
-        await patchProfile({
-          display_name: profile.display_name,
-          preferred_lang: profile.preferred_lang ?? language,
-          sex: profile.sex,
-          age: profile.age,
-        })
         await persistProfileToSupabase({
           userId: signedIn.id,
           email: signedIn.email,
@@ -64,6 +57,16 @@ export function ProfilePage() {
           sex: profile.sex,
           age: profile.age ?? null,
         })
+        try {
+          await patchProfile({
+            display_name: profile.display_name,
+            preferred_lang: profile.preferred_lang ?? language,
+            sex: profile.sex,
+            age: profile.age,
+          })
+        } catch {
+          /* Flask profile is optional; Supabase is the account record. */
+        }
       }
       if (profile.preferred_lang === 'en' || profile.preferred_lang === 'tl') {
         setLanguage(profile.preferred_lang)

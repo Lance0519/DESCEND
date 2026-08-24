@@ -7,6 +7,7 @@ import {
   useState,
   type ReactNode,
 } from 'react'
+import { ensureUserProfile } from '../lib/ensureProfile'
 import { getSupabase, isSupabaseConfigured } from '../lib/supabaseClient'
 
 export type UserRole = 'user' | 'admin'
@@ -172,14 +173,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signUp = useCallback(async (email: string, password: string, displayName?: string) => {
     const sb = getSupabase()
     if (!sb) throw new Error('Supabase is not configured')
+    const name = displayName?.trim() ?? ''
     const { data, error } = await sb.auth.signUp({
-      email,
+      email: email.trim(),
       password,
-      options: { data: { full_name: displayName ?? '' } },
+      options: {
+        data: { full_name: name },
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
+      },
     })
     if (error) throw error
+    if (data.user && (data.user.identities?.length ?? 0) === 0) {
+      throw new Error('already_registered')
+    }
     setIsGuest(false)
-    if (data.session?.user) await applySessionUser(data.session.user)
+    if (data.session?.user) {
+      await ensureUserProfile({
+        id: data.session.user.id,
+        email: data.session.user.email,
+        displayName: name,
+      })
+      await applySessionUser(data.session.user)
+    }
     return { needsEmailConfirm: !data.session }
   }, [applySessionUser])
 

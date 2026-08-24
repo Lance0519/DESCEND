@@ -113,7 +113,7 @@ export async function persistProfileToSupabase(input: {
 }): Promise<void> {
   const sb = getSupabase()
   if (!sb) return
-  await sb.from('profiles').upsert({
+  const { error } = await sb.from('profiles').upsert({
     id: input.userId,
     email: input.email ?? null,
     display_name: input.displayName ?? '',
@@ -122,4 +122,5 @@ export async function persistProfileToSupabase(input: {
     age: input.age ?? null,
     updated_at: new Date().toISOString(),
   })
+  if (error) throw new Error(error.message)
 }
