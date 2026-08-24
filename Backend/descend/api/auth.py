@@ -50,7 +50,12 @@ def _get_token_from_request() -> Optional[str]:
 
 
 def _get_current_user(required: bool = False) -> Optional[User]:
-    """Get authenticated user from token."""
+    """Get authenticated Flask user from a legacy itsdangerous token.
+
+    Frontend login uses Supabase JWTs. Those are verified separately via
+    ``verify_bearer_token`` on estimate/predict. When ``required`` is False,
+    an unrecognized Bearer token must not block scoring — treat as anonymous.
+    """
     token = _get_token_from_request()
     if not token:
         if required:
@@ -62,12 +67,18 @@ def _get_current_user(required: bool = False) -> Optional[User]:
             token, max_age=current_app.config["AUTH_TOKEN_MAX_AGE"]
         )
     except SignatureExpired as exc:
+        if not required:
+            return None
         raise ValueError("Your session has expired. Please log in again.") from exc
     except BadSignature as exc:
+        if not required:
+            return None
         raise ValueError("Invalid authentication token.") from exc
 
     user = db.session.get(User, payload.get("user_id"))
     if not user:
+        if not required:
+            return None
         raise ValueError("The account associated with this session no longer exists.")
     if not user.is_active:
         raise ValueError("This account is disabled. Contact an administrator.")
