@@ -134,6 +134,7 @@ export const en = {
   historyEmpty: 'No saved assessments yet. Complete one while signed in to keep it here.',
   openHistory: 'Assessment history',
   accountNav: 'Profile',
+  dashboardNav: 'Dashboard',
   signOut: 'Sign out',
   dashboardTitle: 'Your dashboard',
   dashboardSubtitle: 'Review assessments saved to your account, newest first.',

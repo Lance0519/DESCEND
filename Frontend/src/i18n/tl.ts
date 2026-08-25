@@ -136,6 +136,7 @@ export const tl: TranslationDict = {
   historyEmpty: 'Wala pang naka-save. Kumpletuhin ang pagsusuri habang naka-sign in.',
   openHistory: 'Kasaysayan ng pagsusuri',
   accountNav: 'Profile',
+  dashboardNav: 'Dashboard',
   signOut: 'Mag-sign out',
   dashboardTitle: 'Iyong dashboard',
   dashboardSubtitle: 'Tingnan ang mga pagsusuring naka-save sa iyong account, pinakabago muna.',

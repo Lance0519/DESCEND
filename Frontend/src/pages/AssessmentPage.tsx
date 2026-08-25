@@ -36,6 +36,33 @@ function initialGate(answers: AssessmentAnswers): DiagnosisGate {
   return 'diagnosis'
 }
 
+function AssessmentToolbar() {
+  const { t } = useLanguage()
+  const { user } = useAuth()
+
+  return (
+    <div className="assessment-page__toolbar">
+      <LanguageToggle />
+      <div className="assessment-page__toolbar-links">
+        {user ? (
+          <>
+            <Link to="/dashboard" className="assessment-page__account">
+              {t.dashboardNav}
+            </Link>
+            <Link to="/account" className="assessment-page__account">
+              {t.accountNav}
+            </Link>
+          </>
+        ) : (
+          <Link to="/access" className="assessment-page__account">
+            {t.accessSignIn}
+          </Link>
+        )}
+      </div>
+    </div>
+  )
+}
+
 export function AssessmentPage() {
   const { t, language } = useLanguage()
   const { user } = useAuth()
@@ -129,6 +156,7 @@ export function AssessmentPage() {
       <PageBackground>
         <div className="assessment-page assessment-page--resume">
           <div className="resume-card">
+            <AssessmentToolbar />
             <h2>{t.resumeTitle}</h2>
             <p>{t.resumeText}</p>
             <button
@@ -168,9 +196,7 @@ export function AssessmentPage() {
       <PageBackground>
         <div className="assessment-page assessment-page--resume">
           <div className="resume-card" style={{ textAlign: 'left', maxWidth: 480 }}>
-            <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '0.75rem' }}>
-              <LanguageToggle />
-            </div>
+            <AssessmentToolbar />
             <h2>{t.diagnosisGateTitle}</h2>
             <p style={{ margin: '0.75rem 0 1rem', color: 'var(--color-text-muted)' }}>
               {t.diagnosisGateQuestion}
@@ -208,9 +234,7 @@ export function AssessmentPage() {
       <PageBackground>
         <div className="assessment-page assessment-page--resume">
           <div className="resume-card" style={{ textAlign: 'left', maxWidth: 480 }}>
-            <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '0.75rem' }}>
-              <LanguageToggle />
-            </div>
+            <AssessmentToolbar />
             <h2>{t.diagnosisOnsetTitle}</h2>
             <p style={{ margin: '0.75rem 0 1rem', color: 'var(--color-text-muted)' }}>
               {t.diagnosisOnsetHelp}
@@ -447,18 +471,7 @@ export function AssessmentPage() {
     <PageBackground>
       <div className="assessment-page">
         <ProgressBar current={flow.index} total={flow.total} label={t.progress} />
-        <div className="assessment-page__toolbar">
-          <LanguageToggle />
-          {user ? (
-            <Link to="/account" className="assessment-page__account">
-              {t.accountNav}
-            </Link>
-          ) : (
-            <Link to="/access" className="assessment-page__account">
-              {t.accessSignIn}
-            </Link>
-          )}
-        </div>
+        <AssessmentToolbar />
         <div className="assessment-page__content">
           <motion.div
             key={current.id}
