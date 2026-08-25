@@ -61,11 +61,29 @@ Signup already uses `emailRedirectTo: {origin}/auth/callback`. That page runs `v
 
 ## 5. Branded email templates (Supabase)
 
-**Authentication** → **Emails** → **Templates**.
+**Important:** Editing this markdown file (or pushing to GitHub) does **not** change emails. You must paste the HTML into the **Supabase dashboard** and click **Save**. Only emails sent **after** that save use the new body.
 
-Custom SMTP must already be enabled (otherwise Supabase locks template editing).
+### Where to paste
 
-Keep Supabase variables exactly: `{{ .ConfirmationURL }}`, `{{ .SiteURL }}`, `{{ .Email }}`.
+1. Open your project → **Authentication** → **Emails** → **Templates**
+2. Select **Confirm sign up** (not Magic Link / Invite)
+3. Set **Subject** and replace the entire **Body** (delete the old default first)
+4. Click **Save**
+5. Refresh the page and confirm your HTML is still there
+6. Register with a **new** email (or use **Resend** confirmation) — old inbox messages stay plain forever
+
+Custom SMTP must be enabled first, or template editing may be locked / ignored.
+
+**Allowed variables only** (anything else → Auth silently falls back to the plain default email):
+
+- `{{ .ConfirmationURL }}`
+- `{{ .SiteURL }}`
+- `{{ .Email }}`
+- `{{ .Token }}` / `{{ .TokenHash }}` (usually not needed)
+
+Do **not** use `{{{ ... }}}`, Liquid filters, or unknown fields like `{{ .Data... }}`.
+
+If the body still looks like the default after saving, open **Logs** → **Auth** and search for `templatemailer_template_body_parse_error`.
 
 ### Confirm sign up — Subject
 
@@ -75,15 +93,10 @@ Confirm your DESCEND account
 
 ### Confirm sign up — Body
 
+Paste this entire block into the Body field:
+
 ```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Confirm your DESCEND account</title>
-</head>
-<body style="margin:0;padding:0;background:#eef4f1;font-family:Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#1f2937;">
+<div style="margin:0;padding:0;background:#eef4f1;font-family:Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#1f2937;">
   <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#eef4f1;padding:32px 12px;">
     <tr>
       <td align="center">
@@ -106,9 +119,7 @@ Confirm your DESCEND account
               <table role="presentation" cellspacing="0" cellpadding="0" style="margin:0 0 24px;">
                 <tr>
                   <td style="border-radius:10px;background:#1f6f5b;">
-                    <a href="{{ .ConfirmationURL }}" style="display:inline-block;padding:14px 22px;font-size:16px;font-weight:700;color:#ffffff;text-decoration:none;">
-                      Confirm email
-                    </a>
+                    <a href="{{ .ConfirmationURL }}" style="display:inline-block;padding:14px 22px;font-size:16px;font-weight:700;color:#ffffff;text-decoration:none;">Confirm email</a>
                   </td>
                 </tr>
               </table>
@@ -135,8 +146,7 @@ Confirm your DESCEND account
       </td>
     </tr>
   </table>
-</body>
-</html>
+</div>
 ```
 
 ### Reset password — Subject
@@ -148,14 +158,7 @@ Reset your DESCEND password
 ### Reset password — Body
 
 ```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Reset your DESCEND password</title>
-</head>
-<body style="margin:0;padding:0;background:#eef4f1;font-family:Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#1f2937;">
+<div style="margin:0;padding:0;background:#eef4f1;font-family:Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#1f2937;">
   <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#eef4f1;padding:32px 12px;">
     <tr>
       <td align="center">
@@ -175,9 +178,7 @@ Reset your DESCEND password
               <table role="presentation" cellspacing="0" cellpadding="0" style="margin:0 0 24px;">
                 <tr>
                   <td style="border-radius:10px;background:#1f6f5b;">
-                    <a href="{{ .ConfirmationURL }}" style="display:inline-block;padding:14px 22px;font-size:16px;font-weight:700;color:#ffffff;text-decoration:none;">
-                      Reset password
-                    </a>
+                    <a href="{{ .ConfirmationURL }}" style="display:inline-block;padding:14px 22px;font-size:16px;font-weight:700;color:#ffffff;text-decoration:none;">Reset password</a>
                   </td>
                 </tr>
               </table>
@@ -204,11 +205,8 @@ Reset your DESCEND password
       </td>
     </tr>
   </table>
-</body>
-</html>
+</div>
 ```
-
-Save each template after pasting.
 
 ## 6. Test
 
