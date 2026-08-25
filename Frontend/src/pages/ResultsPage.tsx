@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef } from 'react'
 import { Activity, Droplets, HeartPulse, Printer, Scale, Users } from 'lucide-react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { ConfirmDialog } from '../components/ConfirmDialog'
+import { ContactSupport } from '../components/ContactSupport'
 import { LanguageToggle } from '../components/LanguageToggle'
 import { PageBackground } from '../components/PageBackground'
 import { useAssessment } from '../context/AssessmentContext'
@@ -166,6 +167,9 @@ export function ResultsPage() {
           ) : null}
 
           <div className="results__disclaimer">{t.resultsDisclaimer}</div>
+          <div className="results__contact results__no-print">
+            <ContactSupport />
+          </div>
 
           {status === 'saving' ? (
             <p className="results__save results__no-print" role="status">

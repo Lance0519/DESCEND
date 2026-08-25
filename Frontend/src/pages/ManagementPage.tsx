@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion'
 import { Activity, Apple, HeartPulse, Moon } from 'lucide-react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
+import { ContactSupport } from '../components/ContactSupport'
 import { LanguageToggle } from '../components/LanguageToggle'
 import { PageBackground } from '../components/PageBackground'
 import { useAssessment } from '../context/AssessmentContext'
@@ -59,6 +60,7 @@ export function ManagementPage() {
           </ul>
 
           <p className="mgmt__disclaimer">{t.mgmtDisclaimer}</p>
+          <ContactSupport />
 
           <div className="mgmt__actions">
             <button

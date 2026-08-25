@@ -1,6 +1,7 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { LayoutDashboard, LogOut, Save, Shield, UserRound } from 'lucide-react'
+import { ContactSupport } from '../components/ContactSupport'
 import { LanguageToggle } from '../components/LanguageToggle'
 import { PageBackground } from '../components/PageBackground'
 import { persistProfileToSupabase } from '../api/admin'
@@ -145,6 +146,9 @@ export function ProfilePage() {
                 <Shield size={16} aria-hidden /> {t.adminNav}
               </Link>
             ) : null}
+          </div>
+          <div className="profile-page__contact">
+            <ContactSupport />
           </div>
         </main>
       </div>

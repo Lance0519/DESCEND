@@ -15,6 +15,7 @@ export const tl: TranslationDict = {
     'Kung naka-sign in ka, maaari naming i-save ang pagsusuri sa iyong dashboard. Hindi pa rin ito klinikal na rekord medikal.',
   privacyLearnMore: 'Alamin pa ang tungkol sa privacy',
   privacyLearnLess: 'Ipakita nang mas kaunti',
+  contactSupportText: 'Kung may tanong ka tungkol sa sistemang ito, makipag-ugnayan sa',
   startAssessment: 'Simulan ang Pagsusuri',
   langLabel: 'Wika',
   next: 'Susunod',

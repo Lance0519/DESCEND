@@ -13,6 +13,7 @@ export const en = {
     'If you are signed in, we can save your assessment to your dashboard so you can review it later. This is still not a clinical medical record.',
   privacyLearnMore: 'Learn more about privacy',
   privacyLearnLess: 'Show less',
+  contactSupportText: 'If you have any questions about this system, contact',
   startAssessment: 'Start Assessment',
   langLabel: 'Language',
   next: 'Next',

@@ -17,6 +17,7 @@ import {
   UserRound,
 } from 'lucide-react'
 import { ConfirmDialog } from '../components/ConfirmDialog'
+import { ContactSupport } from '../components/ContactSupport'
 import { LanguageToggle } from '../components/LanguageToggle'
 import { PageBackground } from '../components/PageBackground'
 import { useAuth } from '../context/AuthContext'
@@ -394,6 +395,9 @@ export function UserDashboard() {
             <ClipboardPlus size={20} aria-hidden />
             {t.dashboardNewAssessment}
           </Link>
+          <div className="user-dash__contact">
+            <ContactSupport />
+          </div>
         </motion.main>
       </div>
 

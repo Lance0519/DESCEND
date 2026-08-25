@@ -193,6 +193,10 @@
   line-height: 1.5;
 }
 
+.results__contact {
+  margin-top: 0.75rem;
+}
+
 .results__retake {
   width: 100%;
   min-height: 52px;

@@ -67,6 +67,10 @@
   gap: 0.65rem;
 }
 
+.landing__disclaimers + .contact-support {
+  margin-top: 0.75rem;
+}
+
 .landing__cta {
   width: 100%;
   min-height: 48px;

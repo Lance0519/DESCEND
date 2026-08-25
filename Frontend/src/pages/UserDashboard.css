@@ -317,6 +317,10 @@
   font-weight: 700;
 }
 
+.user-dash__contact {
+  margin-top: 1rem;
+}
+
 @media (max-width: 640px) {
   .user-dash__item-main {
     grid-template-columns: 1fr;

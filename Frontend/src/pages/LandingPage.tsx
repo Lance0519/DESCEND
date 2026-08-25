@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion'
 import { Activity, ArrowRight, Info, ShieldCheck } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
+import { ContactSupport } from '../components/ContactSupport'
 import { DisclaimerBox } from '../components/DisclaimerBox'
 import { LanguageToggle } from '../components/LanguageToggle'
 import { PageBackground } from '../components/PageBackground'
@@ -35,6 +36,8 @@ export function LandingPage() {
             <DisclaimerBox title={t.disclaimerTitle} text={t.disclaimerText} icon={Info} variant="neutral" />
             <DisclaimerBox title={t.privacyTitle} text={t.privacyText} icon={ShieldCheck} variant="primary" />
           </div>
+
+          <ContactSupport />
 
           <button type="button" className="landing__cta" onClick={() => navigate('/access')}>
             {t.startAssessment}
