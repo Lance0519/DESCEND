@@ -82,9 +82,23 @@ https://YOUR-SITE.netlify.app/auth/callback
 
 (Replace `YOUR-SITE` after Netlify gives you a URL.)
 
-### A5. Enable Email auth
+### A5. Enable Email auth + Resend (confirmation emails)
 
-**Authentication** → **Providers** → **Email** → enable → Save.
+**Authentication** → **Providers** → **Email** → enable → turn **Confirm email** **ON** → Save.
+
+Supabase’s free built-in mailer rate-limits quickly. For production confirmation and password-reset mail, use **Resend** as custom SMTP:
+
+→ Full steps: **[docs/RESEND_EMAIL.md](RESEND_EMAIL.md)** (Resend API key → Supabase SMTP → redirect URLs → test).
+
+Quick SMTP values once you have a Resend key:
+
+| Field | Value |
+|-------|--------|
+| Host | `smtp.resend.com` |
+| Port | `465` |
+| Username | `resend` |
+| Password | Resend API key (`re_...`) |
+| Sender | verified domain address (or `onboarding@resend.dev` for tests) |
 
 ### A6. Google Sign-In — skip for now
 

@@ -120,7 +120,8 @@ export const tl: TranslationDict = {
   resetSubmit: 'I-update ang password',
   resetSuccess: 'Na-update ang password. Maaari ka nang mag-sign in.',
   checkEmailTitle: 'Kumpirmahin ang email',
-  checkEmailText: 'Nagpadala kami ng confirmation link. Buksan ito upang tapusin ang account.',
+  checkEmailText:
+    'Nagpadala kami ng confirmation link sa iyong inbox. Buksan ito upang tapusin ang account (tingnan ang spam kung wala).',
   checkEmailNext: 'Pagkatapos mag-confirm, bumalik at mag-sign in.',
   alreadyRegistered: 'May account na sa email na ito. Mag-sign in na lang.',
   emailNotConfirmed: 'Kumpirmahin muna ang email. Tingnan ang inbox para sa link mula sa DESCEND.',

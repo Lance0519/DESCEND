@@ -118,7 +118,8 @@ export const en = {
   resetSubmit: 'Update password',
   resetSuccess: 'Password updated. You can sign in now.',
   checkEmailTitle: 'Confirm your email',
-  checkEmailText: 'We sent a confirmation link. Open it to finish creating your account.',
+  checkEmailText:
+    'We sent a confirmation link to your inbox. Open it to finish creating your account (check spam if you do not see it).',
   checkEmailNext: 'After you confirm, come back and sign in.',
   alreadyRegistered: 'An account with this email already exists. Sign in instead.',
   emailNotConfirmed: 'Please confirm your email first. Check your inbox for the link from DESCEND.',
