@@ -15,6 +15,7 @@
 3. Netlify (`Frontend`)  
 4. Smoke-test guest / email  
 5. **Google Sign-In last** (optional) — only after Netlify URL works  
+6. **Custom domain** (optional) — Namecheap `descendt2dm.me` → see **[CUSTOM_DOMAIN.md](CUSTOM_DOMAIN.md)**
 
 Read-aloud uses the **free browser Web Speech API** — no TTS API keys.
 

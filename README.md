@@ -29,4 +29,5 @@ Copy `Frontend/.env.example` and `Backend/.env.example` (see `docs/DEPLOY.md`).
 
 - [Risk scoring](docs/RISK_SCORING.md)
 - [Deploy (GitHub → Netlify + Vercel + Supabase)](docs/DEPLOY.md)
+- [Custom domain descendt2dm.me (Namecheap)](docs/CUSTOM_DOMAIN.md)
 - [Resend email confirmation (Supabase SMTP)](docs/RESEND_EMAIL.md)

@@ -57,8 +57,10 @@ def create_app() -> Flask:
         for o in str(app.config["FRONTEND_ORIGIN"]).split(",")
         if o.strip()
     ]
-    # Always allow the production Netlify frontend (env may lag behind).
+    # Always allow known production frontends (env may lag behind).
     _origins.append("https://descendt2dm.netlify.app")
+    _origins.append("https://descendt2dm.me")
+    _origins.append("https://www.descendt2dm.me")
     # Any Vite port when FLASK_ENV is development (5173, 5174, …); avoids shell env
     # overriding .env and breaking CORS (load_dotenv override=True fixes that too).
     _flask_env = os.getenv("FLASK_ENV", "development").strip().lower()
@@ -71,6 +73,7 @@ def create_app() -> Flask:
         )
     if _is_vercel():
         _origins.append(r"^https://[a-z0-9-]+\.netlify\.app$")
+        _origins.append(r"^https://([a-z0-9-]+\.)?descendt2dm\.me$")
     # De-dupe while preserving order
     _seen: set[str] = set()
     _unique_origins: list[str] = []

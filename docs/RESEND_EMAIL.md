@@ -45,13 +45,17 @@ Save.
 
 | Field | Value |
 |-------|--------|
-| Site URL | `https://descendt2dm.netlify.app` |
-| Redirect URLs | include both: |
+| Site URL | `https://descendt2dm.me` (or `https://descendt2dm.netlify.app` until the custom domain is live) |
+| Redirect URLs | include: |
 
 ```
 http://localhost:5173/auth/callback
+https://descendt2dm.me/auth/callback
+https://www.descendt2dm.me/auth/callback
 https://descendt2dm.netlify.app/auth/callback
 ```
+
+Custom domain DNS (Namecheap → Netlify) and Resend domain verification: **[CUSTOM_DOMAIN.md](CUSTOM_DOMAIN.md)**.
 
 Signup already uses `emailRedirectTo: {origin}/auth/callback`. That page runs `verifyOtp` / session exchange and creates the `profiles` row.
 
