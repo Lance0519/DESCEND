@@ -1,4 +1,5 @@
 import { getSupabase } from '../lib/supabaseClient'
+import { fetchAuditLogs, type AuditLogRow } from './audit'
 
 export interface AdminProfileRow {
   id: string
@@ -29,6 +30,7 @@ export interface AdminOverview {
   recentUsers: AdminProfileRow[]
   recentAssessments: AdminAssessmentRow[]
   users: AdminProfileRow[]
+  auditLogs: AuditLogRow[]
 }
 
 function bandKey(value: string | null): keyof AdminOverview['riskMix'] {
@@ -79,6 +81,13 @@ export async function fetchAdminOverview(): Promise<AdminOverview> {
     riskMix[bandKey(row.risk_band)] += 1
   }
 
+  let auditLogs: AuditLogRow[] = []
+  try {
+    auditLogs = await fetchAuditLogs(40)
+  } catch {
+    auditLogs = []
+  }
+
   return {
     userCount: users.length,
     adminCount: users.filter((u) => u.role === 'admin').length,
@@ -90,6 +99,7 @@ export async function fetchAdminOverview(): Promise<AdminOverview> {
     recentUsers: users.slice(0, 8),
     recentAssessments: assessments.slice(0, 8),
     users,
+    auditLogs,
   }
 }
 
