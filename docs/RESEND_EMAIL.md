@@ -59,20 +59,156 @@ Custom domain DNS (Namecheap → Netlify) and Resend domain verification: **[CUS
 
 Signup already uses `emailRedirectTo: {origin}/auth/callback`. That page runs `verifyOtp` / session exchange and creates the `profiles` row.
 
-## 5. Optional — email template text
+## 5. Branded email templates (Supabase)
 
-**Authentication** → **Email Templates** → **Confirm signup**.
+**Authentication** → **Emails** → **Templates**.
 
-Keep Supabase’s confirmation link variable. Example body:
+Custom SMTP must already be enabled (otherwise Supabase locks template editing).
 
-```html
-<h2>Confirm your DESCEND account</h2>
-<p>Thanks for registering. Open this link to finish creating your account:</p>
-<p><a href="{{ .ConfirmationURL }}">Confirm email</a></p>
-<p>If you did not create an account, you can ignore this message.</p>
+Keep Supabase variables exactly: `{{ .ConfirmationURL }}`, `{{ .SiteURL }}`, `{{ .Email }}`.
+
+### Confirm sign up — Subject
+
+```text
+Confirm your DESCEND account
 ```
 
-Same idea for **Reset password** (`{{ .ConfirmationURL }}`).
+### Confirm sign up — Body
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Confirm your DESCEND account</title>
+</head>
+<body style="margin:0;padding:0;background:#eef4f1;font-family:Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#1f2937;">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#eef4f1;padding:32px 12px;">
+    <tr>
+      <td align="center">
+        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:560px;background:#ffffff;border:1px solid #d7e3dc;border-radius:16px;overflow:hidden;">
+          <tr>
+            <td style="background:#1f6f5b;padding:28px 32px;">
+              <p style="margin:0;font-size:13px;letter-spacing:0.08em;text-transform:uppercase;color:#c8ebe0;">Diabetes risk awareness</p>
+              <h1 style="margin:8px 0 0;font-size:28px;line-height:1.2;color:#ffffff;font-weight:700;">DESCEND</h1>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:32px;">
+              <h2 style="margin:0 0 12px;font-size:22px;line-height:1.3;color:#16352c;">Confirm your email</h2>
+              <p style="margin:0 0 16px;font-size:16px;line-height:1.6;color:#374151;">
+                Thanks for creating an account. Confirm your email to finish setup and open your dashboard.
+              </p>
+              <p style="margin:0 0 24px;font-size:14px;line-height:1.5;color:#6b7280;">
+                Signed up as <strong style="color:#16352c;">{{ .Email }}</strong>
+              </p>
+              <table role="presentation" cellspacing="0" cellpadding="0" style="margin:0 0 24px;">
+                <tr>
+                  <td style="border-radius:10px;background:#1f6f5b;">
+                    <a href="{{ .ConfirmationURL }}" style="display:inline-block;padding:14px 22px;font-size:16px;font-weight:700;color:#ffffff;text-decoration:none;">
+                      Confirm email
+                    </a>
+                  </td>
+                </tr>
+              </table>
+              <p style="margin:0 0 8px;font-size:13px;line-height:1.5;color:#6b7280;">
+                If the button does not work, copy and paste this link into your browser:
+              </p>
+              <p style="margin:0 0 24px;font-size:12px;line-height:1.5;word-break:break-all;color:#1f6f5b;">
+                {{ .ConfirmationURL }}
+              </p>
+              <p style="margin:0;font-size:13px;line-height:1.55;color:#6b7280;">
+                DESCEND is an educational awareness tool, not a medical diagnosis. If you did not create this account, you can ignore this message.
+              </p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:18px 32px;background:#f7faf8;border-top:1px solid #e5eee9;">
+              <p style="margin:0;font-size:12px;line-height:1.5;color:#6b7280;">
+                <a href="{{ .SiteURL }}" style="color:#1f6f5b;text-decoration:none;font-weight:600;">descendt2dm.me</a>
+                · DESCEND
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+```
+
+### Reset password — Subject
+
+```text
+Reset your DESCEND password
+```
+
+### Reset password — Body
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Reset your DESCEND password</title>
+</head>
+<body style="margin:0;padding:0;background:#eef4f1;font-family:Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#1f2937;">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#eef4f1;padding:32px 12px;">
+    <tr>
+      <td align="center">
+        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:560px;background:#ffffff;border:1px solid #d7e3dc;border-radius:16px;overflow:hidden;">
+          <tr>
+            <td style="background:#1f6f5b;padding:28px 32px;">
+              <p style="margin:0;font-size:13px;letter-spacing:0.08em;text-transform:uppercase;color:#c8ebe0;">Account security</p>
+              <h1 style="margin:8px 0 0;font-size:28px;line-height:1.2;color:#ffffff;font-weight:700;">DESCEND</h1>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:32px;">
+              <h2 style="margin:0 0 12px;font-size:22px;line-height:1.3;color:#16352c;">Reset your password</h2>
+              <p style="margin:0 0 24px;font-size:16px;line-height:1.6;color:#374151;">
+                We received a request to reset the password for <strong>{{ .Email }}</strong>. Open the button below to choose a new password.
+              </p>
+              <table role="presentation" cellspacing="0" cellpadding="0" style="margin:0 0 24px;">
+                <tr>
+                  <td style="border-radius:10px;background:#1f6f5b;">
+                    <a href="{{ .ConfirmationURL }}" style="display:inline-block;padding:14px 22px;font-size:16px;font-weight:700;color:#ffffff;text-decoration:none;">
+                      Reset password
+                    </a>
+                  </td>
+                </tr>
+              </table>
+              <p style="margin:0 0 8px;font-size:13px;line-height:1.5;color:#6b7280;">
+                If the button does not work, copy and paste this link:
+              </p>
+              <p style="margin:0 0 24px;font-size:12px;line-height:1.5;word-break:break-all;color:#1f6f5b;">
+                {{ .ConfirmationURL }}
+              </p>
+              <p style="margin:0;font-size:13px;line-height:1.55;color:#6b7280;">
+                If you did not ask for a password reset, you can ignore this email. Your password will stay the same.
+              </p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:18px 32px;background:#f7faf8;border-top:1px solid #e5eee9;">
+              <p style="margin:0;font-size:12px;line-height:1.5;color:#6b7280;">
+                <a href="{{ .SiteURL }}" style="color:#1f6f5b;text-decoration:none;font-weight:600;">descendt2dm.me</a>
+                · DESCEND
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+```
+
+Save each template after pasting.
 
 ## 6. Test
 
