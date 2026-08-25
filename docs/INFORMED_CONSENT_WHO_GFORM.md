@@ -200,7 +200,89 @@ Sa pagpili ng **“Oo, sumasang-ayon ako”**, kinukumpirma mong ikaw ay **18 ta
 
 **Branching:**
 - Option 1 → Section: Survey questions  
-- Option 2 → Section: End (message: “Thank you. No responses will be collected.”)
+- Option 2 → Section: **End — Declined consent** (use Part E.2 below)
+
+---
+
+# PART E — Ending of the Google Form
+
+Use these as (1) the final survey section description, and/or (2) **Settings → Presentation → Confirmation message**.
+
+---
+
+## E.1 — Confirmation message (respondent completed the survey)
+
+**Paste into Google Forms → Settings → Presentation → Confirmation message:**
+
+---
+
+Thank you for completing this survey.
+
+Your responses have been recorded and will be used only for educational and academic research related to Type 2 diabetes risk awareness (DESCEND). This survey is **not a medical diagnosis** and is **not a substitute for professional clinical advice**.
+
+If you have concerns about your health, fasting glucose, HbA1c, family history of diabetes, or any symptoms, please consult a licensed healthcare professional.
+
+If you have questions about this study or the DESCEND system, contact:  
+**justinelance0067@gmail.com**
+
+Thank you again for your time and participation.
+
+---
+
+### Tagalog version (optional bilingual confirmation)
+
+Salamat sa pagsagot sa survey na ito.
+
+Naitala na ang iyong mga sagot at gagamitin lamang para sa edukasyon at akademikong pananaliksik tungkol sa kamalayan sa peligro ng Type 2 diabetes (DESCEND). **Hindi ito medikal na diyagnosis** at **hindi kapalit ng propesyonal na payong medikal.**
+
+Kung may concern ka sa iyong kalusugan, fasting glucose, HbA1c, kasaysayan ng diabetes sa pamilya, o anumang sintomas, kumonsulta sa lisensyadong healthcare professional.
+
+Para sa tanong tungkol sa pag-aaral o sistema ng DESCEND:  
+**justinelance0067@gmail.com**
+
+Maraming salamat sa iyong oras at partisipasyon.
+
+---
+
+## E.2 — End section if participant declines consent
+
+**Section title:** End — Declined consent  
+**Section description (no questions needed):**
+
+---
+
+Thank you for your time.
+
+You chose not to participate. **No survey answers will be collected** from this point.
+
+If you change your mind later, you may reopen the form and select “Yes, I agree and wish to continue.”
+
+Questions about this study or DESCEND: **justinelance0067@gmail.com**
+
+---
+
+### Tagalog (optional)
+
+Salamat sa iyong oras.
+
+Pinili mong hindi sumali. **Walang sagot sa survey na kokolektahin** mula rito.
+
+Kung magbabago ang isip mo, maaari mong buksan muli ang form at piliin ang “Oo, sumasang-ayon ako.”
+
+Tanong tungkol sa pag-aaral o DESCEND: **justinelance0067@gmail.com**
+
+**Branching tip:** From the consent “No” option, send respondents to this section, then use **After section → Submit form**.
+
+---
+
+## E.3 — Final survey section (optional on-form closing page)
+
+If you prefer a last section *before* submit (instead of only the confirmation message):
+
+**Section title:** Thank you  
+**Description:** paste **E.1**  
+**Questions:** none (or one optional: “Any comments?” — Short answer / Paragraph)  
+**After section:** Submit form
 
 ---
 
@@ -210,3 +292,4 @@ Sa pagpili ng **“Oo, sumasang-ayon ako”**, kinukumpirma mong ikaw ay **18 ta
 2. If respondents may be patients in a clinic, add clinic permission language required by your IERC.
 3. WHO templates are guidance; your school’s ethics board has the final required wording—adapt if they provide their own form.
 4. Keep a PDF copy of this consent text in your thesis appendices.
+5. Keep the form ending / confirmation message consistent with the consent (educational only; contact email included).
