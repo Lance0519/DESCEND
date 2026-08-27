@@ -20,6 +20,7 @@ if str(_BACKEND_ROOT) not in sys.path:
 
 from descend.ml.feature_builder import _compute_hereditary_load_index
 from descend.ml.graph import derive_family_metrics
+from gform_survey_map import is_google_form_export, maybe_normalize_raw_row
 
 
 TARGET_LABEL = "respondent"
@@ -56,20 +57,18 @@ def compute_bmi(height_cm: float, weight_kg: float) -> float:
 def map_physical_activity(value) -> float:
     """Map survey activity frequency to model scale 0-2."""
     txt = _text(value)
-    if "rare" in txt or "never" in txt:
+    if any(token in txt for token in ("sedentary", "little or no", "rarely", "rare", "never")):
         return 0.0
-    if "1-2" in txt:
-        return 1.0
-    if "3-4" in txt:
-        return 1.0
-    if "5+" in txt or "5x" in txt:
+    if any(token in txt for token in ("daily", "5+", "5x", "4-5", "6-7", "extremely", "very active")):
         return 2.0
+    if any(token in txt for token in ("once a week", "1-2", "2-3", "3-4", "3-5", "lightly", "moderately", "moderate")):
+        return 1.0
 
     numeric = _extract_first_number(value)
     if numeric is None:
         return 1.0
     raw = int(numeric)
-    
+
     if raw <= 0:
         return 0.0
     if raw == 1:  # rarely/never
@@ -78,6 +77,33 @@ def map_physical_activity(value) -> float:
         return 1.0
     if raw >= 4:  # 5+/week
         return 2.0
+    return 1.0
+
+
+def map_physical_activity_combined(frequency, level=None) -> float:
+    """Prefer exercise frequency; fall back to usual activity level (app parity)."""
+    freq_txt = _text(frequency)
+    level_txt = _text(level)
+
+    high_freq = any(token in freq_txt for token in ("daily", "5+", "5 or more", "4-5", "6-7"))
+    mid_freq = any(token in freq_txt for token in ("once a week", "1-2", "2-3", "3-4", "3-5"))
+    low_freq = any(token in freq_txt for token in ("never", "rarely", "rare"))
+
+    if high_freq:
+        return 2.0
+    if mid_freq:
+        return 1.0
+    if freq_txt and _extract_first_number(frequency) is not None and not low_freq:
+        return map_physical_activity(frequency)
+
+    if any(token in level_txt for token in ("sedentary", "little or no", "low")):
+        return 0.0
+    if any(token in level_txt for token in ("extremely", "very active", "high", "moderate", "lightly", "light")):
+        return 1.0
+    if low_freq:
+        return 0.0
+    if freq_txt:
+        return map_physical_activity(frequency)
     return 1.0
 
 
@@ -289,8 +315,11 @@ def transform_row(raw_row: dict, source_record_id: int, demo: dict) -> dict:
     user_is_male = demo["user_is_male"]
     
     # Lifestyle scores
-    physical_activity_score = map_physical_activity(raw_row.get('physical_activity_frequency', 1))
-    diet_quality_score = map_diet_quality(raw_row.get('diet_quality', 1))
+    physical_activity_score = map_physical_activity_combined(
+        raw_row.get("physical_activity_frequency", 1),
+        raw_row.get("physical_activity_level"),
+    )
+    diet_quality_score = map_diet_quality(raw_row.get("diet_quality", 1))
     
     # Health indicators (with defaults)
     hypertension_status = map_hypertension(raw_row.get('self_hypertension_status', 0))
@@ -433,9 +462,14 @@ def prepare_training_dataset(input_path: Path, output_path: Path):
     rows = []
     skip_reasons: Counter[str] = Counter()
     source_record_id = 0
+    detected_gform = False
     with input_path.open('r', encoding='utf-8-sig', newline='') as f:
         reader = csv.DictReader(f)
-        for row in reader:
+        detected_gform = is_google_form_export(reader.fieldnames)
+        if detected_gform:
+            print("Detected DESCEND Google Form export; mapping question headers to internal schema.")
+        for raw_index, raw_row in enumerate(reader, start=1):
+            row = maybe_normalize_raw_row(raw_row, patient_id=raw_index)
             demo, reason = validate_and_parse_demographics(row)
             if demo is None:
                 skip_reasons[reason or "unknown"] += 1
@@ -475,7 +509,10 @@ def prepare_training_dataset(input_path: Path, output_path: Path):
         writer.writeheader()
         writer.writerows(rows)
     
+    n_pos = sum(1 for row in rows if int(row["outcome"]) == 1)
+    n_neg = len(rows) - n_pos
     print(f"Prepared {len(rows)} respondent-level rows")
+    print(f"Outcome: {n_pos} T2DM (1) / {n_neg} not T2DM (0)")
     if skip_reasons:
         total_skipped = sum(skip_reasons.values())
         print(f"Skipped {total_skipped} row(s) (validation); reasons:")

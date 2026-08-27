@@ -12,6 +12,7 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
+from dataset_paths import resolve_raw_survey_csv
 from prepare_training_dataset import prepare_training_dataset
 
 
@@ -23,7 +24,7 @@ def main() -> None:
         "--raw",
         type=Path,
         default=None,
-        help="Path to raw merged CSV (default: backend/ml/datasets/raw/survey_to_excel_raw_merged.csv)",
+        help="Path to raw survey CSV (default: DESCEND Google Form export, else merged internal CSV)",
     )
     parser.add_argument(
         "--out",
@@ -35,10 +36,11 @@ def main() -> None:
     args = parser.parse_args()
 
     backend_dir = Path(__file__).resolve().parents[1]
-    raw_path = args.raw or (backend_dir / "ml" / "datasets" / "raw" / "survey_to_excel_raw_merged.csv")
-    out_path = args.out or (backend_dir / "ml" / "datasets" / "processed" / "training_dataset.csv")
+    datasets_dir = backend_dir / "ml" / "datasets"
+    raw_path = args.raw or resolve_raw_survey_csv(datasets_dir)
+    out_path = args.out or (datasets_dir / "processed" / "training_dataset.csv")
 
-    print("\\n" + "=" * 70)
+    print("\n" + "=" * 70)
     print("RAW TO TRAINING DATASET CLEANER")
     print("=" * 70)
     print(f"Raw input:  {raw_path}")
@@ -46,7 +48,7 @@ def main() -> None:
 
     prepare_training_dataset(raw_path, out_path)
 
-    print("=" * 70 + "\\n")
+    print("=" * 70 + "\n")
 
 
 if __name__ == "__main__":
