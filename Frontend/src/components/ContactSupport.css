@@ -19,9 +19,11 @@
   background: var(--color-primary-light);
   border: 1px solid var(--color-primary-border);
   color: var(--color-primary-dark);
+  font: inherit;
   font-weight: 700;
   text-decoration: none;
   white-space: nowrap;
+  cursor: pointer;
 }
 
 .contact-support__link:hover,
@@ -31,8 +33,113 @@
   color: #fff;
 }
 
-.contact-support svg {
+.contact-support > svg {
   flex-shrink: 0;
   margin-top: 0.15rem;
   color: var(--color-primary);
+}
+
+.contact-dialog {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: rgba(15, 32, 27, 0.45);
+  backdrop-filter: blur(2px);
+}
+
+.contact-dialog__card {
+  position: relative;
+  width: 100%;
+  max-width: 380px;
+  background: var(--color-bg-card, #fff);
+  border: 1px solid var(--surface-card-border);
+  border-radius: 16px;
+  padding: 1.5rem 1.25rem 1.25rem;
+  box-shadow: var(--surface-card-shadow);
+  text-align: center;
+}
+
+.contact-dialog__card h2 {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  margin: 0 0 0.5rem;
+  font-size: 1.1rem;
+  color: var(--color-primary-dark);
+}
+
+.contact-dialog__help {
+  margin: 0 0 1rem;
+  color: var(--color-text-muted);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.contact-dialog__address {
+  margin: 0 0 1.1rem;
+  padding: 0.7rem 0.5rem;
+  border-radius: 10px;
+  background: var(--color-bg-neutral);
+  border: 1px dashed var(--color-border);
+  font-weight: 700;
+  font-size: 15px;
+  word-break: break-all;
+  color: var(--color-text-main);
+}
+
+.contact-dialog__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.contact-dialog__copy,
+.contact-dialog__mail {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  min-height: var(--touch-min);
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.contact-dialog__copy {
+  border: none;
+  background: var(--color-primary);
+  color: #fff;
+}
+
+.contact-dialog__mail {
+  border: 1.5px solid var(--color-border);
+  background: var(--color-bg-card, #fff);
+  color: var(--color-primary-dark);
+}
+
+.contact-dialog__close {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--color-text-muted);
+  cursor: pointer;
+}
+
+.contact-dialog__close:hover {
+  background: var(--color-bg-neutral);
 }
