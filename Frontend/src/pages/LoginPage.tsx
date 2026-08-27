@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { LogIn } from 'lucide-react'
 import { AuthNavBar } from '../components/AuthNavBar'
+import { GoogleSignInButton, isGoogleSignInEnabled } from '../components/GoogleSignInButton'
 import { PageBackground } from '../components/PageBackground'
 import { useAuth } from '../context/AuthContext'
 import { useLanguage } from '../context/LanguageContext'
@@ -16,6 +17,7 @@ export function LoginPage() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
+  const showGoogle = configured && isGoogleSignInEnabled()
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault()
@@ -58,10 +60,17 @@ export function LoginPage() {
           <button type="submit" disabled={busy}>
             {busy ? t.signingIn : t.signInSubmit}
           </button>
+          {showGoogle ? (
+            <>
+              <div className="auth-form__divider">
+                <span>{t.authDividerOr}</span>
+              </div>
+              <GoogleSignInButton />
+            </>
+          ) : null}
           <p className="auth-form__links">
             <Link to="/forgot-password">{t.forgotPassword}</Link>
             <Link to="/register">{t.accessRegister}</Link>
-            <Link to="/access">{t.accessGuest}</Link>
           </p>
         </form>
       </div>

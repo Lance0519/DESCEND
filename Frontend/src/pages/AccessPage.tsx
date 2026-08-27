@@ -9,13 +9,8 @@ import './AccessPage.css'
 
 export function AccessPage() {
   const { t } = useLanguage()
-  const { continueAsGuest, signInWithGoogle, configured } = useAuth()
+  const { continueAsGuest } = useAuth()
   const navigate = useNavigate()
-  const googleFlag = String(import.meta.env.VITE_ENABLE_GOOGLE_SIGNIN ?? '')
-    .trim()
-    .toLowerCase()
-  const googleEnabled = googleFlag === 'true' || googleFlag === '1' || googleFlag === 'yes'
-  const showGoogle = googleEnabled && configured
 
   return (
     <PageBackground>
@@ -50,23 +45,6 @@ export function AccessPage() {
             <UserPlus size={20} aria-hidden />
             {t.accessRegister}
           </button>
-
-          {showGoogle ? (
-            <>
-              <button
-                type="button"
-                className="access__btn access__btn--google"
-                onClick={() => void signInWithGoogle()}
-              >
-                <LogIn size={20} aria-hidden />
-                {t.accessGoogle}
-              </button>
-              <p className="access__hint">{t.accessGoogleHint}</p>
-            </>
-          ) : null}
-          {import.meta.env.DEV && googleEnabled && !configured ? (
-            <p className="access__hint access__hint--muted">{t.accessGoogleNeedsConfig}</p>
-          ) : null}
         </motion.main>
       </div>
     </PageBackground>

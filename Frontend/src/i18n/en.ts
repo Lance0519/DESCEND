@@ -101,9 +101,11 @@ export const en = {
   accessSignIn: 'Sign in',
   accessRegister: 'Create account',
   accessGoogle: 'Continue with Google',
-  accessGoogleHint: 'Sign in with your Google account (free). Requires Supabase Google provider to be enabled.',
+  accessGoogleHint: 'Use your Google account — no new password needed.',
   accessGoogleNeedsConfig:
     'Google sign-in is not available on this device. You can still continue as guest.',
+  authDividerOr: 'or',
+  googleSignInFailed: 'Google sign-in could not start. Try email and password instead.',
   accessGuestHint: 'No account needed. Progress is saved on this device only.',
   email: 'Email',
   password: 'Password',

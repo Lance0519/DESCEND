@@ -1,0 +1,19 @@
+.session-loading {
+  min-height: 100svh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  color: var(--color-text-muted);
+  padding: 2rem;
+}
+
+.session-loading__spin {
+  animation: session-spin 0.9s linear infinite;
+}
+
+@keyframes session-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
