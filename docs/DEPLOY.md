@@ -317,23 +317,26 @@ https://YOUR-PROJECT-REF.supabase.co/auth/v1/callback
 
 1. **Authentication** → **Providers** → **Google** → enable.
 2. Paste Client ID + Client Secret → Save.
-3. Confirm Redirect URL includes `https://YOUR-SITE.netlify.app/auth/callback`.
+3. **Authentication** → **URL Configuration** → Redirect URLs must include every origin you use:
+
+```
+http://localhost:5173/auth/callback
+https://descendt2dm.me/auth/callback
+https://www.descendt2dm.me/auth/callback
+https://descendt2dm.netlify.app/auth/callback
+```
 
 Google Client ID/Secret stay in **Supabase only** — not in Netlify or Vercel.
 
-### G3. Netlify — show the Google button
+### G3. Netlify — the Google button
 
-Add env var and **redeploy**:
+The button shows automatically on **/login** whenever `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` are set.
 
-| Key | Value |
-|-----|--------|
-| `VITE_ENABLE_GOOGLE_SIGNIN` | `true` |
-
-(Requires `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` already set.)
+`VITE_ENABLE_GOOGLE_SIGNIN` is now an **opt-out** only: set it to `false` to hide the button. Leaving it unset keeps Google visible.
 
 ### G4. Smoke-test Google
 
-Access → **Continue with Google** → sign in → Profile shows Google.
+**/login** → **Continue with Google** → choose account → lands on `/auth/callback` → dashboard, and Profile shows Google.
 
 ---
 
@@ -355,5 +358,8 @@ After `001_descend_schema.sql`, run `supabase/migrations/002_patient_survey_reco
 The Flask API exposes `POST /api/estimate` (and `/api/predict` uses the same workflow): diagnosed → management path (no model); undiagnosed → feature array + ExtraTrees probability × 100.
 | Enabling Google before Netlify URL exists | Finish Section F first, then do Section G |
 | Google redirect wrong | Must be `https://<ref>.supabase.co/auth/v1/callback` |
-| Google button missing on Access | Set `VITE_ENABLE_GOOGLE_SIGNIN=true` on Netlify + Supabase keys → redeploy |
+| Google button missing on /login | Supabase keys missing on Netlify, or `VITE_ENABLE_GOOGLE_SIGNIN=false` → fix and redeploy |
+| `Unsupported provider: provider is not enabled` | Google provider is OFF in Supabase → Authentication → Providers → Google |
+| `redirect_uri_mismatch` from Google | Google Cloud redirect URI must be `https://<ref>.supabase.co/auth/v1/callback` |
+| Google works but lands back on /access | Add your site's `/auth/callback` to Supabase Redirect URLs |
 | Putting service_role in Netlify | Remove it — browser must only use **anon** key |
