@@ -25,6 +25,7 @@ export function ProfilePage() {
   const navigate = useNavigate()
   const [profile, setProfile] = useState<ProfileData>({})
   const [message, setMessage] = useState('')
+  const [saving, setSaving] = useState(false)
 
   useEffect(() => {
     if (!user) return
@@ -47,6 +48,7 @@ export function ProfilePage() {
   async function onSave(e: FormEvent) {
     e.preventDefault()
     setMessage('')
+    setSaving(true)
     try {
       if (configured) {
         await persistProfileToSupabase({
@@ -64,7 +66,10 @@ export function ProfilePage() {
       await refreshSession()
       setMessage(t.profileSaved)
     } catch (err) {
-      setMessage(err instanceof Error ? err.message : t.errorRetry)
+      console.warn('profile save failed', err)
+      setMessage(t.errorRetry)
+    } finally {
+      setSaving(false)
     }
   }
 
@@ -86,7 +91,9 @@ export function ProfilePage() {
             <img className="profile-page__avatar" src={profile.avatar_url} alt="" />
           ) : null}
           <p className="profile-page__email">{user.email}</p>
-          <p className="profile-page__provider">Provider: {user.provider}</p>
+          <p className="profile-page__provider">
+            {user.provider === 'google' ? t.profileSignedInGoogle : t.profileSignedInEmail}
+          </p>
           <form onSubmit={(e) => void onSave(e)} className="profile-page__form">
             <label>
               {t.displayName}
@@ -101,7 +108,7 @@ export function ProfilePage() {
                 value={profile.sex ?? ''}
                 onChange={(e) => setProfile((p) => ({ ...p, sex: e.target.value }))}
               >
-                <option value="">—</option>
+                <option value="">{t.notSpecified}</option>
                 <option value="female">{t.options.female}</option>
                 <option value="male">{t.options.male}</option>
               </select>
@@ -131,8 +138,8 @@ export function ProfilePage() {
                 <option value="en">English</option>
               </select>
             </label>
-            <button type="submit">
-              <Save size={18} aria-hidden /> {t.profileSave}
+            <button type="submit" disabled={saving}>
+              <Save size={18} aria-hidden /> {saving ? t.profileSaving : t.profileSave}
             </button>
           </form>
           {message ? <p className="profile-page__msg">{message}</p> : null}

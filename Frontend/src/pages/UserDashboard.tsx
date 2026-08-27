@@ -286,7 +286,7 @@ export function UserDashboard() {
                             <span className={`user-dash__tier ${tierClass(record.risk_tier)}`}>
                               {record.risk_tier && isRiskBand(record.risk_tier)
                                 ? t.bands[record.risk_tier]
-                                : (record.risk_tier ?? '—')}
+                                : (record.risk_tier ?? t.notSpecified)}
                             </span>
                           </div>
                         </>
@@ -378,7 +378,7 @@ export function UserDashboard() {
                             </p>
                             <p className="user-dash__notes">
                               <span className="user-dash__label">{t.dashboardNotes}</span>
-                              <span>{record.notes?.trim() || '—'}</span>
+                              <span>{record.notes?.trim() || t.noNotes}</span>
                             </p>
                           </>
                         )}

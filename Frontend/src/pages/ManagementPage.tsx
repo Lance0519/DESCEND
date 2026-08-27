@@ -74,7 +74,7 @@ export function ManagementPage() {
               {t.mgmtRestart}
             </button>
             <Link to="/" className="btn btn--ghost">
-              {t.brand}
+              {t.backHome}
             </Link>
           </div>
         </motion.main>

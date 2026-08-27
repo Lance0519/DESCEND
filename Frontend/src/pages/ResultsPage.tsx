@@ -151,7 +151,7 @@ export function ResultsPage() {
                   <span>{contribLabel(c.label)}</span>
                   <span className={c.delta >= 0 ? 'delta-up' : 'delta-down'}>
                     {c.delta >= 0 ? '+' : ''}
-                    {(c.delta * 100).toFixed(1)} pts
+                    {(c.delta * 100).toFixed(1)} {t.pointsUnit}
                   </span>
                 </li>
               ))}

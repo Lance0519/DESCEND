@@ -50,6 +50,7 @@ export function AdminDashboard() {
   const [notice, setNotice] = useState('')
   const [loading, setLoading] = useState(true)
   const [pending, setPending] = useState<PendingAction | null>(null)
+  const [busyRowId, setBusyRowId] = useState<string | null>(null)
 
   const [auditLogs, setAuditLogs] = useState<AuditLogRow[] | null>(null)
   const [auditPassword, setAuditPassword] = useState('')
@@ -62,7 +63,8 @@ export function AdminDashboard() {
     try {
       setData(await fetchAdminOverview())
     } catch (err) {
-      setError(err instanceof Error ? err.message : t.adminForbidden)
+      console.warn('admin overview failed', err)
+      setError(t.adminForbidden)
       setData(null)
     } finally {
       setLoading(false)
@@ -112,9 +114,9 @@ export function AdminDashboard() {
   }
 
   function personLabel(id: string | null | undefined) {
-    if (!id) return '—'
+    if (!id) return t.adminUnknownUser
     const row = userById.get(id)
-    return row?.email || row?.display_name || id.slice(0, 8)
+    return row?.email || row?.display_name || t.adminUnknownUser
   }
 
   function targetLabel(row: AuditLogRow) {
@@ -194,6 +196,7 @@ export function AdminDashboard() {
     const { kind, row } = pending
     setPending(null)
     setNotice('')
+    setBusyRowId(row.id)
     try {
       if (kind === 'promote' || kind === 'demote') {
         await updateAdminUser(row.id, { role: kind === 'promote' ? 'admin' : 'user' })
@@ -218,7 +221,10 @@ export function AdminDashboard() {
       await load()
       if (auditLogs) setAuditLogs(await fetchAuditLogs(40))
     } catch (err) {
-      setError(err instanceof Error ? err.message : t.errorRetry)
+      console.warn('admin action failed', err)
+      setError(t.errorRetry)
+    } finally {
+      setBusyRowId(null)
     }
   }
 
@@ -236,7 +242,8 @@ export function AdminDashboard() {
       await purgeExpiredAuditLogs()
       setAuditLogs(await fetchAuditLogs(40))
     } catch (err) {
-      setAuditError(err instanceof Error ? err.message : t.errorRetry)
+      console.warn('audit unlock failed', err)
+      setAuditError(t.errorRetry)
     } finally {
       setAuditBusy(false)
     }
@@ -343,7 +350,7 @@ export function AdminDashboard() {
                       <li key={row.id} className={row.role === 'admin' ? 'is-admin' : undefined}>
                         <div>
                           <strong>
-                            {row.display_name || row.email || row.id}
+                            {row.display_name || row.email || t.adminUnknownUser}
                             {row.role === 'admin' ? (
                               <span className="admin-dash__badge">
                                 <Shield size={13} aria-hidden /> {t.adminAdmins}
@@ -355,31 +362,48 @@ export function AdminDashboard() {
                           </strong>
                           <p>{row.email}</p>
                           <p>
-                            {t.adminRole}: {row.role} · {row.is_active ? t.adminActive : t.adminInactive}
+                            {t.adminRole}: {row.role === 'admin' ? t.adminRoleAdmin : t.adminRoleUser} ·{' '}
+                            {row.is_active ? t.adminActive : t.adminInactive}
                           </p>
                         </div>
                         <div className="admin-dash__actions">
                           {row.role === 'admin' ? (
-                            <button type="button" onClick={() => requestAction({ kind: 'demote', row })}>
+                            <button
+                              type="button"
+                              disabled={busyRowId === row.id}
+                              onClick={() => requestAction({ kind: 'demote', row })}
+                            >
                               {t.adminDemote}
                             </button>
                           ) : (
-                            <button type="button" onClick={() => requestAction({ kind: 'promote', row })}>
+                            <button
+                              type="button"
+                              disabled={busyRowId === row.id}
+                              onClick={() => requestAction({ kind: 'promote', row })}
+                            >
                               {t.adminPromote}
                             </button>
                           )}
                           {row.is_active ? (
-                            <button type="button" onClick={() => requestAction({ kind: 'disable', row })}>
+                            <button
+                              type="button"
+                              disabled={busyRowId === row.id}
+                              onClick={() => requestAction({ kind: 'disable', row })}
+                            >
                               {t.adminDisable}
                             </button>
                           ) : (
-                            <button type="button" onClick={() => requestAction({ kind: 'enable', row })}>
+                            <button
+                              type="button"
+                              disabled={busyRowId === row.id}
+                              onClick={() => requestAction({ kind: 'enable', row })}
+                            >
                               {t.adminEnable}
                             </button>
                           )}
                           <button
                             type="button"
-                            disabled={!row.email}
+                            disabled={!row.email || busyRowId === row.id}
                             onClick={() => requestAction({ kind: 'reset', row })}
                           >
                             {t.adminSendReset}
@@ -460,7 +484,11 @@ export function AdminDashboard() {
         {pending ? (
           <ConfirmDialog
             title={t.adminConfirmTitle}
-            text={`${confirmText(pending)}${pending.row.email ? `\n${pending.row.email}` : ''}`}
+            text={
+              pending.row.email
+                ? `${confirmText(pending)} (${pending.row.email})`
+                : confirmText(pending)
+            }
             confirmLabel={confirmLabel(pending)}
             cancelLabel={t.confirmCancel}
             danger={pending.kind === 'disable' || pending.kind === 'demote'}

@@ -332,8 +332,8 @@ export function AssessmentPage() {
             >
               {t.flowErrorRestart}
             </button>
-            <Link to="/" className="btn btn--ghost" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none' }}>
-              {t.brand}
+            <Link to="/" className="btn btn--ghost btn--link">
+              {t.backHome}
             </Link>
           </div>
         </div>

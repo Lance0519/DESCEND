@@ -25,7 +25,10 @@ function asOtpType(value: string | null): EmailOtpType | null {
   return OTP_TYPES.includes(value as EmailOtpType) ? (value as EmailOtpType) : null
 }
 
-/** Providers return failures either as query params or in the URL fragment. */
+/**
+ * Providers return failures either as query params or in the URL fragment.
+ * The raw code is logged rather than shown, so users see plain language.
+ */
 function readProviderError(url: URL): string | null {
   const hash = new URLSearchParams(url.hash.replace(/^#/, ''))
   const description =
@@ -36,7 +39,8 @@ function readProviderError(url: URL): string | null {
     url.searchParams.get('error') ??
     hash.get('error')
   if (!description && !code) return null
-  return [description, code ? `(${code})` : null].filter(Boolean).join(' ')
+  console.warn('auth callback provider error', { description, code })
+  return description
 }
 
 export function AuthCallbackPage() {

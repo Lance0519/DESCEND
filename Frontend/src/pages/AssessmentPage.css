@@ -141,6 +141,13 @@
   backdrop-filter: blur(6px);
 }
 
+.btn--link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
 .btn--ghost:hover:not(:disabled) {
   border-color: var(--color-primary-border);
   background: var(--color-primary-light);

@@ -28,6 +28,7 @@ export function authErrorMessage(
   if (normalized.includes('invalid login') || normalized.includes('invalid credentials')) {
     return copy.invalidCredentials
   }
-  if (raw.length > 0 && raw.length < 180) return raw
+  // Anything unmapped is a backend string in English; never show it to users.
+  if (raw) console.warn('auth error', raw)
   return copy.errorRetry
 }
