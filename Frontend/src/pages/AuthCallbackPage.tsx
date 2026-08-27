@@ -5,6 +5,7 @@ import { useLanguage } from '../context/LanguageContext'
 import { ensureUserProfile } from '../lib/ensureProfile'
 import { getSupabase } from '../lib/supabaseClient'
 import type { EmailOtpType } from '@supabase/supabase-js'
+import './AuthCallbackPage.css'
 
 const OTP_TYPES: EmailOtpType[] = [
   'signup',
@@ -20,10 +21,25 @@ function asOtpType(value: string | null): EmailOtpType | null {
   return OTP_TYPES.includes(value as EmailOtpType) ? (value as EmailOtpType) : null
 }
 
+/** Providers return failures either as query params or in the URL fragment. */
+function readProviderError(url: URL): string | null {
+  const hash = new URLSearchParams(url.hash.replace(/^#/, ''))
+  const description =
+    url.searchParams.get('error_description') ?? hash.get('error_description')
+  const code =
+    url.searchParams.get('error_code') ??
+    hash.get('error_code') ??
+    url.searchParams.get('error') ??
+    hash.get('error')
+  if (!description && !code) return null
+  return [description, code ? `(${code})` : null].filter(Boolean).join(' ')
+}
+
 export function AuthCallbackPage() {
   const navigate = useNavigate()
   const { t } = useLanguage()
   const [message, setMessage] = useState(t.callbackSigningIn)
+  const [detail, setDetail] = useState('')
 
   useEffect(() => {
     const sb = getSupabase()
@@ -34,17 +50,28 @@ export function AuthCallbackPage() {
 
     let cancelled = false
 
+    function fail(reason: string, detailText?: string) {
+      if (cancelled) return
+      setMessage(reason)
+      setDetail(detailText ?? '')
+    }
+
     async function finish() {
       const url = new URL(window.location.href)
+      const providerError = readProviderError(url)
+      if (providerError) {
+        fail(t.callbackFailed, providerError)
+        return
+      }
+
       const tokenHash = url.searchParams.get('token_hash')
       const otpType = asOtpType(url.searchParams.get('type'))
       const hasCode = url.searchParams.has('code') || url.hash.includes('access_token')
 
       if (tokenHash && otpType) {
         const { error } = await sb!.auth.verifyOtp({ token_hash: tokenHash, type: otpType })
-        if (error && !cancelled) {
-          setMessage(error.message || t.callbackFailed)
-          window.setTimeout(() => navigate('/access', { replace: true }), 2500)
+        if (error) {
+          fail(t.callbackFailed, error.message)
           return
         }
       } else if (hasCode) {
@@ -52,10 +79,7 @@ export function AuthCallbackPage() {
         if (error) {
           const { data } = await sb!.auth.getSession()
           if (!data.session) {
-            if (!cancelled) {
-              setMessage(error.message || t.callbackFailed)
-              window.setTimeout(() => navigate('/access', { replace: true }), 2500)
-            }
+            fail(t.callbackFailed, error.message)
             return
           }
         }
@@ -76,21 +100,22 @@ export function AuthCallbackPage() {
         navigate(next, { replace: true })
         return
       }
-      setMessage(t.callbackFailed)
-      window.setTimeout(() => navigate('/access', { replace: true }), 2500)
+
+      fail(t.callbackFailed, hasCode ? t.callbackNoSession : t.callbackNoCode)
     }
 
     void finish()
     return () => {
       cancelled = true
     }
-  }, [navigate, t.callbackFailed, t.callbackSigningIn])
+  }, [navigate, t.callbackFailed, t.callbackNoCode, t.callbackNoSession, t.callbackSigningIn])
 
   return (
     <PageBackground>
-      <div style={{ padding: '2rem', textAlign: 'center' }}>
-        <p style={{ color: 'var(--color-text-muted)' }}>{message}</p>
-        <Link to="/access">{t.callbackCancel}</Link>
+      <div className="auth-callback">
+        <p className="auth-callback__message">{message}</p>
+        {detail ? <p className="auth-callback__detail">{detail}</p> : null}
+        <Link to="/login">{t.callbackCancel}</Link>
       </div>
     </PageBackground>
   )

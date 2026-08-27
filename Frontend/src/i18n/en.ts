@@ -273,7 +273,11 @@ export const en = {
   adminActionNamed: 'Updated {email}.',
   callbackCancel: 'Cancel',
   callbackSigningIn: 'Signing you in…',
-  callbackFailed: 'Could not finish sign-in. You can try again from the access page.',
+  callbackFailed: 'Could not finish sign-in.',
+  callbackNoCode:
+    'The provider did not return a sign-in code. Check that this exact site address is listed under Supabase Redirect URLs.',
+  callbackNoSession:
+    'A sign-in code arrived but no session was created. This usually means the sign-in started on a different address than this one (for example www vs non-www).',
   passwordUpdated: 'Password updated. You can sign in now.',
   goToSignIn: 'Sign in',
   section: {

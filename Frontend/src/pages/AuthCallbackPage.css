@@ -1,0 +1,34 @@
+.auth-callback {
+  min-height: 60svh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 2rem 1rem;
+  text-align: center;
+}
+
+.auth-callback__message {
+  margin: 0;
+  color: var(--color-text-main);
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.auth-callback__detail {
+  margin: 0;
+  max-width: 420px;
+  color: var(--color-text-muted);
+  background: var(--color-bg-neutral);
+  border-radius: 8px;
+  padding: 0.7rem 0.85rem;
+  font-size: 14px;
+  line-height: 1.45;
+  word-break: break-word;
+}
+
+.auth-callback a {
+  color: var(--color-primary-dark);
+  font-weight: 600;
+}

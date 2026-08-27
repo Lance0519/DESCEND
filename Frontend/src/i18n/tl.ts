@@ -275,7 +275,11 @@ export const tl: TranslationDict = {
   adminActionNamed: 'Na-update si {email}.',
   callbackCancel: 'Kanselahin',
   callbackSigningIn: 'Nag-sign in…',
-  callbackFailed: 'Hindi natapos ang sign-in. Subukan muli mula sa access page.',
+  callbackFailed: 'Hindi natapos ang sign-in.',
+  callbackNoCode:
+    'Walang sign-in code na ibinalik ang provider. Tiyaking nakalista ang eksaktong address na ito sa Supabase Redirect URLs.',
+  callbackNoSession:
+    'May dumating na sign-in code ngunit walang session. Karaniwan ito kapag nagsimula ang sign-in sa ibang address (halimbawa www kumpara sa walang www).',
   passwordUpdated: 'Na-update ang password. Maaari ka nang mag-sign in.',
   goToSignIn: 'Mag-sign in',
   section: {
