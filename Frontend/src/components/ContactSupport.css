@@ -12,10 +12,23 @@
   line-height: 1.45;
 }
 
-.contact-support a {
+.contact-support__link {
+  display: inline-block;
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  background: var(--color-primary-light);
+  border: 1px solid var(--color-primary-border);
   color: var(--color-primary-dark);
-  font-weight: 600;
-  word-break: break-all;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.contact-support__link:hover,
+.contact-support__link:focus-visible {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #fff;
 }
 
 .contact-support svg {
