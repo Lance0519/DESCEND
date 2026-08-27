@@ -37,6 +37,7 @@ interface AuthContextValue {
   signInWithGoogle: () => Promise<void>
   signOut: () => Promise<void>
   sendPasswordReset: (email: string) => Promise<void>
+  reauthenticate: (password: string) => Promise<boolean>
   updatePassword: (password: string) => Promise<void>
   refreshSession: () => Promise<void>
 }
@@ -217,6 +218,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (error) throw error
   }, [])
 
+  /** Confirms the signed-in admin still knows their password, for sensitive views. */
+  const reauthenticate = useCallback(async (password: string) => {
+    const sb = getSupabase()
+    if (!sb) return false
+    const { data } = await sb.auth.getSession()
+    const email = data.session?.user.email
+    if (!email) return false
+    const { error } = await sb.auth.signInWithPassword({ email, password })
+    return !error
+  }, [])
+
   const updatePassword = useCallback(async (password: string) => {
     const sb = getSupabase()
     if (!sb) throw new Error('Supabase is not configured')
@@ -245,6 +257,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       signInWithGoogle,
       signOut,
       sendPasswordReset,
+      reauthenticate,
       updatePassword,
       refreshSession: syncToken,
     }),
@@ -259,6 +272,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       signInWithGoogle,
       signOut,
       sendPasswordReset,
+      reauthenticate,
       updatePassword,
       syncToken,
     ],

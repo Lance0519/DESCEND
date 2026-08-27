@@ -139,6 +139,14 @@ set role = 'admin', is_active = true
 where public.is_admin_email(p.email);
 ```
 
+### Audit log access and retention
+
+Run `supabase/migrations/009_audit_log_retention.sql` as well. It deletes `audit_logs` rows older than **6 months** and exposes an admin-only `purge_audit_logs_as_admin()` that the dashboard calls when the log is opened.
+
+To purge on a schedule instead of relying on an admin visiting the page, enable **pg_cron** (Database → Extensions) and uncomment the `cron.schedule` block at the bottom of that migration.
+
+In the admin dashboard the audit log is **hidden until the signed-in admin re-enters their password**. Nothing is fetched from `audit_logs` until that check passes. Accounts that only ever signed in with Google have no password, so they must set one from account settings first.
+
 Two consequences to be aware of:
 
 - An allowlisted email **cannot be demoted** from the admin UI — the trigger re-promotes it on the next write. Remove the email from `admin_emails` first.

@@ -144,9 +144,33 @@
   background: rgba(255, 255, 255, 0.75);
 }
 
+.admin-dash__users li.is-admin {
+  border-color: var(--color-primary-border);
+  background: var(--color-primary-light);
+}
+
 .admin-dash__users p {
   color: var(--color-text-muted);
   font-size: 14px;
+}
+
+.admin-dash__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-left: 0.5rem;
+  padding: 0.1rem 0.45rem;
+  border-radius: 999px;
+  background: var(--color-primary);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  vertical-align: middle;
+}
+
+.admin-dash__badge--you {
+  background: var(--color-bg-neutral);
+  color: var(--color-text-muted);
 }
 
 .admin-dash__actions button {
@@ -180,6 +204,72 @@
   align-items: center;
   gap: 0.4rem;
   margin-bottom: 0.75rem;
+}
+
+.admin-dash__audit-retention {
+  color: var(--color-text-muted);
+  font-size: 13px;
+  margin: 0 0 0.75rem;
+}
+
+.admin-dash__audit-gate {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  max-width: 340px;
+  padding: 1rem;
+  border: 1px dashed var(--color-border);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.6);
+}
+
+.admin-dash__audit-locked {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 14px;
+}
+
+.admin-dash__audit-gate label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  font-size: 14px;
+  color: var(--color-text-muted);
+}
+
+.admin-dash__audit-gate input {
+  min-height: var(--touch-min);
+  padding: 0.55rem 0.75rem;
+  border-radius: 8px;
+  border: 1.5px solid var(--color-border);
+  font-size: 16px;
+}
+
+.admin-dash__audit-gate button {
+  min-height: var(--touch-min);
+  border: none;
+  border-radius: 10px;
+  background: var(--color-primary);
+  color: #fff;
+  font-weight: 700;
+  font-size: 15px;
+}
+
+.admin-dash__audit-gate button:disabled {
+  opacity: 0.6;
+}
+
+.admin-dash__audit-hide {
+  margin-bottom: 0.75rem;
+  min-height: 36px;
+  padding: 0 0.8rem;
+  border-radius: 8px;
+  border: 1px solid var(--color-border);
+  background: var(--color-bg-card);
+  font-weight: 600;
 }
 
 .admin-dash__audit-list {

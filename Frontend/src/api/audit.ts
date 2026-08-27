@@ -47,6 +47,14 @@ export async function fetchAuditLogs(limit = 40): Promise<AuditLogRow[]> {
   }))
 }
 
+/** Entries older than six months are removed server-side; see migration 009. */
+export async function purgeExpiredAuditLogs(): Promise<void> {
+  const sb = getSupabase()
+  if (!sb) return
+  const { error } = await sb.rpc('purge_audit_logs_as_admin')
+  if (error) console.warn('audit log purge failed', error.message)
+}
+
 export async function writeAuditLog(input: {
   action: AuditAction
   targetType: string

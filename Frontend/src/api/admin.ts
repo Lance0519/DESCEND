@@ -1,5 +1,4 @@
 import { getSupabase } from '../lib/supabaseClient'
-import { fetchAuditLogs, type AuditLogRow } from './audit'
 
 export interface AdminProfileRow {
   id: string
@@ -30,7 +29,6 @@ export interface AdminOverview {
   recentUsers: AdminProfileRow[]
   recentAssessments: AdminAssessmentRow[]
   users: AdminProfileRow[]
-  auditLogs: AuditLogRow[]
 }
 
 function bandKey(value: string | null): keyof AdminOverview['riskMix'] {
@@ -66,26 +64,25 @@ export async function fetchAdminOverview(): Promise<AdminOverview> {
     }))
   }
 
-  const users: AdminProfileRow[] = (profiles ?? []).map((row) => ({
-    id: String(row.id),
-    email: row.email ? String(row.email) : null,
-    display_name: row.display_name ? String(row.display_name) : null,
-    role: row.role === 'admin' ? 'admin' : 'user',
-    is_active: row.is_active !== false,
-    created_at: row.created_at ? String(row.created_at) : null,
-  }))
+  const users: AdminProfileRow[] = (profiles ?? [])
+    .map((row) => ({
+      id: String(row.id),
+      email: row.email ? String(row.email) : null,
+      display_name: row.display_name ? String(row.display_name) : null,
+      role: row.role === 'admin' ? 'admin' : 'user',
+      is_active: row.is_active !== false,
+      created_at: row.created_at ? String(row.created_at) : null,
+    }))
+    // Admins first, then newest accounts.
+    .sort((a, b) => {
+      if (a.role !== b.role) return a.role === 'admin' ? -1 : 1
+      return (b.created_at ?? '').localeCompare(a.created_at ?? '')
+    })
 
   const riskMix = { Low: 0, Moderate: 0, High: 0, Other: 0 }
   for (const row of assessments) {
     if (row.diagnosed_t2dm) continue
     riskMix[bandKey(row.risk_band)] += 1
-  }
-
-  let auditLogs: AuditLogRow[] = []
-  try {
-    auditLogs = await fetchAuditLogs(40)
-  } catch {
-    auditLogs = []
   }
 
   return {
@@ -99,7 +96,6 @@ export async function fetchAdminOverview(): Promise<AdminOverview> {
     recentUsers: users.slice(0, 8),
     recentAssessments: assessments.slice(0, 8),
     users,
-    auditLogs,
   }
 }
 

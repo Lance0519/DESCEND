@@ -1,8 +1,9 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react'
 import { Link, Navigate } from 'react-router-dom'
 import {
   LayoutDashboard,
   LoaderCircle,
+  Lock,
   Shield,
   ShieldCheck,
   Users,
@@ -10,13 +11,26 @@ import {
   UserRound,
   ScrollText,
 } from 'lucide-react'
+import { ConfirmDialog } from '../components/ConfirmDialog'
 import { LanguageToggle } from '../components/LanguageToggle'
 import { PageBackground } from '../components/PageBackground'
-import { fetchAdminOverview, updateAdminUser, type AdminOverview } from '../api/admin'
-import { writeAuditLog, type AuditLogRow } from '../api/audit'
+import { fetchAdminOverview, updateAdminUser, type AdminOverview, type AdminProfileRow } from '../api/admin'
+import {
+  fetchAuditLogs,
+  purgeExpiredAuditLogs,
+  writeAuditLog,
+  type AuditLogRow,
+} from '../api/audit'
 import { useAuth } from '../context/AuthContext'
 import { useLanguage } from '../context/LanguageContext'
 import './AdminDashboard.css'
+
+type PendingAction =
+  | { kind: 'promote'; row: AdminProfileRow }
+  | { kind: 'demote'; row: AdminProfileRow }
+  | { kind: 'disable'; row: AdminProfileRow }
+  | { kind: 'enable'; row: AdminProfileRow }
+  | { kind: 'reset'; row: AdminProfileRow }
 
 function formatAuditWhen(iso: string, locale: string) {
   const ms = Date.parse(iso)
@@ -29,12 +43,18 @@ function formatAuditWhen(iso: string, locale: string) {
 
 export function AdminDashboard() {
   const { t, language } = useLanguage()
-  const { user, isAdmin, loading: authLoading, sendPasswordReset } = useAuth()
+  const { user, isAdmin, loading: authLoading, sendPasswordReset, reauthenticate } = useAuth()
   const [data, setData] = useState<AdminOverview | null>(null)
   const [search, setSearch] = useState('')
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
   const [loading, setLoading] = useState(true)
+  const [pending, setPending] = useState<PendingAction | null>(null)
+
+  const [auditLogs, setAuditLogs] = useState<AuditLogRow[] | null>(null)
+  const [auditPassword, setAuditPassword] = useState('')
+  const [auditBusy, setAuditBusy] = useState(false)
+  const [auditError, setAuditError] = useState('')
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -127,43 +147,98 @@ export function AdminDashboard() {
   if (!user) return <Navigate to="/access" replace />
   if (!isAdmin) return <Navigate to="/dashboard" replace />
 
-  async function changeRole(id: string, role: 'user' | 'admin') {
+  const signsInWithGoogleOnly = user.provider === 'google'
+
+  function confirmText(action: PendingAction) {
+    switch (action.kind) {
+      case 'promote':
+        return t.adminConfirmPromote
+      case 'demote':
+        return t.adminConfirmDemote
+      case 'disable':
+        return t.adminConfirmDisable
+      case 'enable':
+        return t.adminConfirmEnable
+      case 'reset':
+        return t.adminConfirmReset
+    }
+  }
+
+  function confirmLabel(action: PendingAction) {
+    switch (action.kind) {
+      case 'promote':
+        return t.adminPromote
+      case 'demote':
+        return t.adminDemote
+      case 'disable':
+        return t.adminDisable
+      case 'enable':
+        return t.adminEnable
+      case 'reset':
+        return t.adminSendReset
+    }
+  }
+
+  function requestAction(action: PendingAction) {
+    setNotice('')
+    setError('')
+    if (action.kind === 'disable' && action.row.id === user!.id) {
+      setError(t.adminCannotDisableSelf)
+      return
+    }
+    setPending(action)
+  }
+
+  async function runPending() {
+    if (!pending) return
+    const { kind, row } = pending
+    setPending(null)
     setNotice('')
     try {
-      await updateAdminUser(id, { role })
-      setNotice(t.adminUpdated)
+      if (kind === 'promote' || kind === 'demote') {
+        await updateAdminUser(row.id, { role: kind === 'promote' ? 'admin' : 'user' })
+      } else if (kind === 'disable' || kind === 'enable') {
+        await updateAdminUser(row.id, { is_active: kind === 'enable' })
+      } else if (kind === 'reset') {
+        if (!row.email) return
+        await sendPasswordReset(row.email)
+        await writeAuditLog({
+          action: 'password_reset_sent',
+          targetType: 'profile',
+          targetId: row.id,
+          metadata: { email: row.email },
+        })
+        setNotice(t.adminResetSent)
+        await load()
+        return
+      }
+      setNotice(
+        row.email ? t.adminActionNamed.replace('{email}', row.email) : t.adminUpdated,
+      )
       await load()
+      if (auditLogs) setAuditLogs(await fetchAuditLogs(40))
     } catch (err) {
       setError(err instanceof Error ? err.message : t.errorRetry)
     }
   }
 
-  async function changeActive(id: string, isActive: boolean) {
-    setNotice('')
+  async function unlockAudit(e: FormEvent) {
+    e.preventDefault()
+    setAuditBusy(true)
+    setAuditError('')
     try {
-      await updateAdminUser(id, { is_active: isActive })
-      setNotice(t.adminUpdated)
-      await load()
+      const ok = await reauthenticate(auditPassword)
+      if (!ok) {
+        setAuditError(signsInWithGoogleOnly ? t.adminAuditNoPassword : t.adminAuditWrongPassword)
+        return
+      }
+      setAuditPassword('')
+      await purgeExpiredAuditLogs()
+      setAuditLogs(await fetchAuditLogs(40))
     } catch (err) {
-      setError(err instanceof Error ? err.message : t.errorRetry)
-    }
-  }
-
-  async function sendReset(email: string | null, userId: string) {
-    if (!email) return
-    setNotice('')
-    try {
-      await sendPasswordReset(email)
-      await writeAuditLog({
-        action: 'password_reset_sent',
-        targetType: 'profile',
-        targetId: userId,
-        metadata: { email },
-      })
-      setNotice(t.adminResetSent)
-      await load()
-    } catch (err) {
-      setError(err instanceof Error ? err.message : t.errorRetry)
+      setAuditError(err instanceof Error ? err.message : t.errorRetry)
+    } finally {
+      setAuditBusy(false)
     }
   }
 
@@ -265,9 +340,19 @@ export function AdminDashboard() {
                 ) : (
                   <ul className="admin-dash__users">
                     {filteredUsers.map((row) => (
-                      <li key={row.id}>
+                      <li key={row.id} className={row.role === 'admin' ? 'is-admin' : undefined}>
                         <div>
-                          <strong>{row.display_name || row.email || row.id}</strong>
+                          <strong>
+                            {row.display_name || row.email || row.id}
+                            {row.role === 'admin' ? (
+                              <span className="admin-dash__badge">
+                                <Shield size={13} aria-hidden /> {t.adminAdmins}
+                              </span>
+                            ) : null}
+                            {row.id === user.id ? (
+                              <span className="admin-dash__badge admin-dash__badge--you">{t.adminYou}</span>
+                            ) : null}
+                          </strong>
                           <p>{row.email}</p>
                           <p>
                             {t.adminRole}: {row.role} · {row.is_active ? t.adminActive : t.adminInactive}
@@ -275,24 +360,28 @@ export function AdminDashboard() {
                         </div>
                         <div className="admin-dash__actions">
                           {row.role === 'admin' ? (
-                            <button type="button" onClick={() => void changeRole(row.id, 'user')}>
+                            <button type="button" onClick={() => requestAction({ kind: 'demote', row })}>
                               {t.adminDemote}
                             </button>
                           ) : (
-                            <button type="button" onClick={() => void changeRole(row.id, 'admin')}>
+                            <button type="button" onClick={() => requestAction({ kind: 'promote', row })}>
                               {t.adminPromote}
                             </button>
                           )}
                           {row.is_active ? (
-                            <button type="button" onClick={() => void changeActive(row.id, false)}>
+                            <button type="button" onClick={() => requestAction({ kind: 'disable', row })}>
                               {t.adminDisable}
                             </button>
                           ) : (
-                            <button type="button" onClick={() => void changeActive(row.id, true)}>
+                            <button type="button" onClick={() => requestAction({ kind: 'enable', row })}>
                               {t.adminEnable}
                             </button>
                           )}
-                          <button type="button" onClick={() => void sendReset(row.email, row.id)}>
+                          <button
+                            type="button"
+                            disabled={!row.email}
+                            onClick={() => requestAction({ kind: 'reset', row })}
+                          >
                             {t.adminSendReset}
                           </button>
                         </div>
@@ -306,34 +395,79 @@ export function AdminDashboard() {
                 <h2>
                   <ScrollText size={18} aria-hidden /> {t.adminAuditTitle}
                 </h2>
-                {data.auditLogs.length === 0 ? (
-                  <p className="admin-dash__empty">{t.adminAuditEmpty}</p>
+                <p className="admin-dash__audit-retention">{t.adminAuditRetention}</p>
+
+                {auditLogs === null ? (
+                  <form className="admin-dash__audit-gate" onSubmit={(e) => void unlockAudit(e)}>
+                    <p className="admin-dash__audit-locked">
+                      <Lock size={16} aria-hidden /> {t.adminAuditLocked}
+                    </p>
+                    <label>
+                      {t.password}
+                      <input
+                        type="password"
+                        autoComplete="current-password"
+                        value={auditPassword}
+                        onChange={(e) => setAuditPassword(e.target.value)}
+                        required
+                      />
+                    </label>
+                    {auditError ? <p className="admin-dash__error">{auditError}</p> : null}
+                    <button type="submit" disabled={auditBusy || !auditPassword}>
+                      {auditBusy ? t.adminAuditUnlocking : t.adminAuditUnlock}
+                    </button>
+                  </form>
                 ) : (
-                  <ul className="admin-dash__audit-list">
-                    {data.auditLogs.map((row) => {
-                      const detail = detailLabel(row)
-                      return (
-                        <li key={row.id}>
-                          <div className="admin-dash__audit-main">
-                            <strong>{actionLabel(row.action)}</strong>
-                            <span>{targetLabel(row)}</span>
-                            {detail ? <p>{detail}</p> : null}
-                          </div>
-                          <div className="admin-dash__audit-meta">
-                            <span>
-                              {t.adminAuditActor}: {personLabel(row.actor_id)}
-                            </span>
-                            <time dateTime={row.created_at}>{formatAuditWhen(row.created_at, locale)}</time>
-                          </div>
-                        </li>
-                      )
-                    })}
-                  </ul>
+                  <>
+                    <button
+                      type="button"
+                      className="admin-dash__audit-hide"
+                      onClick={() => setAuditLogs(null)}
+                    >
+                      {t.adminAuditHide}
+                    </button>
+                    {auditLogs.length === 0 ? (
+                      <p className="admin-dash__empty">{t.adminAuditEmpty}</p>
+                    ) : (
+                      <ul className="admin-dash__audit-list">
+                        {auditLogs.map((row) => {
+                          const detail = detailLabel(row)
+                          return (
+                            <li key={row.id}>
+                              <div className="admin-dash__audit-main">
+                                <strong>{actionLabel(row.action)}</strong>
+                                <span>{targetLabel(row)}</span>
+                                {detail ? <p>{detail}</p> : null}
+                              </div>
+                              <div className="admin-dash__audit-meta">
+                                <span>
+                                  {t.adminAuditActor}: {personLabel(row.actor_id)}
+                                </span>
+                                <time dateTime={row.created_at}>{formatAuditWhen(row.created_at, locale)}</time>
+                              </div>
+                            </li>
+                          )
+                        })}
+                      </ul>
+                    )}
+                  </>
                 )}
               </section>
             </>
           ) : null}
         </main>
+
+        {pending ? (
+          <ConfirmDialog
+            title={t.adminConfirmTitle}
+            text={`${confirmText(pending)}${pending.row.email ? `\n${pending.row.email}` : ''}`}
+            confirmLabel={confirmLabel(pending)}
+            cancelLabel={t.confirmCancel}
+            danger={pending.kind === 'disable' || pending.kind === 'demote'}
+            onConfirm={() => void runPending()}
+            onCancel={() => setPending(null)}
+          />
+        ) : null}
       </div>
     </PageBackground>
   )
