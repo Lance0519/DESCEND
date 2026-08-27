@@ -334,6 +334,8 @@ The button shows automatically on **/login** whenever `VITE_SUPABASE_URL` and `V
 
 `VITE_ENABLE_GOOGLE_SIGNIN` is now an **opt-out** only: set it to `false` to hide the button. Leaving it unset keeps Google visible.
 
+Troubleshooting Google sign-in in depth: **[GOOGLE_SIGNIN.md](GOOGLE_SIGNIN.md)**.
+
 ### G4. Smoke-test Google
 
 **/login** → **Continue with Google** → choose account → lands on `/auth/callback` → dashboard, and Profile shows Google.
