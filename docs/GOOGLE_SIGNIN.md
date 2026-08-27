@@ -106,6 +106,44 @@ Keep these consistent:
 4. **Supabase → Authentication → Users** shows the user with provider `google`
 5. Sign out and back in to confirm it is repeatable
 
+## Google sign-in and the admin role
+
+Admin is a `role` column on the `profiles` row, keyed by the auth user's UUID — not by email address. Signing in with Google creates a **separate auth user** from an email/password account with the same address, so its profile row starts at the default `role = 'user'`.
+
+To see the duplicates:
+
+```sql
+select u.id,
+       u.email,
+       u.raw_app_meta_data->>'provider' as provider,
+       u.created_at,
+       p.role,
+       p.is_active
+from auth.users u
+left join public.profiles p on p.id = u.id
+order by u.created_at;
+```
+
+Rather than promoting each row by hand, run `supabase/migrations/008_admin_email_allowlist.sql`. It adds `public.admin_emails` plus a trigger that forces `role = 'admin'` whenever a profile is written with an allowlisted email, so any provider you sign in with lands as admin.
+
+To manage the list (SQL editor only — the table is not writable from the app):
+
+```sql
+insert into public.admin_emails (email, note)
+values ('you@example.com', 'primary admin')
+on conflict (email) do nothing;
+
+-- apply to rows that already exist
+update public.profiles p
+set role = 'admin', is_active = true
+where public.is_admin_email(p.email);
+```
+
+Two consequences to be aware of:
+
+- An allowlisted email **cannot be demoted** from the admin UI — the trigger re-promotes it on the next write. Remove the email from `admin_emails` first.
+- The role is read when the session is established, so **sign out and back in** after changing it.
+
 ## Notes
 
 - Client ID and Secret live in **Supabase only** — never in Netlify, Vercel, or the repo.
