@@ -27,6 +27,9 @@ Copy `Frontend/.env.example` and `Backend/.env.example` (see `docs/DEPLOY.md`).
 
 ## Docs
 
+- [Survey cleaning for training](docs/DATA_CLEANING.md)
+- [Google Form field inventory](docs/GOOGLE_FORM_FIELD_INVENTORY.md)
+- [ML validation plan](docs/ML_VALIDATION_AND_DOCUMENTATION_PLAN.md)
 - [Risk scoring](docs/RISK_SCORING.md)
 - [Deploy (GitHub → Netlify + Vercel + Supabase)](docs/DEPLOY.md)
 - [Custom domain descendt2dm.me (Namecheap)](docs/CUSTOM_DOMAIN.md)
