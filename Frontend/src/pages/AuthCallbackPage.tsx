@@ -4,7 +4,7 @@ import { PageBackground } from '../components/PageBackground'
 import { useLanguage } from '../context/LanguageContext'
 import { ensureUserProfile } from '../lib/ensureProfile'
 import { getSupabase } from '../lib/supabaseClient'
-import type { EmailOtpType } from '@supabase/supabase-js'
+import type { EmailOtpType, Session } from '@supabase/supabase-js'
 import './AuthCallbackPage.css'
 
 const OTP_TYPES: EmailOtpType[] = [
@@ -15,6 +15,10 @@ const OTP_TYPES: EmailOtpType[] = [
   'email_change',
   'email',
 ]
+
+/** How long to wait for supabase-js to finish its own code exchange. */
+const SESSION_WAIT_MS = 12000
+const POLL_INTERVAL_MS = 250
 
 function asOtpType(value: string | null): EmailOtpType | null {
   if (!value) return null
@@ -50,17 +54,29 @@ export function AuthCallbackPage() {
 
     let cancelled = false
 
-    function fail(reason: string, detailText?: string) {
+    function fail(detailText: string) {
       if (cancelled) return
-      setMessage(reason)
-      setDetail(detailText ?? '')
+      setMessage(t.callbackFailed)
+      setDetail(detailText)
+    }
+
+    // The client is created with detectSessionInUrl, so it performs the OAuth code
+    // exchange itself. Exchanging here as well would reuse a spent code.
+    async function waitForSession(): Promise<Session | null> {
+      const deadline = Date.now() + SESSION_WAIT_MS
+      while (!cancelled && Date.now() < deadline) {
+        const { data } = await sb!.auth.getSession()
+        if (data.session?.access_token) return data.session
+        await new Promise((resolve) => window.setTimeout(resolve, POLL_INTERVAL_MS))
+      }
+      return null
     }
 
     async function finish() {
       const url = new URL(window.location.href)
       const providerError = readProviderError(url)
       if (providerError) {
-        fail(t.callbackFailed, providerError)
+        fail(providerError)
         return
       }
 
@@ -71,37 +87,33 @@ export function AuthCallbackPage() {
       if (tokenHash && otpType) {
         const { error } = await sb!.auth.verifyOtp({ token_hash: tokenHash, type: otpType })
         if (error) {
-          fail(t.callbackFailed, error.message)
+          fail(error.message)
           return
         }
-      } else if (hasCode) {
-        const { error } = await sb!.auth.exchangeCodeForSession(window.location.href)
-        if (error) {
-          const { data } = await sb!.auth.getSession()
-          if (!data.session) {
-            fail(t.callbackFailed, error.message)
-            return
-          }
+      } else if (!hasCode) {
+        const { data } = await sb!.auth.getSession()
+        if (!data.session) {
+          fail(t.callbackNoCode)
+          return
         }
       }
 
-      const { data } = await sb!.auth.getSession()
+      const session = await waitForSession()
       if (cancelled) return
-      const session = data.session
-      if (session?.access_token && session.user) {
-        sessionStorage.setItem('descend-supabase-access-token', session.access_token)
-        const meta = session.user.user_metadata ?? {}
-        await ensureUserProfile({
-          id: session.user.id,
-          email: session.user.email,
-          displayName: String(meta.full_name ?? meta.name ?? ''),
-        })
-        const next = otpType === 'recovery' ? '/reset-password' : '/dashboard'
-        navigate(next, { replace: true })
+      if (!session?.user) {
+        fail(t.callbackNoSession)
         return
       }
 
-      fail(t.callbackFailed, hasCode ? t.callbackNoSession : t.callbackNoCode)
+      sessionStorage.setItem('descend-supabase-access-token', session.access_token)
+      const meta = session.user.user_metadata ?? {}
+      await ensureUserProfile({
+        id: session.user.id,
+        email: session.user.email,
+        displayName: String(meta.full_name ?? meta.name ?? ''),
+      })
+      if (cancelled) return
+      navigate(otpType === 'recovery' ? '/reset-password' : '/dashboard', { replace: true })
     }
 
     void finish()
