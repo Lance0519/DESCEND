@@ -6,7 +6,7 @@ This document records the evidence supporting DESCEND as a Filipino-focused diab
 
 DESCEND is educational and non-diagnostic. Do not present its output as a clinical diagnosis or as externally validated medical probability.
 
-Survey cleaning, Google Form column mapping, screening augmentation, and the 1080-row processed file are documented in [DATA_CLEANING.md](DATA_CLEANING.md).
+Survey cleaning, Google Form column mapping, and the 1080-row processed file are documented in [DATA_CLEANING.md](DATA_CLEANING.md).
 
 ## 1. Dataset Profile
 
@@ -14,21 +14,22 @@ Do not treat these artifacts as the same dataset.
 
 | Artifact | Rows | File | Role |
 |---|---:|---|---|
-| Current training CSV (augmented) | 1080 | `training_dataset.csv` (snapshot: `training_dataset_descend_1080.csv`) | 900 Google Form rows (162 noised) + 180 synthetic FN-profile positives. ExtraTrees JSON `datasetRows: 1080`. |
-| Unaffected 900-row snapshot | 900 | `training_dataset_descend_900.csv` | Pre-augmentation clean export. |
+| Current training CSV | 1080 | `training_dataset.csv` (snapshot: `training_dataset_descend_responses_1080.csv`) | Full `DESCEND ... (Responses)` Google Form export: the earlier 900 responses unchanged plus 180 newly collected positives. No synthetic rows. ExtraTrees JSON `datasetRows: 1080`. |
+| Earlier 900-row snapshot | 900 | `training_dataset_descend_900.csv` | Previous clean export, superseded. |
 | Prior Filipino survey | 488 | `training_dataset_filipino_488.csv` | Historical ExtraTrees artifact. |
 
 ### 1.1 Current training CSV (1080 rows)
 
 | Item | Verified result |
 |---|---|
-| Raw sources | `DESCEND RAW SURVEY.csv` plus `DESCEND RAW SURVEY augmented.csv` |
-| Processed rows | 1080 (400 T2DM / 680 not) |
+| Raw source | `DESCEND RAW SURVEY (Responses).csv` (from the `(Responses)` workbook) |
+| Processed rows | 1080 (400 T2DM / 680 not), 0 dropped |
 | Operating threshold | 0.58, recall-constrained |
-| Label quality | Self-reported doctor diagnosis on the 900-row export; 180 boundary rows are synthetic labeled positives |
-| Cleaning / augmentation | [DATA_CLEANING.md](DATA_CLEANING.md) §10 |
+| Label quality | Self-reported doctor diagnosis throughout; no synthetic labels |
+| Hold-out | Recall 90.0%, precision 87.8%, ROC-AUC 97.3%, confusion `[[126, 10], [8, 72]]` |
+| Cleaning | [DATA_CLEANING.md](DATA_CLEANING.md) §10 |
 
-### 1.1a Unaffected 900-row Google Form snapshot
+### 1.1a Earlier 900-row Google Form snapshot
 
 | Item | Verified result |
 |---|---|
@@ -193,18 +194,18 @@ ExtraTrees, 400 estimators, max depth 6, min leaf 3, `class_weight=balanced`, se
 
 | Metric | Cross-validation | Locked hold-out |
 |---|---:|---:|
-| ROC-AUC | 0.9667 | 0.9616 |
-| PR-AUC | 0.9570 | 0.9463 |
-| Brier score | 0.0823 | 0.0795 |
-| Recall | 0.8350 | 0.8500 |
-| Precision | 0.9212 | 0.8831 |
-| F1 score | 0.8745 | 0.8662 |
-| Specificity | 0.9559 | 0.9338 |
-| Accuracy | 0.9111 | 0.9028 |
-| Confusion matrix | — | `[[127, 9], [12, 68]]` |
+| ROC-AUC | 0.9545 | 0.9726 |
+| PR-AUC | 0.9289 | 0.9606 |
+| Brier score | 0.0949 | 0.0665 |
+| Recall | 0.8600 | 0.9000 |
+| Precision | 0.8372 | 0.8780 |
+| F1 score | 0.8484 | 0.8889 |
+| Specificity | 0.9015 | 0.9265 |
+| Accuracy | 0.8861 | 0.9167 |
+| Confusion matrix | — | `[[126, 10], [8, 72]]` |
 | Operating threshold | 0.58 (OOF/train) | 0.58 |
 
-Label-shuffle mean ROC-AUC ~0.48. All 1080 rows have distinct group IDs, so CV is respondent-level, not family-level. 180 hold-out-style boundary rows are synthetic labeled positives; treat hold-out recall as internally evaluated, not external validation.
+Label-shuffle mean ROC-AUC ~0.47. All 1080 rows have distinct group IDs, so CV is respondent-level, not family-level. Because the 180 added responses are all positives targeting known blind spots, the 37.0% positive rate is not population prevalence; treat these as internal evaluation, not external validation.
 
 ### 4.2 Prior 488-row artifact (historical)
 
@@ -344,7 +345,7 @@ CVI supports content relevance. It does not establish diagnostic accuracy, calib
 
 ## 12. Future Work
 
-1. Retrain used the 1080-row screening CSV with recall-constrained threshold 0.58. Keep `training_dataset_descend_900.csv` and `training_dataset_filipino_488.csv` for reproduction of earlier artifacts. Do not present synthetic boundary rows as survey respondents.
+1. Retrain used the full 1080-row `(Responses)` export with recall-constrained threshold 0.58. Keep `training_dataset_descend_900.csv` and `training_dataset_filipino_488.csv` for reproduction of earlier artifacts.
 2. Confirm label provenance and obtain physician-confirmed labels where possible.
 3. Collect a larger, multi-site Filipino dataset.
 4. Use real patient or family identifiers for family-level splitting.

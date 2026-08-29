@@ -26,18 +26,26 @@ Pedigree upgrade (legacy): if Low but `0.24 ≤ p < 0.34` with strong lineage bu
 
 ## Trained model feature importances (ExtraTrees)
 
-From `t2dm_risk_model.json` after the 1080-row screening retrain (2026-08-29). Importances shift when the training CSV or labels change; they are not the family-formula weights.
+From `t2dm_risk_model.json` after the retrain on the 1080-row `(Responses)` export (2026-08-29). Importances shift when the training CSV or labels change; they are not the family-formula weights.
 
 | Feature | Importance |
 |---------|------------|
-| aunts_uncles_score | ~17.4% |
-| propagationProbability | ~16.6% |
-| lineageRiskIndex | ~13.7% |
-| weightedFamilyScore | ~13.5% |
-| hereditary_load_index | ~11.1% |
-| parent_has_t2dm | ~9.3% |
-| bmi | ~5.3% |
-| physical_activity_score | ~3.3% |
+| propagationProbability | ~28.3% |
+| lineageRiskIndex | ~20.5% |
+| weightedFamilyScore | ~16.1% |
+| hereditary_load_index | ~12.6% |
+| bmi | ~5.8% |
+| parent_has_t2dm | ~5.6% |
+| aunts_uncles_score | ~4.0% |
+| siblings_diabetes_count | ~3.2% |
+| metabolic_risk_index | ~1.3% |
+| age | ~1.2% |
+| hypertension_status | ~0.7% |
+| user_is_male | ~0.4% |
+| activity_metabolic_index | ~0.1% |
+| physical_activity_score | ~0.1% |
+
+The four lineage-derived features now carry ~77.5% of the importance, up from ~55% on the previous artifact — the added responses pushed the model further onto family-history signal.
 
 ### Binary operating threshold (evaluation only)
 

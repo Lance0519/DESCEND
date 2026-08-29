@@ -10,23 +10,24 @@ Related docs: [Google Form field inventory](GOOGLE_FORM_FIELD_INVENTORY.md), [ML
 
 | Role | Path |
 |---|---|
-| Raw Google Form export (unchanged original) | `Backend/ml/datasets/raw/DESCEND RAW SURVEY.csv` |
-| Augmented raw (noise + 180 boundary cases) | `Backend/ml/datasets/raw/DESCEND RAW SURVEY augmented.csv` |
+| Current Google Form export (workbook) | `Backend/ml/datasets/raw/DESCEND — Type 2 Diabetes Risk Awareness Survey  (Responses).xlsx` |
+| Current Google Form export (CSV used by the pipeline) | `Backend/ml/datasets/raw/DESCEND RAW SURVEY (Responses).csv` |
+| Earlier 900-row export (kept for provenance) | `Backend/ml/datasets/raw/DESCEND RAW SURVEY.csv` |
 | Canonical training CSV | `Backend/ml/datasets/processed/training_dataset.csv` |
-| Named 900-row snapshot (pre-augmentation) | `Backend/ml/datasets/processed/training_dataset_descend_900.csv` |
-| Named 1080-row snapshot (current train file) | `Backend/ml/datasets/processed/training_dataset_descend_1080.csv` |
-| Augmentation manifest | `Backend/ml/datasets/processed/screening_augmentation_manifest.json` |
+| Named 900-row snapshot | `Backend/ml/datasets/processed/training_dataset_descend_900.csv` |
+| Named 1080-row snapshot (current train file) | `Backend/ml/datasets/processed/training_dataset_descend_responses_1080.csv` |
 | Prior 488-row artifact | `Backend/ml/datasets/processed/training_dataset_filipino_488.csv` |
+
+The 1080-row `(Responses)` export supersedes the earlier local augmentation step. It contains the original 900 responses **unchanged** plus 180 additional collected responses covering the previously missed positive profiles, so no synthetic noise or synthetic boundary rows are added on top of it.
 
 **Scripts**
 
 | Script | Role |
 |---|---|
 | `Backend/scripts/clean_raw_to_training.py` | Clean original or resolved raw CSV |
-| `Backend/scripts/augment_screening_dataset.py` | Noise 18% of the 900-row export; append 180 FN-profile rows; rebuild training CSV |
 | `Backend/scripts/gform_survey_map.py` | Detect Google Form headers; map questions to internal names |
 | `Backend/scripts/prepare_training_dataset.py` | Validate rows; encode features; write training CSV |
-| `Backend/scripts/dataset_paths.py` | Prefer the augmented Google Form export when present |
+| `Backend/scripts/dataset_paths.py` | Prefer the live `(Responses)` export when present |
 | `Backend/train.py` | Train ExtraTrees; default threshold is recall-constrained |
 | `Backend/tests/test_gform_survey_map.py` | Mapping, activity/diet encoding, and end-to-end prepare tests |
 | `Backend/tests/test_threshold_selection.py` | Screening threshold selection |
@@ -35,7 +36,6 @@ From `Backend/`:
 
 ```bash
 python scripts/clean_raw_to_training.py
-python scripts/augment_screening_dataset.py
 python train.py
 ```
 
@@ -49,38 +49,42 @@ The cleaner detects question-text headers automatically. Rows that fail validati
 
 ## 2. Raw export profile
 
-Checked 2026-08-27 on `DESCEND RAW SURVEY.csv`.
+Checked 2026-08-29 on `DESCEND RAW SURVEY (Responses).csv`.
 
 | Item | Result |
 |---|---|
-| Format | Google Sheets / Forms CSV, UTF-8 |
-| Rows | 900 |
+| Format | Google Sheets / Forms export, UTF-8 |
+| Rows | 1080 |
 | Columns | 39 (timestamp + 38 answer fields) |
-| Collection timestamps | 2024-01-05 through 2025-08-20 (565 in 2024, 335 in 2025) |
-| Consent | 900 `I agree`; 0 refusals |
+| Composition | 900 rows identical to the earlier export + 180 newly collected responses |
+| Consent | 1080 `I agree`; 0 refusals |
 | Exact duplicate responses (excluding timestamp) | 0 |
 | Duplicate timestamps | 0 |
 | Required demographics (sex, age, height, weight) | 0 missing |
 | Family status and aunt/uncle counts | 0 missing |
-| Optional fasting glucose filled | 363 / 900 (40.3%) |
-| Optional HbA1c filled | 325 / 900 (36.1%) |
-| Respondent diagnosis age filled | 220 / 900 (only the diagnosed group) |
+| Optional fasting glucose filled | 473 / 1080 (43.8%) |
+| Optional HbA1c filled | 427 / 1080 (39.5%) |
+| Respondent diagnosis age filled | 400 / 1080 (only the diagnosed group) |
 
 ### 2.1 Raw label and demographics
 
 | Item | Count |
 |---|---:|
-| Doctor-diagnosed T2DM = Yes | 220 |
+| Doctor-diagnosed T2DM = Yes | 400 |
 | Doctor-diagnosed T2DM = No | 680 |
-| Female | 479 |
-| Male | 421 |
-| Age | 18–77 years (mean 48.88) |
+| Female | 595 |
+| Male | 485 |
+| Age | 18–77 years |
 | Height | 143–177 cm |
 | Weight | 37–109 kg |
-| Computed BMI | 17.31–37.72 (mean 23.25) |
-| Diagnosed age among Yes respondents | 22–75; none missing; none greater than current age |
+| Computed BMI | 17.31–37.72 |
+| Diagnosed age among Yes respondents | none missing; none greater than current age |
 
-Hypertension: 549 No, 246 Yes, 105 I'm not sure.
+Hypertension: 668 No, 273 Yes, 139 I'm not sure.
+
+### 2.2 The 180 newly collected responses
+
+All 180 are doctor-diagnosed T2DM = Yes, and they deliberately cover the profiles the earlier model missed: age 28–65 (mean 48.5), BMI 20.9–28.3 (mean 24.9, i.e. mostly non-obese), 119 / 180 without hypertension, and 130 / 180 reporting at least two affected grandparents. They raise the positive rate from 24.4% to 37.0%.
 
 The form does not include a mother-GDM question. That training column is filled as unknown (`0.35`) for every row and is **not** an ExtraTrees feature.
 
@@ -106,23 +110,23 @@ Optional blanks (glucose, HbA1c, relative diagnosis ages, earliest aunt/uncle ag
 
 ```mermaid
 flowchart TD
-    A[900 Google Form rows] --> B[Detect question-text headers]
+    A[1080 Google Form rows] --> B[Detect question-text headers]
     B --> C[Map to internal column names]
     C --> D[Assign sequential patient_id]
     D --> E[Consent screen]
     E --> F[Age / sex / height / weight / BMI validation]
     F --> G[Encode lifestyle, family, outcome]
     G --> H[Compute lineage and interaction features]
-    H --> I[900-row training_dataset.csv]
+    H --> I[1080-row training_dataset.csv]
 ```
 
 | Stage | Rows remaining | Removed |
 |---|---:|---:|
-| Raw export | 900 | — |
-| Consent | 900 | 0 |
-| Demographic and BMI validation | 900 | 0 |
-| Duplicate responses | 900 | 0 |
-| Final training CSV | 900 | 0 |
+| Raw export | 1080 | — |
+| Consent | 1080 | 0 |
+| Demographic and BMI validation | 1080 | 0 |
+| Duplicate responses | 1080 | 0 |
+| Final training CSV | 1080 | 0 |
 
 ## 5. Google Form → internal schema
 
@@ -151,7 +155,7 @@ flowchart TD
 | Maternal uncles + maternal aunts counts | summed → `maternal_aunts_uncles_t2dm_count_raw` |
 | Paternal uncles + paternal aunts counts | summed → `paternal_aunts_uncles_t2dm_count_raw` |
 
-`patient_id` is not on the Google Form. Each kept row receives a sequential id `1`…`900`, copied to `source_patient_id` and `source_record_id`.
+`patient_id` is not on the Google Form. Each kept row receives a sequential id `1`…`1080`, copied to `source_patient_id` and `source_record_id`.
 
 ## 6. Feature encoding
 
@@ -265,35 +269,28 @@ Smoking, alcohol, sleep, exercise duration, optional glucose/HbA1c, and relative
 4. Sibling history is a yes/no item, not a count of diabetic siblings.
 5. Mother GDM was not asked; the column is a constant unknown value.
 6. Optional labs are missing for most respondents and must not be described as complete clinical workups.
-7. ExtraTrees does not include mother GDM (not asked on the form). Young-female boundary rows teach mother T2DM in young women, not a GDM coefficient.
-8. The 180 boundary-case rows are synthetic labeled positives. Hold-out metrics after augmentation are not comparable one-to-one with the previous 13-FN / 180-row hold-out.
+7. ExtraTrees does not include mother GDM (not asked on the form), so young-female rows teach mother T2DM in young women, not a GDM coefficient.
+8. The 180 added responses are all positives targeted at known blind spots. That is useful for recall but it makes the sample's positive rate (37.0%) unrepresentative of population prevalence, so precision and PR-AUC here should not be read as population estimates.
+9. Hold-out metrics on the 1080-row file are not comparable one-to-one with earlier 900-row or locally augmented runs; the test split differs.
 
 ## 9. Relationship to the 488-row Filipino artifact
 
-| | Google Form 900 | Prior Filipino 488 |
+| | Google Form 1080 | Prior Filipino 488 |
 |---|---|---|
-| Raw file | `DESCEND RAW SURVEY.csv` | `training_dataset_filipino_488.csv` (processed); original workbook documented in the ML plan |
-| Processed rows | 900 | 488 |
+| Raw file | `DESCEND RAW SURVEY (Responses).csv` | `training_dataset_filipino_488.csv` (processed); original workbook documented in the ML plan |
+| Processed rows | 1080 | 488 |
 | Rows dropped | 0 | 12 unknown `outcome = 99` |
-| T2DM / not T2DM | 220 / 680 | 290 / 198 |
+| T2DM / not T2DM | 400 / 680 | 290 / 198 |
 | Header style | Google Form question text | Internal column names |
 | Current `training_dataset.csv` | This file | Replaced as the canonical train path |
 
 Keep `training_dataset_filipino_488.csv` so that artifact can still be reproduced. Do not mix the two CSVs in one training run without documenting the merge.
 
-## 10. Screening augmentation and operating threshold
+## 10. Screening coverage and operating threshold
 
-This repository does **not** contain a documented 520-row real + 900-row generated mix. The 900-row Google Form export is uniformly complete. To reduce that uniformity and to target missed-positive profiles, `augment_screening_dataset.py` (seed 42):
+Earlier revisions of this document described a local augmentation script that added synthetic noise and 180 synthetic boundary rows. That step has been **removed**: the live form now supplies 180 real responses covering the same missed-positive profiles (see §2.2), so the pipeline trains directly on the export with no synthetic rows.
 
-| Step | What happened |
-|---|---|
-| Noise | 162 / 900 original rows (18%): one family-history field flipped; often blank glucose/HbA1c; some high-risk rows set to Never / sedentary activity |
-| Boundary A | 60 labeled T2DM: age 40–55, exactly one parent with T2DM, no hypertension, normal BMI |
-| Boundary B | 60 labeled T2DM: age 55–65, no parent T2DM, 3–4 grandparents affected |
-| Boundary C | 60 labeled T2DM: female age 22–35, mother T2DM, no hypertension |
-| Combined | 1080 rows, 400 T2DM / 680 not T2DM |
-
-`python train.py` now defaults to **recall-constrained** threshold selection (not F1):
+`python train.py` defaults to **recall-constrained** threshold selection (not F1):
 
 - Require **recall ≥ 0.82**
 - Prefer **precision ≥ 0.70** inside **0.45–0.58**
@@ -302,4 +299,17 @@ This repository does **not** contain a documented 520-row real + 900-row generat
 
 Rationale for the thesis: this is a screening-style awareness tool, so missed positives are costlier than extra false positives. The displayed percentage is still the calibrated probability; the cutoff is the binary operating point used in CV/hold-out confusion matrices.
 
-Retrain (2026-08-29): ExtraTrees, 1080 rows, operating cutoff **0.58**. CV recall 83.5%, precision 92.1%. Hold-out recall 85.0%, precision 88.3%, confusion `[[127, 9], [12, 68]]` (12 FN / 9 FP on 216 test rows). Do not claim those 12 FN are the same 13 cases from the unaugmented 180-row hold-out.
+Retrain (2026-08-29) on the 1080-row `(Responses)` export: ExtraTrees, operating cutoff **0.58**.
+
+| Metric | 5-fold CV (mean ± std) | Hold-out |
+|---|---|---|
+| ROC-AUC | 95.45% ± 0.68% | 97.26% |
+| PR-AUC | 92.89% ± 1.07% | 96.06% |
+| Recall | 86.00% ± 0.50% | 90.00% |
+| Precision | 83.72% ± 1.58% | 87.80% |
+| F1 | 84.84% ± 0.97% | 88.89% |
+| Specificity | 90.15% ± 1.10% | 92.65% |
+| Accuracy | 88.61% ± 0.81% | 91.67% |
+| Brier | 0.0949 ± 0.0052 | 0.0665 |
+
+Hold-out confusion `[[126, 10], [8, 72]]` — 8 false negatives and 10 false positives on 216 test rows. The label-shuffle sanity check returns ROC-AUC ≈ 0.47, confirming the model is not fitting label patterns.
