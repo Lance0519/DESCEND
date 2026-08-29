@@ -6,25 +6,36 @@ This document records the evidence supporting DESCEND as a Filipino-focused diab
 
 DESCEND is educational and non-diagnostic. Do not present its output as a clinical diagnosis or as externally validated medical probability.
 
-Survey cleaning, Google Form column mapping, and the 900-row processed file are documented in [DATA_CLEANING.md](DATA_CLEANING.md).
+Survey cleaning, Google Form column mapping, screening augmentation, and the 1080-row processed file are documented in [DATA_CLEANING.md](DATA_CLEANING.md).
 
 ## 1. Dataset Profile
 
-Two processed artifacts exist. Do not treat them as the same dataset.
+Do not treat these artifacts as the same dataset.
 
 | Artifact | Rows | File | Role |
 |---|---:|---|---|
-| DESCEND Google Form (current training CSV) | 900 | `Backend/ml/datasets/processed/training_dataset.csv` (snapshot: `training_dataset_descend_900.csv`) | Cleaned 2026-08-27 from `DESCEND RAW SURVEY.csv`. Ready for training. |
-| Prior Filipino survey (deployed ExtraTrees JSON) | 488 | `Backend/ml/datasets/processed/training_dataset_filipino_488.csv` | Dataset documented below as the model artifact with `datasetRows: 488`. Keep until a new `t2dm_risk_model.json` is trained on the 900-row file. |
+| Current training CSV (augmented) | 1080 | `training_dataset.csv` (snapshot: `training_dataset_descend_1080.csv`) | 900 Google Form rows (162 noised) + 180 synthetic FN-profile positives. ExtraTrees JSON `datasetRows: 1080`. |
+| Unaffected 900-row snapshot | 900 | `training_dataset_descend_900.csv` | Pre-augmentation clean export. |
+| Prior Filipino survey | 488 | `training_dataset_filipino_488.csv` | Historical ExtraTrees artifact. |
 
-### 1.1 Current training CSV (900 Google Form rows)
+### 1.1 Current training CSV (1080 rows)
+
+| Item | Verified result |
+|---|---|
+| Raw sources | `DESCEND RAW SURVEY.csv` plus `DESCEND RAW SURVEY augmented.csv` |
+| Processed rows | 1080 (400 T2DM / 680 not) |
+| Operating threshold | 0.58, recall-constrained |
+| Label quality | Self-reported doctor diagnosis on the 900-row export; 180 boundary rows are synthetic labeled positives |
+| Cleaning / augmentation | [DATA_CLEANING.md](DATA_CLEANING.md) §10 |
+
+### 1.1a Unaffected 900-row Google Form snapshot
 
 | Item | Verified result |
 |---|---|
 | Raw source file | `Backend/ml/datasets/raw/DESCEND RAW SURVEY.csv` |
 | Raw rows / columns | 900 rows, 39 columns |
 | Processed rows | 900 (0 dropped) |
-| Processed files | `training_dataset.csv`, `training_dataset_descend_900.csv` |
+| Processed files | `training_dataset_descend_900.csv` |
 | Age range | 18–77 years |
 | Sex coding | 421 male (46.78%), 479 female (53.22%) |
 | Outcome | 220 T2DM (24.44%), 680 not T2DM (75.56%) |
@@ -32,7 +43,7 @@ Two processed artifacts exist. Do not treat them as the same dataset.
 | Label quality | Self-reported doctor diagnosis; not physician-verified in project files |
 | Cleaning methodology | [DATA_CLEANING.md](DATA_CLEANING.md) |
 
-### 1.1b Prior 488-row model dataset (currently deployed ExtraTrees)
+### 1.1b Prior 488-row model dataset (historical ExtraTrees)
 
 | Item | Verified result |
 |---|---|
@@ -176,7 +187,28 @@ The lineage variables `parent_has_t2dm`, `weightedFamilyScore`, `lineageRiskInde
 
 ## 4. Model Validation Snapshot
 
-The tracked model was trained on 2026-08-24 using ExtraTrees with 400 estimators, maximum depth 6, minimum leaf size 3, balanced class weighting, and random seed 42.
+### 4.1 Current ExtraTrees artifact (1080-row screening train, 2026-08-29)
+
+ExtraTrees, 400 estimators, max depth 6, min leaf 3, `class_weight=balanced`, seed 42. Threshold strategy: **recall-constrained** (recall ≥ 0.82, prefer precision ≥ 0.70, preferred band 0.45–0.58).
+
+| Metric | Cross-validation | Locked hold-out |
+|---|---:|---:|
+| ROC-AUC | 0.9667 | 0.9616 |
+| PR-AUC | 0.9570 | 0.9463 |
+| Brier score | 0.0823 | 0.0795 |
+| Recall | 0.8350 | 0.8500 |
+| Precision | 0.9212 | 0.8831 |
+| F1 score | 0.8745 | 0.8662 |
+| Specificity | 0.9559 | 0.9338 |
+| Accuracy | 0.9111 | 0.9028 |
+| Confusion matrix | — | `[[127, 9], [12, 68]]` |
+| Operating threshold | 0.58 (OOF/train) | 0.58 |
+
+Label-shuffle mean ROC-AUC ~0.48. All 1080 rows have distinct group IDs, so CV is respondent-level, not family-level. 180 hold-out-style boundary rows are synthetic labeled positives; treat hold-out recall as internally evaluated, not external validation.
+
+### 4.2 Prior 488-row artifact (historical)
+
+Trained 2026-08-24, F1 threshold. Do not mix with the table above.
 
 | Metric | Cross-validation | Locked hold-out |
 |---|---:|---:|
@@ -184,13 +216,10 @@ The tracked model was trained on 2026-08-24 using ExtraTrees with 400 estimators
 | PR-AUC | 0.9982 | 0.9951 |
 | Brier score | 0.0189 | 0.0294 |
 | Recall | 0.9828 | 0.9828 |
-| Accuracy | Not listed here | 0.9592 |
-| Precision | Not listed here | 0.9500 |
-| F1 score | Not listed here | 0.9661 |
 | Confusion matrix | - | `[[37, 3], [1, 57]]` |
 | Operating threshold | - | 0.515 |
 
-The label-shuffle diagnostic produced ROC-AUC 0.5583. However, all 488 processed rows have distinct group IDs, so the recorded grouping does not measure generalization to unseen families. The unusually high performance must therefore be presented cautiously and investigated for label, duplicate-feature, sampling, and target-construction effects.
+The label-shuffle diagnostic produced ROC-AUC 0.5583. Unusually high 488-row metrics should be presented cautiously (label, duplicate-feature, sampling, and target-construction effects).
 
 ## 5. Expert Validation Questionnaire
 
@@ -315,7 +344,7 @@ CVI supports content relevance. It does not establish diagnostic accuracy, calib
 
 ## 12. Future Work
 
-1. Retrain and re-evaluate on the 900-row Google Form CSV before replacing the deployed 488-row ExtraTrees artifact. Keep `training_dataset_filipino_488.csv` for reproduction of the current model JSON.
+1. Retrain used the 1080-row screening CSV with recall-constrained threshold 0.58. Keep `training_dataset_descend_900.csv` and `training_dataset_filipino_488.csv` for reproduction of earlier artifacts. Do not present synthetic boundary rows as survey respondents.
 2. Confirm label provenance and obtain physician-confirmed labels where possible.
 3. Collect a larger, multi-site Filipino dataset.
 4. Use real patient or family identifiers for family-level splitting.

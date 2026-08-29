@@ -9,6 +9,7 @@ from pathlib import Path
 RAW_MERGED_NAME = "survey_to_excel_raw_merged.csv"
 TEMPLATE_GLOB_HINT = "survey_to_excel_raw_template - survey_to_excel_raw_template.csv"
 GFORM_RAW_NAME = "DESCEND RAW SURVEY.csv"
+AUGMENTED_GFORM_NAME = "DESCEND RAW SURVEY augmented.csv"
 
 
 def sync_legacy_merged_into_raw(datasets_dir: Path) -> None:
@@ -44,13 +45,17 @@ def _find_gform_raw(raw_dir: Path) -> Path | None:
 def resolve_raw_survey_csv(datasets_dir: Path) -> Path:
     """Return the raw survey CSV to use for training prep.
 
-    Preference: DESCEND Google Form export, then merged internal CSV, then template.
+    Preference: augmented Google Form export (noise + boundary cases), then the
+    original DESCEND Google Form export, then merged internal CSV, then template.
     """
     sync_legacy_merged_into_raw(datasets_dir)
     raw_dir = datasets_dir / "raw"
+    augmented = raw_dir / AUGMENTED_GFORM_NAME
     gform = _find_gform_raw(raw_dir)
     raw_merged = raw_dir / RAW_MERGED_NAME
     template = raw_dir / TEMPLATE_GLOB_HINT
+    if augmented.exists():
+        return augmented
     if gform is not None:
         return gform
     if raw_merged.exists():
@@ -59,6 +64,7 @@ def resolve_raw_survey_csv(datasets_dir: Path) -> Path:
         return template
     raise FileNotFoundError(
         "No raw survey CSV found. Expected one of:\n"
+        f"  {augmented}\n"
         f"  {raw_dir / GFORM_RAW_NAME}\n"
         f"  {raw_merged}\n"
         f"  {template}"

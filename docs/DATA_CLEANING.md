@@ -10,25 +10,33 @@ Related docs: [Google Form field inventory](GOOGLE_FORM_FIELD_INVENTORY.md), [ML
 
 | Role | Path |
 |---|---|
-| Raw Google Form export | `Backend/ml/datasets/raw/DESCEND RAW SURVEY.csv` |
+| Raw Google Form export (unchanged original) | `Backend/ml/datasets/raw/DESCEND RAW SURVEY.csv` |
+| Augmented raw (noise + 180 boundary cases) | `Backend/ml/datasets/raw/DESCEND RAW SURVEY augmented.csv` |
 | Canonical training CSV | `Backend/ml/datasets/processed/training_dataset.csv` |
-| Named 900-row snapshot | `Backend/ml/datasets/processed/training_dataset_descend_900.csv` |
-| Prior 488-row artifact (deployed ExtraTrees model) | `Backend/ml/datasets/processed/training_dataset_filipino_488.csv` |
+| Named 900-row snapshot (pre-augmentation) | `Backend/ml/datasets/processed/training_dataset_descend_900.csv` |
+| Named 1080-row snapshot (current train file) | `Backend/ml/datasets/processed/training_dataset_descend_1080.csv` |
+| Augmentation manifest | `Backend/ml/datasets/processed/screening_augmentation_manifest.json` |
+| Prior 488-row artifact | `Backend/ml/datasets/processed/training_dataset_filipino_488.csv` |
 
 **Scripts**
 
 | Script | Role |
 |---|---|
-| `Backend/scripts/clean_raw_to_training.py` | Entry point |
+| `Backend/scripts/clean_raw_to_training.py` | Clean original or resolved raw CSV |
+| `Backend/scripts/augment_screening_dataset.py` | Noise 18% of the 900-row export; append 180 FN-profile rows; rebuild training CSV |
 | `Backend/scripts/gform_survey_map.py` | Detect Google Form headers; map questions to internal names |
 | `Backend/scripts/prepare_training_dataset.py` | Validate rows; encode features; write training CSV |
-| `Backend/scripts/dataset_paths.py` | Prefer `DESCEND RAW SURVEY.csv` over older merged templates |
+| `Backend/scripts/dataset_paths.py` | Prefer the augmented Google Form export when present |
+| `Backend/train.py` | Train ExtraTrees; default threshold is recall-constrained |
 | `Backend/tests/test_gform_survey_map.py` | Mapping, activity/diet encoding, and end-to-end prepare tests |
+| `Backend/tests/test_threshold_selection.py` | Screening threshold selection |
 
 From `Backend/`:
 
 ```bash
 python scripts/clean_raw_to_training.py
+python scripts/augment_screening_dataset.py
+python train.py
 ```
 
 Optional paths:
@@ -257,7 +265,8 @@ Smoking, alcohol, sleep, exercise duration, optional glucose/HbA1c, and relative
 4. Sibling history is a yes/no item, not a count of diabetic siblings.
 5. Mother GDM was not asked; the column is a constant unknown value.
 6. Optional labs are missing for most respondents and must not be described as complete clinical workups.
-7. The deployed ExtraTrees artifact may still be the 488-row model until `python train.py` is run on this file and the new `t2dm_risk_model.json` is accepted.
+7. ExtraTrees does not include mother GDM (not asked on the form). Young-female boundary rows teach mother T2DM in young women, not a GDM coefficient.
+8. The 180 boundary-case rows are synthetic labeled positives. Hold-out metrics after augmentation are not comparable one-to-one with the previous 13-FN / 180-row hold-out.
 
 ## 9. Relationship to the 488-row Filipino artifact
 
@@ -270,4 +279,27 @@ Smoking, alcohol, sleep, exercise duration, optional glucose/HbA1c, and relative
 | Header style | Google Form question text | Internal column names |
 | Current `training_dataset.csv` | This file | Replaced as the canonical train path |
 
-Keep `training_dataset_filipino_488.csv` so the currently deployed model can still be reproduced. Do not mix the two CSVs in one training run without documenting the merge.
+Keep `training_dataset_filipino_488.csv` so that artifact can still be reproduced. Do not mix the two CSVs in one training run without documenting the merge.
+
+## 10. Screening augmentation and operating threshold
+
+This repository does **not** contain a documented 520-row real + 900-row generated mix. The 900-row Google Form export is uniformly complete. To reduce that uniformity and to target missed-positive profiles, `augment_screening_dataset.py` (seed 42):
+
+| Step | What happened |
+|---|---|
+| Noise | 162 / 900 original rows (18%): one family-history field flipped; often blank glucose/HbA1c; some high-risk rows set to Never / sedentary activity |
+| Boundary A | 60 labeled T2DM: age 40–55, exactly one parent with T2DM, no hypertension, normal BMI |
+| Boundary B | 60 labeled T2DM: age 55–65, no parent T2DM, 3–4 grandparents affected |
+| Boundary C | 60 labeled T2DM: female age 22–35, mother T2DM, no hypertension |
+| Combined | 1080 rows, 400 T2DM / 680 not T2DM |
+
+`python train.py` now defaults to **recall-constrained** threshold selection (not F1):
+
+- Require **recall ≥ 0.82**
+- Prefer **precision ≥ 0.70** inside **0.45–0.58**
+- If that band cannot hit the recall floor, search down to 0.20
+- Among feasible cutoffs, pick the **highest** threshold (as few extra false positives as possible)
+
+Rationale for the thesis: this is a screening-style awareness tool, so missed positives are costlier than extra false positives. The displayed percentage is still the calibrated probability; the cutoff is the binary operating point used in CV/hold-out confusion matrices.
+
+Retrain (2026-08-29): ExtraTrees, 1080 rows, operating cutoff **0.58**. CV recall 83.5%, precision 92.1%. Hold-out recall 85.0%, precision 88.3%, confusion `[[127, 9], [12, 68]]` (12 FN / 9 FP on 216 test rows). Do not claim those 12 FN are the same 13 cases from the unaugmented 180-row hold-out.

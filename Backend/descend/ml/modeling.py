@@ -57,12 +57,18 @@ DEFAULT_RANDOM_SEED = 42
 # Threshold search (balanced / F1 mode): wide grid; selection uses train or OOF only — never hold-out test
 THRESHOLD_RANGE_MIN = 0.20
 THRESHOLD_RANGE_MAX = 0.70
-# Wider floor for recall-constrained operating points (thesis screening objective)
-THRESHOLD_RECALL_STRATEGY_MIN = 0.06
+# Screening-first band (Fix 1): try these cutoffs before expanding downward.
+THRESHOLD_RECALL_PREFERRED_MIN = 0.45
+THRESHOLD_RECALL_PREFERRED_MAX = 0.58
+# If recall floor is infeasible in the preferred band, search this wider range.
+THRESHOLD_RECALL_STRATEGY_MIN = 0.20
 THRESHOLD_RECALL_STRATEGY_MAX = 0.58
 TEST_SET_SIZE = 0.20  # 20% hold-out by family
 
 ThresholdStrategy = str  # "f1" | "recall_constrained"
+DEFAULT_THRESHOLD_STRATEGY: ThresholdStrategy = "recall_constrained"
+DEFAULT_MIN_RECALL_FLOOR = 0.82
+DEFAULT_MIN_PRECISION_FLOOR = 0.70
 
 DEFAULT_FEATURE_MEANS = {
     "age": 35.0,
@@ -1020,61 +1026,96 @@ def _select_optimal_threshold_f1(
     return best_threshold, best_metrics
 
 
-def _select_threshold_recall_constrained(
+def _threshold_candidates(low: float, high: float, scores: list[float], step: float = 0.005) -> list[float]:
+    n_steps = int(round((high - low) / step)) + 1
+    grid = [round(low + i * step, 4) for i in range(max(n_steps, 2))]
+    observed = [round(float(s), 6) for s in scores]
+    return sorted(c for c in set(grid + observed) if low - 1e-12 <= c <= high + 1e-12)
+
+
+def _select_highest_threshold_meeting(
     labels: list[int],
     scores: list[float],
+    candidates: list[float],
     *,
-    min_recall: float = 0.65,
-    min_precision: float = 0.25,
-    min_positive_predictions: int = 5,
-) -> tuple[float, dict]:
-    """
-    Prefer operating points with recall >= min_recall, then maximize F1.
-    Relaxes precision floor in small steps if infeasible (small-n screening reality).
-    """
-    step = 0.005
-    n_steps = int((THRESHOLD_RECALL_STRATEGY_MAX - THRESHOLD_RECALL_STRATEGY_MIN) / step) + 1
-    candidates = sorted(
-        set(
-            [round(THRESHOLD_RECALL_STRATEGY_MIN + i * step, 4) for i in range(n_steps)]
-            + [round(float(s), 6) for s in scores]
-        )
-    )
-    candidates = sorted(
-        c for c in candidates if THRESHOLD_RECALL_STRATEGY_MIN <= c <= THRESHOLD_RECALL_STRATEGY_MAX
-    )
-
-    precision_floors = [
-        min_precision,
-        min_precision - 0.04,
-        min_precision - 0.08,
-        min_precision - 0.12,
-        0.10,
-        0.05,
-        0.0,
-    ]
-    for prec_floor in precision_floors:
-        feasible: list[tuple[float, dict]] = []
-        for threshold in candidates:
-            metrics = calculate_metrics(labels, scores, threshold=threshold)
-            predicted_positives = metrics["truePositives"] + metrics["falsePositives"]
-            if predicted_positives < min_positive_predictions:
-                continue
-            if metrics["recall"] + 1e-6 >= min_recall and metrics["precision"] + 1e-6 >= prec_floor:
-                feasible.append((threshold, metrics))
-        if feasible:
-            feasible.sort(key=lambda item: (-item[1]["f1Score"], item[0]))
-            return feasible[0][0], feasible[0][1]
-
-    best_threshold = 0.5
-    best_recall = -1.0
-    best_metrics = calculate_metrics(labels, scores, threshold=0.5)
+    min_recall: float,
+    min_precision: float | None,
+    min_positive_predictions: int,
+) -> tuple[float, dict] | None:
+    """Highest cutoff that still meets recall (and optional precision). Limits extra FPs."""
+    feasible: list[tuple[float, dict]] = []
     for threshold in candidates:
         metrics = calculate_metrics(labels, scores, threshold=threshold)
         predicted_positives = metrics["truePositives"] + metrics["falsePositives"]
         if predicted_positives < min_positive_predictions:
             continue
-        if metrics["recall"] > best_recall:
+        if metrics["recall"] + 1e-6 < min_recall:
+            continue
+        if min_precision is not None and metrics["precision"] + 1e-6 < min_precision:
+            continue
+        feasible.append((threshold, metrics))
+    if not feasible:
+        return None
+    feasible.sort(key=lambda item: item[0], reverse=True)
+    return feasible[0][0], feasible[0][1]
+
+
+def _select_threshold_recall_constrained(
+    labels: list[int],
+    scores: list[float],
+    *,
+    min_recall: float = DEFAULT_MIN_RECALL_FLOOR,
+    min_precision: float = DEFAULT_MIN_PRECISION_FLOOR,
+    min_positive_predictions: int = 5,
+) -> tuple[float, dict]:
+    """Screening operating point: require recall, keep the highest feasible threshold.
+
+    Search order:
+    1. Preferred band 0.45–0.58 with recall and precision floors (Fix 1).
+    2. Same band with recall floor only (Fix 4 — report resulting precision).
+    3. Wider band down to THRESHOLD_RECALL_STRATEGY_MIN, precision then recall-only.
+    4. Last resort: maximize recall in the wide band.
+    """
+    preferred = _threshold_candidates(
+        THRESHOLD_RECALL_PREFERRED_MIN, THRESHOLD_RECALL_PREFERRED_MAX, scores
+    )
+    extended = _threshold_candidates(
+        THRESHOLD_RECALL_STRATEGY_MIN, THRESHOLD_RECALL_STRATEGY_MAX, scores
+    )
+    bands = (preferred, extended)
+    for candidates in bands:
+        hit = _select_highest_threshold_meeting(
+            labels,
+            scores,
+            candidates,
+            min_recall=min_recall,
+            min_precision=min_precision,
+            min_positive_predictions=min_positive_predictions,
+        )
+        if hit is not None:
+            return hit
+        hit = _select_highest_threshold_meeting(
+            labels,
+            scores,
+            candidates,
+            min_recall=min_recall,
+            min_precision=None,
+            min_positive_predictions=min_positive_predictions,
+        )
+        if hit is not None:
+            return hit
+
+    best_threshold = 0.5
+    best_recall = -1.0
+    best_metrics = calculate_metrics(labels, scores, threshold=0.5)
+    for threshold in extended:
+        metrics = calculate_metrics(labels, scores, threshold=threshold)
+        predicted_positives = metrics["truePositives"] + metrics["falsePositives"]
+        if predicted_positives < min_positive_predictions:
+            continue
+        if metrics["recall"] > best_recall or (
+            abs(metrics["recall"] - best_recall) < 1e-12 and threshold > best_threshold
+        ):
             best_recall = metrics["recall"]
             best_threshold = threshold
             best_metrics = metrics
@@ -1085,9 +1126,9 @@ def select_operating_threshold(
     labels: list[int],
     scores: list[float],
     *,
-    strategy: ThresholdStrategy = "f1",
-    min_recall_floor: float = 0.65,
-    min_precision_floor: float = 0.25,
+    strategy: ThresholdStrategy = DEFAULT_THRESHOLD_STRATEGY,
+    min_recall_floor: float = DEFAULT_MIN_RECALL_FLOOR,
+    min_precision_floor: float = DEFAULT_MIN_PRECISION_FLOOR,
     min_positive_predictions: int = 5,
 ) -> tuple[float, dict]:
     """Unified threshold selection for CV / holdout (no test-set peeking)."""
@@ -1131,7 +1172,7 @@ def select_screening_threshold(
     labels: list[int],
     scores: list[float],
     *,
-    min_precision_floor: float = 0.25,
+    min_precision_floor: float = DEFAULT_MIN_PRECISION_FLOOR,
     min_positive_predictions: int = 5,
 ) -> tuple[float, dict]:
     """
@@ -1538,9 +1579,9 @@ def compute_crossvalidation_metrics(
     k: int = 5,
     seed: int = DEFAULT_RANDOM_SEED,
     balance_mode: BalanceMode = "none",
-    threshold_strategy: ThresholdStrategy = "f1",
-    min_recall_floor: float = 0.65,
-    min_precision_floor: float = 0.25,
+    threshold_strategy: ThresholdStrategy = DEFAULT_THRESHOLD_STRATEGY,
+    min_recall_floor: float = DEFAULT_MIN_RECALL_FLOOR,
+    min_precision_floor: float = DEFAULT_MIN_PRECISION_FLOOR,
     cv_repeats: int = 1,
     et_config: dict | None = None,
     lr_config: dict | None = None,
@@ -1775,13 +1816,15 @@ def compute_crossvalidation_metrics(
             "thresholdStrategy": threshold_strategy,
             "thresholdStrategyNote": (
                 "f1: maximize F1 on train fold within [THRESHOLD_RANGE_MIN, THRESHOLD_RANGE_MAX]. "
-                "recall_constrained: require recall >= minRecallFloor (relaxing precision floor if needed), "
-                "then maximize F1; search extends to lower probabilities for screening-oriented points."
+                "recall_constrained: require recall >= minRecallFloor; prefer precision >= minPrecisionFloor "
+                "inside 0.45–0.58, then expand downward. Among feasible points pick the highest threshold "
+                "(screening: hit sensitivity with as few extra false positives as possible)."
             ),
             "minRecallFloor": min_recall_floor,
             "minPrecisionFloor": min_precision_floor,
             "f1SearchRange": f"[{THRESHOLD_RANGE_MIN}, {THRESHOLD_RANGE_MAX}]",
             "recallSearchRange": f"[{THRESHOLD_RECALL_STRATEGY_MIN}, {THRESHOLD_RECALL_STRATEGY_MAX}]",
+            "recallPreferredRange": f"[{THRESHOLD_RECALL_PREFERRED_MIN}, {THRESHOLD_RECALL_PREFERRED_MAX}]",
             "perFoldThresholds": [round(t, 6) for t in fold_thresholds],
             "cvRepeats": repeats,
             "average": "binary",
@@ -1820,9 +1863,9 @@ def compute_holdout_metrics(
     test_rows: list[dict[str, float]],
     seed: int = DEFAULT_RANDOM_SEED,
     balance_mode: BalanceMode = "none",
-    threshold_strategy: ThresholdStrategy = "f1",
-    min_recall_floor: float = 0.65,
-    min_precision_floor: float = 0.25,
+    threshold_strategy: ThresholdStrategy = DEFAULT_THRESHOLD_STRATEGY,
+    min_recall_floor: float = DEFAULT_MIN_RECALL_FLOOR,
+    min_precision_floor: float = DEFAULT_MIN_PRECISION_FLOOR,
     et_config: dict | None = None,
     lr_config: dict | None = None,
     hgb_config: dict | None = None,
@@ -1983,9 +2026,9 @@ def build_trained_artifact(
     rows: list[dict[str, float]],
     seed: int = DEFAULT_RANDOM_SEED,
     balance_mode: BalanceMode = "none",
-    threshold_strategy: ThresholdStrategy = "f1",
-    min_recall_floor: float = 0.65,
-    min_precision_floor: float = 0.25,
+    threshold_strategy: ThresholdStrategy = DEFAULT_THRESHOLD_STRATEGY,
+    min_recall_floor: float = DEFAULT_MIN_RECALL_FLOOR,
+    min_precision_floor: float = DEFAULT_MIN_PRECISION_FLOOR,
     cv_repeats: int = 1,
     tune_hyperparams: bool = False,
     model_algorithm: ModelAlgorithm = "extra_trees",
@@ -2283,9 +2326,9 @@ def train_model_from_dataset_path(
     model_path: Path,
     seed: int = DEFAULT_RANDOM_SEED,
     balance_mode: BalanceMode = "none",
-    threshold_strategy: ThresholdStrategy = "f1",
-    min_recall_floor: float = 0.65,
-    min_precision_floor: float = 0.25,
+    threshold_strategy: ThresholdStrategy = DEFAULT_THRESHOLD_STRATEGY,
+    min_recall_floor: float = DEFAULT_MIN_RECALL_FLOOR,
+    min_precision_floor: float = DEFAULT_MIN_PRECISION_FLOOR,
     cv_repeats: int = 1,
     tune_hyperparams: bool = False,
     model_algorithm: ModelAlgorithm = "extra_trees",

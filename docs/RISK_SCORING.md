@@ -26,24 +26,22 @@ Pedigree upgrade (legacy): if Low but `0.24 ≤ p < 0.34` with strong lineage bu
 
 ## Trained model feature importances (ExtraTrees)
 
-Approximate importances from `t2dm_risk_model.json`:
+From `t2dm_risk_model.json` after the 1080-row screening retrain (2026-08-29). Importances shift when the training CSV or labels change; they are not the family-formula weights.
 
 | Feature | Importance |
 |---------|------------|
-| parent_has_t2dm | ~32.4% |
-| weightedFamilyScore | ~15.1% |
-| hereditary_load_index | ~12.2% |
-| lineageRiskIndex | ~10.6% |
-| propagationProbability | ~10.4% |
-| hypertension_status | ~5.3% |
-| age | ~3.3% |
-| metabolic_risk_index | ~3.1% |
-| user_is_male | ~2.1% |
-| aunts_uncles_score | ~1.5% |
-| siblings_diabetes_count | ~1.3% |
-| bmi | ~1.0% |
-| activity_metabolic_index | ~0.9% |
-| physical_activity_score | ~0.8% |
+| aunts_uncles_score | ~17.4% |
+| propagationProbability | ~16.6% |
+| lineageRiskIndex | ~13.7% |
+| weightedFamilyScore | ~13.5% |
+| hereditary_load_index | ~11.1% |
+| parent_has_t2dm | ~9.3% |
+| bmi | ~5.3% |
+| physical_activity_score | ~3.3% |
+
+### Binary operating threshold (evaluation only)
+
+Default strategy is **recall-constrained**, not F1. Target: recall ≥ 0.82 with precision ≥ 0.70, search 0.45–0.58 first. Current artifact cutoff: **0.58**. Risk bands (Low / Moderate / High) still use 0.34 / 0.67 and are not this cutoff.
 
 ## Core formulas (legacy)
 

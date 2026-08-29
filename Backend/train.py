@@ -7,6 +7,7 @@ directly via importlib to avoid Flask app factory side-effects.
 Usage:
     python train.py
     python train.py --dataset ml/datasets/processed/training_dataset.csv
+    python train.py --threshold-strategy f1
     python train.py --dataset ml/datasets/processed/training_dataset_filipino_488.csv
     python train.py --dataset path/to/dataset.csv --model path/to/model.json --seed 42
 """
@@ -255,24 +256,24 @@ def main() -> int:
     parser.add_argument(
         "--threshold-strategy",
         choices=("f1", "recall_constrained"),
-        default="f1",
+        default="recall_constrained",
         help=(
-            "f1: maximize F1 on train fold within a bounded threshold range. "
-            "recall_constrained: require recall >= --min-recall (relaxing --min-precision if needed), "
-            "then maximize F1; uses a wider probability search band for screening-oriented points."
+            "recall_constrained (default, screening): require recall >= --min-recall; prefer "
+            "precision >= --min-precision inside 0.45–0.58, then expand downward. "
+            "f1: maximize F1 on train fold within a bounded threshold range."
         ),
     )
     parser.add_argument(
         "--min-recall",
         type=float,
-        default=0.65,
-        help="Minimum recall floor when --threshold-strategy recall_constrained (default: 0.65).",
+        default=0.82,
+        help="Minimum recall floor when --threshold-strategy recall_constrained (default: 0.82).",
     )
     parser.add_argument(
         "--min-precision",
         type=float,
-        default=0.25,
-        help="Initial minimum precision when recall_constrained; relaxed in steps if infeasible (default: 0.25).",
+        default=0.70,
+        help="Preferred minimum precision for recall_constrained in the 0.45–0.58 band (default: 0.70).",
     )
     parser.add_argument(
         "--cv-repeats",
