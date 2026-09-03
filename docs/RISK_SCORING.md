@@ -2,6 +2,8 @@
 
 Educational awareness scoring for the DESCEND rebuild. This is **not a medical diagnosis**.
 
+Clinician one-pager (factor % ↔ survey answers): [CLINICIAN_FACTOR_PERCENTAGES.md](CLINICIAN_FACTOR_PERCENTAGES.md).
+
 ## Pipeline
 
 1. Survey answers → feature builder (legacy ExtraTrees features)
