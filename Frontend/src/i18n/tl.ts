@@ -122,6 +122,32 @@ export const tl: TranslationDict = {
   displayName: 'Pangalan',
   signInSubmit: 'Mag-sign in',
   registerSubmit: 'Gumawa ng account',
+  registerEmergencyTitle: 'Paunawa sa Medikal na Emergency',
+  registerEmergencyText:
+    'Ang descendt2dm.me ay digital na tracking tool, hindi sistema ng emergency response. Kung may malubhang hypoglycemia, ketoacidosis, o kritikal na emergency, tumawag agad sa emergency medical services.',
+  registerMedicalTitle: 'Disclaimer:',
+  registerMedicalText:
+    'Nagbibigay lamang ang platapormang ito ng tracking at pang-edukasyong kaalaman. Hindi ito nagbibigay ng medikal na diyagnosis o plano ng gamutan. Kumonsulta sa iyong physician o endocrinologist bago baguhin ang iyong regimen sa diabetes.',
+  consentTermsPrefix: 'Nabasa ko at sumasang-ayon ako sa ',
+  consentTermsLink: 'Mga Tuntunin ng Serbisyo',
+  consentTermsMid: ' at sa ',
+  consentPrivacyLink: 'Patakaran sa Privacy',
+  consentTermsSuffix: '.',
+  consentHealth:
+    'Hayagan akong pumapayag sa pagkolekta, pag-imbak, at pagproseso ng aking sensitibong personal na health metrics (tulad ng blood glucose, HbA1c, at tala ng gamot) para sa tracking.',
+  consentAge: 'Kinukumpirma ko na ako ay hindi bababa sa 18 taong gulang.',
+  consentRequired:
+    'Pakisang-ayunan ang Mga Tuntunin at Patakaran sa Privacy, consent sa health data, at kumpirmasyon ng edad upang gumawa ng account.',
+  legalTermsTitle: 'Mga Tuntunin ng Serbisyo',
+  legalTermsLead:
+    'Ang DESCEND (descendt2dm.me) ay digital na tracking at pang-edukasyong tool. Inilalarawan ng mga tuntuning ito kung paano maaaring gamitin ang serbisyo.',
+  legalTermsBody:
+    'Hindi nagbibigay ang plataporma ng medikal na diyagnosis, emergency response, o plano ng gamutan. Ikaw ang responsable sa paghingi ng lisensyadong klinikal na pangangalaga. Huwag gamitin ang site kapalit ng emergency medical services. Kailangan mong maging 18 taong gulang upang gumawa ng account. Sa pagrehistro, sumasang-ayon kang gamitin ang tool para sa personal na tracking at edukasyon lamang.',
+  legalPrivacyTitle: 'Patakaran sa Privacy',
+  legalPrivacyLead:
+    'Kung gagawa ka ng account, iniimbak namin ang impormasyong kailangan upang patakbuhin ang iyong dashboard, kabilang ang health metrics na pipiliin mong i-log.',
+  legalPrivacyBody:
+    'Maaaring kabilang dito ang contact details, sagot sa pagsusuri, blood glucose, HbA1c, at tala ng gamot na iyong ilalagay. Ginagamit ang data para sa tracking at pang-edukasyong kaalaman sa site na ito — hindi bilang klinikal na rekord medikal. Sa bisita, nananatili ang sagot sa aparatong ito para sa sesyon lamang. Maaari kang magtanong sa team tungkol sa data ng account gamit ang contact option sa site.',
   forgotPassword: 'Nakalimutan ang password?',
   forgotTitle: 'I-reset ang password',
   forgotHelp: 'Ilagay ang email at magpapadala kami ng reset link kung may account.',

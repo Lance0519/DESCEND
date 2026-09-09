@@ -10,6 +10,7 @@ import { LandingPage } from './pages/LandingPage'
 import { LoginPage } from './pages/LoginPage'
 import { ManagementPage } from './pages/ManagementPage'
 import { ProfilePage } from './pages/ProfilePage'
+import { PrivacyPage, TermsPage } from './pages/LegalPage'
 import { RegisterPage } from './pages/RegisterPage'
 import { ResultsPage } from './pages/ResultsPage'
 import { UserDashboard } from './pages/UserDashboard'
@@ -28,6 +29,8 @@ export default function App() {
               <Route path="/access" element={<AccessPage />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
+              <Route path="/terms" element={<TermsPage />} />
+              <Route path="/privacy" element={<PrivacyPage />} />
               <Route path="/forgot-password" element={<ForgotPasswordPage />} />
               <Route path="/reset-password" element={<ResetPasswordPage />} />
               <Route path="/auth/callback" element={<AuthCallbackPage />} />
