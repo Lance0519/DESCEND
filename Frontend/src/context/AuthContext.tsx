@@ -7,7 +7,7 @@ import {
   useState,
   type ReactNode,
 } from 'react'
-import { ensureUserProfile } from '../lib/ensureProfile'
+import { consentFromUserMetadata, ensureUserProfile, type RegistrationConsent } from '../lib/ensureProfile'
 import { getSupabase, isSupabaseConfigured } from '../lib/supabaseClient'
 
 export type UserRole = 'user' | 'admin'
@@ -33,7 +33,12 @@ interface AuthContextValue {
   configured: boolean
   continueAsGuest: () => void
   signIn: (email: string, password: string) => Promise<void>
-  signUp: (email: string, password: string, displayName?: string) => Promise<{ needsEmailConfirm: boolean }>
+  signUp: (
+    email: string,
+    password: string,
+    displayName?: string,
+    consent?: RegistrationConsent,
+  ) => Promise<{ needsEmailConfirm: boolean }>
   signInWithGoogle: () => Promise<void>
   signOut: () => Promise<void>
   sendPasswordReset: (email: string) => Promise<void>
@@ -171,15 +176,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setIsGuest(false)
   }, [applySessionUser])
 
-  const signUp = useCallback(async (email: string, password: string, displayName?: string) => {
+  const signUp = useCallback(async (
+    email: string,
+    password: string,
+    displayName?: string,
+    consent?: RegistrationConsent,
+  ) => {
     const sb = getSupabase()
     if (!sb) throw new Error('Supabase is not configured')
     const name = displayName?.trim() ?? ''
+    const consentMeta =
+      consent?.terms_accepted && consent.health_consent_accepted && consent.age_confirmed
+        ? {
+            terms_accepted: true,
+            health_consent_accepted: true,
+            age_confirmed: true,
+            consent_timestamp: consent.consent_timestamp,
+          }
+        : {}
     const { data, error } = await sb.auth.signUp({
       email: email.trim(),
       password,
       options: {
-        data: { full_name: name },
+        data: { full_name: name, ...consentMeta },
         emailRedirectTo: `${window.location.origin}/auth/callback`,
       },
     })
@@ -193,6 +212,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         id: data.session.user.id,
         email: data.session.user.email,
         displayName: name,
+        consent: consentFromUserMetadata(data.session.user.user_metadata) ?? consent ?? null,
       })
       await applySessionUser(data.session.user)
     }

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { PageBackground } from '../components/PageBackground'
 import { useLanguage } from '../context/LanguageContext'
-import { ensureUserProfile } from '../lib/ensureProfile'
+import { consentFromUserMetadata, ensureUserProfile } from '../lib/ensureProfile'
 import { getSupabase } from '../lib/supabaseClient'
 import type { EmailOtpType, Session } from '@supabase/supabase-js'
 import './AuthCallbackPage.css'
@@ -115,6 +115,7 @@ export function AuthCallbackPage() {
         id: session.user.id,
         email: session.user.email,
         displayName: String(meta.full_name ?? meta.name ?? ''),
+        consent: consentFromUserMetadata(meta),
       })
       if (cancelled) return
       navigate(otpType === 'recovery' ? '/reset-password' : '/dashboard', { replace: true })

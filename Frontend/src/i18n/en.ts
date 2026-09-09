@@ -120,6 +120,32 @@ export const en = {
   displayName: 'Display name',
   signInSubmit: 'Sign in',
   registerSubmit: 'Create account',
+  registerEmergencyTitle: 'Medical Emergency Notice',
+  registerEmergencyText:
+    'descendt2dm.me is a digital tracking tool, not an emergency response system. If you suspect severe hypoglycemia, ketoacidosis, or a critical emergency, contact emergency medical services immediately.',
+  registerMedicalTitle: 'Disclaimer:',
+  registerMedicalText:
+    'This platform provides tracking and educational insights only. It does not provide medical diagnoses or treatment plans. Consult your physician or endocrinologist before adjusting your diabetes care regimen.',
+  consentTermsPrefix: 'I have read and agree to the ',
+  consentTermsLink: 'Terms of Service',
+  consentTermsMid: ' and ',
+  consentPrivacyLink: 'Privacy Policy',
+  consentTermsSuffix: '.',
+  consentHealth:
+    'I explicitly consent to the collection, storage, and processing of my sensitive personal health metrics (such as blood glucose, HbA1c, and medication logs) for tracking purposes.',
+  consentAge: 'I confirm that I am at least 18 years old.',
+  consentRequired:
+    'Please agree to the Terms and Privacy Policy, health data consent, and age confirmation to create an account.',
+  legalTermsTitle: 'Terms of Service',
+  legalTermsLead:
+    'DESCEND (descendt2dm.me) is a digital tracking and educational awareness tool. These terms describe how the service may be used.',
+  legalTermsBody:
+    'The platform does not provide medical diagnoses, emergency response, or treatment plans. You are responsible for seeking licensed clinical care. Do not use this site instead of emergency medical services. You must be at least 18 years old to create an account. By registering, you agree to use the tool for personal tracking and education only.',
+  legalPrivacyTitle: 'Privacy Policy',
+  legalPrivacyLead:
+    'If you create an account, we store the information needed to run your dashboard, including the health metrics you choose to log.',
+  legalPrivacyBody:
+    'This may include contact details, assessment answers, blood glucose, HbA1c, and medication logs you enter. Data is used for tracking and educational insights on this site — not as a clinical medical record. Guests keep answers on this device for the session only. You can ask the team about your account data using the contact option on the site.',
   forgotPassword: 'Forgot password?',
   forgotTitle: 'Reset your password',
   forgotHelp: 'Enter your email and we will send a reset link if an account exists.',
