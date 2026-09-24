@@ -42,6 +42,19 @@ export const tl: TranslationDict = {
   fieldRequired: 'Maglagay ng sagot upang magpatuloy.',
   fieldOutOfRange: 'Maglagay ng halaga sa pagitan ng {min} at {max}.',
   submitIncomplete: 'May kulang na kinakailangang sagot. Bumalik at kumpletuhin ang mga naunang hakbang.',
+  reviewTitle: 'Suriin ang iyong mga sagot',
+  reviewIntro:
+    'Tingnan ang iyong mga sagot sa ibaba bago kalkulahin ang iyong marka. Maaari mong baguhin ang kahit alin na kailangang itama.',
+  reviewSectionLabel: 'Buod',
+  reviewEdit: 'Baguhin',
+  reviewEditAria: 'Baguhin ang iyong sagot sa: {question}',
+  reviewConfirm: 'Kumpirmahin at tingnan ang resulta',
+  reviewBackToQuestions: 'Bumalik sa mga tanong',
+  reviewSkipped: 'Nilaktawan',
+  reviewUnanswered: 'Walang sagot',
+  reviewIncompleteWarning:
+    'May mga sagot na kulang pa. Kumpletuhin ang mga ito bago magpatuloy.',
+  reviewGoToFirstMissing: 'Pumunta sa unang kulang na sagot',
   predictErrorTitle: 'Hindi makalkula ang iyong marka',
   predictErrorText:
     'Hindi tumugon ang live na modelo. Suriin ang koneksyon at subukan muli. Nandito pa ang iyong mga sagot.',

@@ -7,6 +7,7 @@ import { NumberInput } from '../components/NumberInput'
 import { PageBackground } from '../components/PageBackground'
 import { ProgressBar } from '../components/ProgressBar'
 import { QuestionCard } from '../components/QuestionCard'
+import { ReviewSummary } from '../components/ReviewSummary'
 import { SkipButton } from '../components/SkipButton'
 import { SpeakButton } from '../components/SpeakButton'
 import { useAssessment } from '../context/AssessmentContext'
@@ -15,6 +16,8 @@ import { useLanguage } from '../context/LanguageContext'
 import { useAssessmentFlow } from '../hooks/useAssessmentFlow'
 import { useSpeech } from '../hooks/useSpeech'
 import { clearDraft } from '../lib/draftStorage'
+import { buildReviewGroups, firstMissingIndex } from '../lib/answerSummary'
+import { getVisibleQuestions } from '../data/questions'
 import {
   isStrictNumberField,
   validateAnswersForSubmit,
@@ -28,7 +31,7 @@ import { mapPayload } from '../api/mapPayload'
 import { mockScore } from '../utils/mockScore'
 import './AssessmentPage.css'
 
-type DiagnosisGate = 'diagnosis' | 'onset' | 'survey'
+type DiagnosisGate = 'diagnosis' | 'onset' | 'survey' | 'review'
 
 function initialGate(answers: AssessmentAnswers): DiagnosisGate {
   if (answers.diagnosedT2dm === 'no') return 'survey'
@@ -90,6 +93,7 @@ export function AssessmentPage() {
   )
   const [onsetError, setOnsetError] = useState<string | null>(null)
   const [gateSubmitting, setGateSubmitting] = useState(false)
+  const [returnToReview, setReturnToReview] = useState(false)
 
   useEffect(() => {
     if (!user) return
@@ -125,6 +129,12 @@ export function AssessmentPage() {
     const opts = current.options?.map((o) => optionLabel(String(o.labelKey))).join('. ') ?? ''
     return `${questionText}. ${opts}`
   }, [current, questionText, language])
+
+  const reviewGroups = useMemo(
+    () => buildReviewGroups(flow.visible, answers, t),
+    [flow.visible, answers, t],
+  )
+  const reviewMissingIndex = useMemo(() => firstMissingIndex(reviewGroups), [reviewGroups])
 
   function rangeMessage(min?: number, max?: number) {
     return t.fieldOutOfRange
@@ -315,6 +325,68 @@ export function AssessmentPage() {
     )
   }
 
+  if (gate === 'review') {
+    return (
+      <PageBackground>
+        <div className="assessment-page">
+          <ProgressBar current={flow.total - 1} total={flow.total} label={t.progress} />
+          <AssessmentToolbar />
+          <div className="assessment-page__content">
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.25 }}
+            >
+              <ReviewSummary
+                groups={reviewGroups}
+                missingIndex={reviewMissingIndex}
+                onEdit={handleEditAnswer}
+              />
+            </motion.div>
+
+            <div className="assessment-page__nav">
+              <button
+                type="button"
+                className="btn btn--ghost"
+                disabled={submitting}
+                onClick={() => {
+                  setReturnToReview(false)
+                  setQuestionIndex(Math.max(flow.total - 1, 0))
+                  setGate('survey')
+                }}
+              >
+                {t.reviewBackToQuestions}
+              </button>
+              <button
+                type="button"
+                className="btn btn--primary"
+                disabled={submitting || reviewMissingIndex != null}
+                onClick={() => void submitAssessment(answers)}
+              >
+                {submitting ? t.loading : t.reviewConfirm}
+              </button>
+            </div>
+
+            {predictError ? (
+              <div className="assessment-page__predict-error" role="alert">
+                <h3>{t.predictErrorTitle}</h3>
+                <p>{predictError}</p>
+                <button
+                  type="button"
+                  className="btn btn--primary"
+                  disabled={submitting}
+                  onClick={() => void submitAssessment(answers)}
+                >
+                  {submitting ? t.loading : t.predictRetry}
+                </button>
+              </div>
+            ) : null}
+          </div>
+        </div>
+      </PageBackground>
+    )
+  }
+
   if (!current) {
     return (
       <PageBackground>
@@ -419,11 +491,34 @@ export function AssessmentPage() {
       if (draftNumber !== '' && !skipped) latest = commitNumber(draftNumber)
     }
 
-    if (!flow.isLast) {
-      cancel()
-      flow.goNext()
+    cancel()
+
+    if (flow.isLast) {
+      setReturnToReview(false)
+      setGate('review')
       return
     }
+
+    // After editing from the review, skip straight back to it unless the edit
+    // revealed a question that still needs an answer.
+    if (returnToReview) {
+      const missing = firstMissingIndex(buildReviewGroups(getVisibleQuestions(latest), latest, t))
+      if (missing == null) {
+        setReturnToReview(false)
+        setGate('review')
+        return
+      }
+      if (missing !== flow.index) {
+        setQuestionIndex(missing)
+        return
+      }
+    }
+
+    flow.goNext()
+  }
+
+  async function submitAssessment(latest: AssessmentAnswers) {
+    setPredictError(null)
 
     if (!validateAnswersForSubmit(latest)) {
       setPredictError(t.submitIncomplete)
@@ -455,6 +550,16 @@ export function AssessmentPage() {
     } finally {
       setSubmitting(false)
     }
+  }
+
+  function handleEditAnswer(index: number) {
+    cancel()
+    setPredictError(null)
+    setFieldError(null)
+    setAttemptedNext(false)
+    setReturnToReview(true)
+    setQuestionIndex(index)
+    setGate('survey')
   }
 
   const bmi =
@@ -569,7 +674,7 @@ export function AssessmentPage() {
               disabled={submitting || (current.type === 'choice' && !canProceed)}
               onClick={() => void handleNext()}
             >
-              {submitting ? t.loading : flow.isLast ? t.seeResults : t.next}
+              {submitting ? t.loading : flow.isLast ? t.reviewTitle : t.next}
             </button>
           </div>
 
