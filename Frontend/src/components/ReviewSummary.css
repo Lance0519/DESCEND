@@ -1,0 +1,119 @@
+.review-summary:focus {
+  outline: none;
+}
+
+.review-summary__intro {
+  color: var(--color-text-muted);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.review-summary__warning {
+  padding: 0.85rem 1rem;
+  border-radius: 12px;
+  border: 1px solid rgba(183, 28, 28, 0.25);
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.92), rgba(255, 235, 238, 0.85));
+}
+
+.review-summary__warning p {
+  color: #b71c1c;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.review-summary__warning-link {
+  margin-top: 0.4rem;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--color-primary-dark);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+.review-summary__group {
+  margin-top: 0.35rem;
+}
+
+.review-summary__group-title {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--color-primary-dark);
+  margin-bottom: 0.5rem;
+}
+
+.review-summary__list {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.review-summary__row {
+  padding: 0.6rem 0.75rem;
+  border-radius: 10px;
+  border: 1px solid var(--surface-card-border);
+  background: rgba(255, 255, 255, 0.6);
+}
+
+.review-summary__row--missing {
+  border-color: rgba(183, 28, 28, 0.35);
+  background: rgba(255, 235, 238, 0.6);
+}
+
+.review-summary__question {
+  font-size: 13px;
+  color: var(--color-text-muted);
+  line-height: 1.35;
+}
+
+.review-summary__answer {
+  margin: 0.3rem 0 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.review-summary__value {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-text-main);
+  word-break: break-word;
+}
+
+.review-summary__value--muted {
+  font-weight: 500;
+  font-style: italic;
+  color: var(--color-text-muted);
+}
+
+.review-summary__edit {
+  flex-shrink: 0;
+  min-height: 32px;
+  padding: 0.3rem 0.8rem;
+  border-radius: 999px;
+  border: 1px solid var(--color-primary-border);
+  background: var(--color-primary-light);
+  color: var(--color-primary-dark);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.review-summary__edit:hover {
+  background: #fff;
+  border-color: var(--color-primary);
+}
+
+@media (min-width: 640px) {
+  .review-summary__question {
+    font-size: 14px;
+  }
+
+  .review-summary__group-title {
+    font-size: 13px;
+  }
+}

@@ -40,6 +40,19 @@ export const en = {
   fieldRequired: 'Please enter a value to continue.',
   fieldOutOfRange: 'Enter a value between {min} and {max}.',
   submitIncomplete: 'Some required answers are missing. Go back and complete the earlier steps.',
+  reviewTitle: 'Review your answers',
+  reviewIntro:
+    'Check your answers below before we compute your score. You can edit anything that needs correcting.',
+  reviewSectionLabel: 'Summary',
+  reviewEdit: 'Edit',
+  reviewEditAria: 'Edit your answer to: {question}',
+  reviewConfirm: 'Confirm and see results',
+  reviewBackToQuestions: 'Back to questions',
+  reviewSkipped: 'Skipped',
+  reviewUnanswered: 'Not answered',
+  reviewIncompleteWarning:
+    'Some answers are still missing. Please complete them before continuing.',
+  reviewGoToFirstMissing: 'Go to the first missing answer',
   predictErrorTitle: 'Could not score your assessment',
   predictErrorText:
     'The live risk model did not respond. Check your connection and try again. Your answers are still on this step.',
