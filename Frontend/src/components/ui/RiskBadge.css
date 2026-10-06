@@ -1,0 +1,54 @@
+.risk-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  font-weight: 700;
+  line-height: 1.2;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  white-space: nowrap;
+}
+
+.risk-badge--sm {
+  min-height: 1.5rem;
+  padding: 0.15rem 0.55rem;
+  font-size: 12px;
+}
+
+.risk-badge--md {
+  min-height: 1.85rem;
+  padding: 0.25rem 0.75rem;
+  font-size: 13.5px;
+}
+
+.risk-badge--lg {
+  min-height: 2.25rem;
+  padding: 0.45rem 1.15rem;
+  font-size: 15px;
+  border-radius: 10px;
+}
+
+.risk-badge--low {
+  background: var(--risk-low-bg, #e8f5e9);
+  color: var(--risk-low, #2e7d32);
+  border-color: var(--risk-low-border, #c8e6c9);
+}
+
+.risk-badge--moderate {
+  background: var(--risk-moderate-bg, #fff3e0);
+  color: var(--risk-moderate, #e65100);
+  border-color: var(--risk-moderate-border, #ffe0b2);
+}
+
+.risk-badge--high {
+  background: var(--risk-high-bg, #ffebee);
+  color: var(--risk-high, #c62828);
+  border-color: var(--risk-high-border, #ffcdd2);
+}
+
+.risk-badge--neutral {
+  background: var(--color-bg-neutral, #f3f4f6);
+  color: var(--color-text-main, #374151);
+  border-color: var(--color-border, #e5e7eb);
+}

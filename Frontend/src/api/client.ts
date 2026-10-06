@@ -110,13 +110,9 @@ export async function estimateAssessment(payload: unknown): Promise<EstimateResp
   }
 
   if (!res.ok) {
-    let detail = ''
-    try {
-      detail = (await res.text()).slice(0, 280)
-    } catch {
-      detail = ''
-    }
-    throw new PredictApiError('http', detail || `Estimate failed (${res.status})`, res.status)
+    const detail = await res.text().catch(() => '')
+    const sliced = detail.slice(0, 280)
+    throw new PredictApiError('http', sliced || `Estimate failed (${res.status})`, res.status)
   }
 
   let data: Record<string, unknown>

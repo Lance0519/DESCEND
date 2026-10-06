@@ -20,6 +20,8 @@ npm run dev
 # Backend
 cd Backend
 pip install -r requirements.txt
+# optional: tests + training merge script
+pip install -e ".[dev,scripts]"
 python run.py
 ```
 

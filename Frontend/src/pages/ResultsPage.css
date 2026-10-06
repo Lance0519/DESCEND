@@ -112,18 +112,18 @@
 }
 
 .results__band--low {
-  background: var(--color-primary-light);
-  color: var(--color-primary-dark);
+  background: var(--risk-low-bg, #e8f5e9);
+  color: var(--risk-low, #2e7d32);
 }
 
 .results__band--moderate {
-  background: var(--color-bg-neutral);
-  color: var(--color-text-main);
+  background: var(--risk-moderate-bg, #fff3e0);
+  color: var(--risk-moderate, #e65100);
 }
 
 .results__band--high {
-  background: #e5e7eb;
-  color: var(--color-text-main);
+  background: var(--risk-high-bg, #ffebee);
+  color: var(--risk-high, #c62828);
 }
 
 .results__icons {

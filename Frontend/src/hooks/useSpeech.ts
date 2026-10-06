@@ -3,7 +3,7 @@ import {
   isAzureSpeechConfigured,
   speakAzureText,
   stopAzureSpeech,
-} from '../components/AzureSpeechPlayer'
+} from '../lib/azureSpeech'
 import type { Language } from '../types/assessment'
 
 function pickVoice(language: Language): SpeechSynthesisVoice | null {

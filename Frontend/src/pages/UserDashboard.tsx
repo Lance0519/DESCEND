@@ -18,8 +18,9 @@ import {
 } from 'lucide-react'
 import { ConfirmDialog } from '../components/ConfirmDialog'
 import { ContactSupport } from '../components/ContactSupport'
-import { LanguageToggle } from '../components/LanguageToggle'
 import { PageBackground } from '../components/PageBackground'
+import { RiskBadge } from '../components/ui/RiskBadge'
+import { AppNavBar } from '../components/ui/AppNavBar'
 import { useAuth } from '../context/AuthContext'
 import { useLanguage } from '../context/LanguageContext'
 import {
@@ -51,14 +52,6 @@ function formatRiskScore(score: number | null, language: Language): string {
 
 function isRiskBand(value: string): value is RiskBand {
   return value === 'Low' || value === 'Moderate' || value === 'High'
-}
-
-function tierClass(tier: string | null): string {
-  const normalized = (tier ?? '').toLowerCase()
-  if (normalized.includes('low')) return 'user-dash__tier--low'
-  if (normalized.includes('high')) return 'user-dash__tier--high'
-  if (normalized.includes('mod')) return 'user-dash__tier--moderate'
-  return 'user-dash__tier--neutral'
 }
 
 export function UserDashboard() {
@@ -166,25 +159,30 @@ export function UserDashboard() {
   return (
     <PageBackground>
       <div className="user-dash">
-        <div className="user-dash__toolbar">
-          <LanguageToggle />
-          <div className="user-dash__toolbar-actions">
-            <Link className="user-dash__text-link" to="/account">
-              <UserRound size={18} aria-hidden />
-              {t.accountNav}
-            </Link>
-            {isAdmin ? (
-              <Link className="user-dash__text-link" to="/admin">
-                <Shield size={18} aria-hidden />
-                {t.adminNav}
+        <AppNavBar
+          right={
+            <div className="user-dash__toolbar-actions">
+              <Link className="app-nav__link" to="/account">
+                <UserRound size={16} aria-hidden />
+                {t.accountNav}
               </Link>
-            ) : null}
-            <button type="button" className="user-dash__signout" onClick={() => void onSignOut()}>
-              <LogOut size={18} aria-hidden />
-              {t.signOut}
-            </button>
-          </div>
-        </div>
+              {isAdmin ? (
+                <Link className="app-nav__link" to="/admin">
+                  <Shield size={16} aria-hidden />
+                  {t.adminNav}
+                </Link>
+              ) : null}
+              <button
+                type="button"
+                className="app-nav__link app-nav__btn"
+                onClick={() => void onSignOut()}
+              >
+                <LogOut size={16} aria-hidden />
+                {t.signOut}
+              </button>
+            </div>
+          }
+        />
 
         <motion.main
           className="user-dash__card"
@@ -265,9 +263,9 @@ export function UserDashboard() {
                             <Stethoscope size={16} aria-hidden />
                             {t.dashboardRiskTier}
                           </span>
-                          <span className="user-dash__tier user-dash__tier--low">
+                          <RiskBadge level="low" size="sm">
                             {t.dashboardManagementMode}
-                          </span>
+                          </RiskBadge>
                         </div>
                       ) : (
                         <>
@@ -283,11 +281,14 @@ export function UserDashboard() {
                               <Shield size={16} aria-hidden />
                               {t.dashboardRiskTier}
                             </span>
-                            <span className={`user-dash__tier ${tierClass(record.risk_tier)}`}>
+                            <RiskBadge
+                              band={record.risk_tier}
+                              size="sm"
+                            >
                               {record.risk_tier && isRiskBand(record.risk_tier)
                                 ? t.bands[record.risk_tier]
                                 : (record.risk_tier ?? t.notSpecified)}
-                            </span>
+                            </RiskBadge>
                           </div>
                         </>
                       )}

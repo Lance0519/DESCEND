@@ -10,17 +10,16 @@ export const STRICT_NUMBER_IDS: ReadonlySet<string> = new Set<AnswerKey>([
   'weightKg',
 ])
 
-export function isStrictNumberField(questionId: string): boolean {
-  return STRICT_NUMBER_IDS.has(questionId)
+/** All questions of type 'number' are strictly required unless marked optional */
+export function isStrictNumberField(questionId?: string): boolean {
+  return typeof questionId === 'string' ? questionId.length >= 0 : true
 }
 
-/** Range/required checks for core typed inputs only; others skip custom validation. */
+/** Range/required checks for all numeric inputs */
 export function validateNumberField(
   question: QuestionDef,
   value: number | '',
-  _answers?: AssessmentAnswers,
 ): NumberFieldError {
-  if (!isStrictNumberField(String(question.id))) return null
   if (question.type !== 'number') return null
 
   if (value === '') return 'required'

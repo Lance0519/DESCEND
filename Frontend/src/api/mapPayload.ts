@@ -6,9 +6,13 @@ export function mapPayload(answers: AssessmentAnswers) {
   const dietQualityScore = deriveDietQualityScore(answers)
 
   const maternalDiabetes =
-    (answers.maternalUnclesWithT2dm ?? 0) + (answers.maternalAuntsWithT2dm ?? 0)
+    answers.maternalAuntsUnclesT2dm === 'yes'
+      ? (answers.maternalUnclesWithT2dm ?? 0) + (answers.maternalAuntsWithT2dm ?? 0)
+      : 0
   const paternalDiabetes =
-    (answers.paternalUnclesWithT2dm ?? 0) + (answers.paternalAuntsWithT2dm ?? 0)
+    answers.paternalAuntsUnclesT2dm === 'yes'
+      ? (answers.paternalUnclesWithT2dm ?? 0) + (answers.paternalAuntsWithT2dm ?? 0)
+      : 0
 
   return {
     personalInfo: {

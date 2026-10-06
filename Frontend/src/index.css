@@ -32,6 +32,29 @@
   --color-border-hover: #D1D5DB;
   --color-disabled: #9CA3AF;
 
+  /* Semantic Feedback: Danger & Error */
+  --color-danger: #D32F2F;
+  --color-danger-dark: #B71C1C;
+  --color-danger-light: #FFEBEE;
+  --color-danger-border: #FFCDD2;
+
+  /* Semantic Feedback: Warning */
+  --color-warning: #ED6C02;
+  --color-warning-dark: #7A4A00;
+  --color-warning-light: #FFF8E8;
+  --color-warning-border: #EFD4A0;
+
+  /* Clinical Risk Tiers */
+  --risk-low: #2E7D32;
+  --risk-low-bg: #E8F5E9;
+  --risk-low-border: #C8E6C9;
+  --risk-moderate: #E65100;
+  --risk-moderate-bg: #FFF3E0;
+  --risk-moderate-border: #FFE0B2;
+  --risk-high: #C62828;
+  --risk-high-bg: #FFEBEE;
+  --risk-high-border: #FFCDD2;
+
   --font-size-base: 16px;
   --font-size-heading: 24px;
   --touch-min: 44px;

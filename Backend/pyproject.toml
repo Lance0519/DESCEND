@@ -1,3 +1,5 @@
+# Vercel Python (`uv lock`) installs [project].dependencies, not requirements.txt.
+# Keep the two lists identical; cryptography is required for Supabase ES256/RS256 JWKS.
 [project]
 name = "descend-api"
 version = "1.0.0"
@@ -7,6 +9,9 @@ dependencies = [
   "Flask==3.1.0",
   "Flask-Cors==5.0.0",
   "Flask-SQLAlchemy==3.1.1",
+  "SQLAlchemy==2.0.48",
+  "Werkzeug==3.1.6",
+  "itsdangerous==2.2.0",
   "networkx==3.4.2",
   "pymysql==1.1.1",
   "psycopg2-binary==2.9.10",
@@ -15,6 +20,15 @@ dependencies = [
   "joblib==1.4.2",
   "PyJWT==2.9.0",
   "cryptography==43.0.3",
+]
+
+[project.optional-dependencies]
+scripts = [
+  "pandas==3.0.1",
+  "openpyxl==3.1.5",
+]
+dev = [
+  "pytest==9.0.3",
 ]
 
 [tool.vercel]

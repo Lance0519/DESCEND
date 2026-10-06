@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { ChoiceButtons } from '../components/ChoiceButtons'
-import { LanguageToggle } from '../components/LanguageToggle'
 import { NumberInput } from '../components/NumberInput'
 import { PageBackground } from '../components/PageBackground'
 import { ProgressBar } from '../components/ProgressBar'
@@ -10,6 +9,7 @@ import { QuestionCard } from '../components/QuestionCard'
 import { ReviewSummary } from '../components/ReviewSummary'
 import { SkipButton } from '../components/SkipButton'
 import { SpeakButton } from '../components/SpeakButton'
+import { AppNavBar } from '../components/ui/AppNavBar'
 import { useAssessment } from '../context/AssessmentContext'
 import { useAuth } from '../context/AuthContext'
 import { useLanguage } from '../context/LanguageContext'
@@ -44,25 +44,24 @@ function AssessmentToolbar() {
   const { user } = useAuth()
 
   return (
-    <div className="assessment-page__toolbar">
-      <LanguageToggle />
-      <div className="assessment-page__toolbar-links">
-        {user ? (
+    <AppNavBar
+      right={
+        user ? (
           <>
-            <Link to="/dashboard" className="assessment-page__account">
+            <Link to="/dashboard" className="app-nav__link">
               {t.dashboardNav}
             </Link>
-            <Link to="/account" className="assessment-page__account">
+            <Link to="/account" className="app-nav__link">
               {t.accountNav}
             </Link>
           </>
         ) : (
-          <Link to="/access" className="assessment-page__account">
+          <Link to="/access" className="app-nav__link">
             {t.accessSignIn}
           </Link>
-        )}
-      </div>
-    </div>
+        )
+      }
+    />
   )
 }
 
@@ -439,9 +438,9 @@ export function AssessmentPage() {
         ? flow.isAnswered(current)
         : current.type === 'optionalNumber'
           ? optionalAnswered
-          : current.type === 'number' && isStrictNumberField(String(current.id))
+          : current.type === 'number'
             ? draftNumber !== '' && numberErrorCode === null
-            : draftNumber !== '' || flow.isAnswered(current)
+            : false
 
   function commitNumber(value: number | '', into?: AssessmentAnswers): AssessmentAnswers {
     const next = { ...(into ?? answers) }
@@ -457,17 +456,42 @@ export function AssessmentPage() {
   }
 
   function handleSkip() {
+    cancel()
+    let latest = { ...answers }
     if (current!.id === 'fastingGlucoseMgDl') {
       setAnswer('fastingGlucoseMgDl', null)
       setAnswer('fastingGlucoseSkipped', true)
+      latest = { ...latest, fastingGlucoseMgDl: null, fastingGlucoseSkipped: true }
     }
     if (current!.id === 'hba1cPercent') {
       setAnswer('hba1cPercent', null)
       setAnswer('hba1cSkipped', true)
+      latest = { ...latest, hba1cPercent: null, hba1cSkipped: true }
     }
     setDraftNumber('')
     setFieldError(null)
     setAttemptedNext(false)
+
+    if (flow.isLast) {
+      setReturnToReview(false)
+      setGate('review')
+      return
+    }
+
+    if (returnToReview) {
+      const missing = firstMissingIndex(buildReviewGroups(getVisibleQuestions(latest), latest, t))
+      if (missing == null) {
+        setReturnToReview(false)
+        setGate('review')
+        return
+      }
+      if (missing !== flow.index) {
+        setQuestionIndex(missing)
+        return
+      }
+    }
+
+    flow.goNext()
   }
 
   async function handleNext() {
@@ -572,6 +596,17 @@ export function AssessmentPage() {
       ? fieldError ?? messageForFieldError(numberErrorCode, current.min, current.max)
       : null
 
+  const questionTooltip =
+    current.tooltipKey && t.tooltips[current.tooltipKey]
+      ? {
+          title: t.tooltips[current.tooltipKey].title,
+          body: t.tooltips[current.tooltipKey].body,
+          triggerLabel: t.tooltips.whatDoesThisMean,
+          closeLabel: t.tooltips.closeTooltip,
+          buttonAriaLabel: t.tooltips.whatDoesThisMean,
+        }
+      : undefined
+
   return (
     <PageBackground>
       <div className="assessment-page">
@@ -587,6 +622,7 @@ export function AssessmentPage() {
             <QuestionCard
               sectionLabel={sectionLabel}
               title={questionText}
+              tooltip={questionTooltip}
               headerAction={
                 <SpeakButton
                   speaking={speaking}
@@ -671,7 +707,7 @@ export function AssessmentPage() {
             <button
               type="button"
               className="btn btn--primary"
-              disabled={submitting || (current.type === 'choice' && !canProceed)}
+              disabled={submitting || !canProceed}
               onClick={() => void handleNext()}
             >
               {submitting ? t.loading : flow.isLast ? t.reviewTitle : t.next}

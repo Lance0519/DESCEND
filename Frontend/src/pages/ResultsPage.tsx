@@ -3,7 +3,6 @@ import { Activity, Droplets, HeartPulse, Printer, Scale, Users } from 'lucide-re
 import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { ConfirmDialog } from '../components/ConfirmDialog'
 import { ContactSupport } from '../components/ContactSupport'
-import { LanguageToggle } from '../components/LanguageToggle'
 import { PageBackground } from '../components/PageBackground'
 import { useAssessment } from '../context/AssessmentContext'
 import { useAuth } from '../context/AuthContext'
@@ -14,6 +13,8 @@ import { FamilyPedigreePanel } from '../features/results/FamilyPedigreePanel'
 import { preventionBmi } from '../data/preventionTips'
 import { useCloudSave } from '../hooks/useCloudSave'
 import { clearDraft } from '../lib/draftStorage'
+import { RiskBadge } from '../components/ui/RiskBadge'
+import { AppNavBar } from '../components/ui/AppNavBar'
 import './ResultsPage.css'
 
 export function ResultsPage() {
@@ -48,13 +49,6 @@ export function ResultsPage() {
   if (answers.diagnosedT2dm === 'yes') return <Navigate to="/management" replace />
   if (!result) return <Navigate to="/assessment" replace />
 
-  const bandClass =
-    result.riskBand === 'Low'
-      ? 'results__band--low'
-      : result.riskBand === 'Moderate'
-        ? 'results__band--moderate'
-        : 'results__band--high'
-
   const contribLabel = (key: string) => (t.contrib as Record<string, string>)[key] ?? key
 
   const printedAt = new Intl.DateTimeFormat(language === 'tl' ? 'fil-PH' : 'en-PH', {
@@ -72,19 +66,21 @@ export function ResultsPage() {
   return (
     <PageBackground>
       <div className="results">
-        <div className="results__toolbar results__no-print">
-          <LanguageToggle />
-          {user ? (
-            <>
-              <Link to="/dashboard" className="results__account">
-                {t.dashboardTitle}
-              </Link>
-              <Link to="/account" className="results__account">
-                {t.accountNav}
-              </Link>
-            </>
-          ) : null}
-        </div>
+        <AppNavBar
+          className="results__no-print"
+          right={
+            user ? (
+              <>
+                <Link to="/dashboard" className="app-nav__link">
+                  {t.dashboardTitle}
+                </Link>
+                <Link to="/account" className="app-nav__link">
+                  {t.accountNav}
+                </Link>
+              </>
+            ) : null
+          }
+        />
         <main className="results__card">
           <h1>{t.resultsTitle}</h1>
           <p className="results__print-meta">
@@ -99,9 +95,11 @@ export function ResultsPage() {
           </p>
           <p className="results__percent-label">{t.resultsPercent}</p>
           <p className="results__percent">{result.percentage}%</p>
-          <p className={`results__band ${bandClass}`}>
-            {t.resultsBand}: {t.bands[result.riskBand]}
-          </p>
+          <div style={{ marginBottom: '1.25rem' }}>
+            <RiskBadge band={result.riskBand} size="lg">
+              {t.resultsBand}: {t.bands[result.riskBand]}
+            </RiskBadge>
+          </div>
 
           <div className="results__icons results__no-print" aria-hidden>
             <span>

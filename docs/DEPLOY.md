@@ -124,6 +124,8 @@ Open [https://vercel.com](https://vercel.com) → **Add New** → **Project** �
 
 Vercel detects Flask via `Backend/index.py` (`app = create_app()`). Do not point the project at `api/index.py`.
 
+The Python builder may run `uv lock` against `Backend/pyproject.toml` `[project].dependencies`. Keep that list identical to `requirements.txt` (including `cryptography` for Supabase JWKS / ES256–RS256, and first-order Flask imports `SQLAlchemy` / `Werkzeug` / `itsdangerous`). `pandas`, `openpyxl`, and `pytest` stay in `[project.optional-dependencies]` (`scripts`, `dev`) so the Vercel function does not install them.
+
 ### B2. Environment Variables — what to put in Key / Value
 
 Click **Environment Variables**. Remove any placeholder like `EXAMPLE_NAME`.

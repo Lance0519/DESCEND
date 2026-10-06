@@ -183,7 +183,7 @@
 
 .assessment-page__predict-error h3 {
   font-size: 18px;
-  color: #b71c1c;
+  color: var(--color-danger-dark, #b71c1c);
   margin-bottom: 0.5rem;
 }
 
@@ -207,6 +207,6 @@
 .assessment-page__inline-error {
   margin: 0.5rem 0 0;
   font-size: 14px;
-  color: #b71c1c;
+  color: var(--color-danger-dark, #b71c1c);
   line-height: 1.4;
 }

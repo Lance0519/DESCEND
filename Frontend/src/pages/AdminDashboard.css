@@ -101,11 +101,11 @@
 }
 
 .admin-dash__bar-fill--moderate {
-  background: #6b7280;
+  background: var(--risk-moderate, #e65100);
 }
 
 .admin-dash__bar-fill--high {
-  background: #4b5563;
+  background: var(--risk-high, #c62828);
 }
 
 .admin-dash__search {

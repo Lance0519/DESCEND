@@ -198,18 +198,22 @@
 }
 
 .user-dash__tier--low {
-  background: var(--color-primary-light);
-  color: var(--color-primary-dark);
+  background: var(--risk-low-bg, #e8f5e9);
+  color: var(--risk-low, #2e7d32);
 }
 
 .user-dash__tier--moderate {
-  background: var(--color-bg-neutral);
-  color: var(--color-text-main);
+  background: var(--risk-moderate-bg, #fff3e0);
+  color: var(--risk-moderate, #e65100);
 }
 
-.user-dash__tier--high,
+.user-dash__tier--high {
+  background: var(--risk-high-bg, #ffebee);
+  color: var(--risk-high, #c62828);
+}
+
 .user-dash__tier--neutral {
-  background: #e5e7eb;
+  background: var(--color-bg-neutral, #f3f4f6);
   color: var(--color-text-main);
 }
 
@@ -244,8 +248,8 @@
 }
 
 .user-dash__action--danger {
-  color: #7f1d1d;
-  border-color: #f1c5c5;
+  color: var(--color-danger-dark, #7f1d1d);
+  border-color: var(--color-danger-border, #f1c5c5);
 }
 
 .user-dash__detail {
