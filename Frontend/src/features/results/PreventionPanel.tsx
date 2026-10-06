@@ -8,6 +8,7 @@ import {
   type PreventionSourceId,
   type PreventionTipId,
 } from '../../data/preventionTips'
+import { TipCard } from '../../components/ui/TipCard'
 import type { AssessmentAnswers } from '../../types/assessment'
 import './PreventionPanel.css'
 
@@ -75,14 +76,14 @@ export function PreventionPanel({ answers, bmi }: PreventionPanelProps) {
           const copy = tipCopy(id, t)
           const highlighted = matchesPreventionTip(id, answers, bmi)
           return (
-            <li key={id} className={highlighted ? 'prevent__tip prevent__tip--highlight' : 'prevent__tip'}>
-              <Icon size={22} aria-hidden className="prevent__icon" />
-              <div>
-                {highlighted ? <p className="prevent__badge">{t.preventBasedOnAnswers}</p> : null}
-                <h3>{copy.title}</h3>
-                <p>{copy.text}</p>
-              </div>
-            </li>
+            <TipCard
+              key={id}
+              icon={Icon}
+              title={copy.title}
+              text={copy.text}
+              highlighted={highlighted}
+              badge={highlighted ? t.preventBasedOnAnswers : undefined}
+            />
           )
         })}
       </ul>

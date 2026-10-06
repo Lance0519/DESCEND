@@ -2,8 +2,8 @@ import { useEffect, useState, type FormEvent } from 'react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { LayoutDashboard, LogOut, Save, Shield, UserRound } from 'lucide-react'
 import { ContactSupport } from '../components/ContactSupport'
-import { LanguageToggle } from '../components/LanguageToggle'
 import { PageBackground } from '../components/PageBackground'
+import { AppNavBar } from '../components/ui/AppNavBar'
 import { persistProfileToSupabase } from '../api/admin'
 import { useAuth } from '../context/AuthContext'
 import { fetchOwnProfile } from '../lib/ensureProfile'
@@ -76,13 +76,18 @@ export function ProfilePage() {
   return (
     <PageBackground>
       <div className="profile-page">
-        <div className="profile-page__toolbar">
-          <LanguageToggle />
-          <button type="button" className="profile-page__signout" onClick={() => void signOut().then(() => navigate('/'))}>
-            <LogOut size={18} aria-hidden />
-            {t.signOut}
-          </button>
-        </div>
+        <AppNavBar
+          right={
+            <button
+              type="button"
+              className="app-nav__link app-nav__btn"
+              onClick={() => void signOut().then(() => navigate('/'))}
+            >
+              <LogOut size={16} aria-hidden />
+              {t.signOut}
+            </button>
+          }
+        />
         <main className="profile-page__card">
           <h1>
             <UserRound size={24} aria-hidden /> {t.profileTitle}

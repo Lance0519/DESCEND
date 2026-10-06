@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion'
 import { LogIn, UserPlus, UserRound } from 'lucide-react'
-import { useNavigate } from 'react-router-dom'
+import { Navigate, useNavigate } from 'react-router-dom'
 import { AuthNavBar } from '../components/AuthNavBar'
 import { PageBackground } from '../components/PageBackground'
 import { useAuth } from '../context/AuthContext'
@@ -9,8 +9,12 @@ import './AccessPage.css'
 
 export function AccessPage() {
   const { t } = useLanguage()
-  const { continueAsGuest } = useAuth()
+  const { user, continueAsGuest } = useAuth()
   const navigate = useNavigate()
+
+  if (user) {
+    return <Navigate to="/assessment" replace />
+  }
 
   return (
     <PageBackground>

@@ -11,12 +11,12 @@
 .review-summary__warning {
   padding: 0.85rem 1rem;
   border-radius: 12px;
-  border: 1px solid rgba(183, 28, 28, 0.25);
-  background: linear-gradient(145deg, rgba(255, 255, 255, 0.92), rgba(255, 235, 238, 0.85));
+  border: 1px solid var(--color-danger-border, rgba(183, 28, 28, 0.25));
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.92), var(--color-danger-light, rgba(255, 235, 238, 0.85)));
 }
 
 .review-summary__warning p {
-  color: #b71c1c;
+  color: var(--color-danger-dark, #b71c1c);
   font-size: 14px;
   line-height: 1.4;
 }

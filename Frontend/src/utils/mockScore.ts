@@ -26,17 +26,19 @@ function familyBurden(answers: AssessmentAnswers): number {
   if (answers.paternalGrandfatherT2dm === 'yes') score += 0.04
   if (answers.paternalGrandmotherT2dm === 'yes') score += 0.04
   const auntUncle =
-    (answers.maternalUnclesWithT2dm ?? 0) +
-    (answers.maternalAuntsWithT2dm ?? 0) +
-    (answers.paternalUnclesWithT2dm ?? 0) +
-    (answers.paternalAuntsWithT2dm ?? 0)
+    (answers.maternalAuntsUnclesT2dm === 'yes'
+      ? (answers.maternalUnclesWithT2dm ?? 0) + (answers.maternalAuntsWithT2dm ?? 0)
+      : 0) +
+    (answers.paternalAuntsUnclesT2dm === 'yes'
+      ? (answers.paternalUnclesWithT2dm ?? 0) + (answers.paternalAuntsWithT2dm ?? 0)
+      : 0)
   score += Math.min(auntUncle, 6) * 0.015
   return clamp(score, 0, 0.35)
 }
 
 function bmiDelta(bmi: number | null): { delta: number; contrib?: SoftAdjustmentContribution } {
   if (bmi == null) return { delta: 0 }
-  let delta = 0
+  let delta: number
   if (bmi >= 30) delta = 0.08
   else if (bmi >= 25) delta = 0.045
   else if (bmi < 18.5) delta = 0.01
@@ -124,10 +126,7 @@ function bloodDeltas(answers: AssessmentAnswers): {
     Number.isFinite(answers.fastingGlucoseMgDl)
   ) {
     const g = answers.fastingGlucoseMgDl
-    let d = 0
-    if (g < 100) d = -0.01
-    else if (g < 126) d = 0.04
-    else d = 0.07
+    const d = g < 100 ? -0.01 : g < 126 ? 0.04 : 0.07
     total += d
     contributions.push({ id: 'glucose', label: 'glucose', delta: d, group: 'blood' })
   }
@@ -138,10 +137,7 @@ function bloodDeltas(answers: AssessmentAnswers): {
     Number.isFinite(answers.hba1cPercent)
   ) {
     const h = answers.hba1cPercent
-    let d = 0
-    if (h < 5.7) d = -0.01
-    else if (h < 6.5) d = 0.045
-    else d = 0.08
+    const d = h < 5.7 ? -0.01 : h < 6.5 ? 0.045 : 0.08
     total += d
     contributions.push({ id: 'hba1c', label: 'hba1c', delta: d, group: 'blood' })
   }

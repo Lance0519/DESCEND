@@ -5,7 +5,6 @@ import { LanguageProvider } from './context/LanguageContext'
 import { AccessPage } from './pages/AccessPage'
 import { AssessmentPage } from './pages/AssessmentPage'
 import { AuthCallbackPage } from './pages/AuthCallbackPage'
-import { HistoryPage } from './pages/HistoryPage'
 import { LandingPage } from './pages/LandingPage'
 import { LoginPage } from './pages/LoginPage'
 import { ManagementPage } from './pages/ManagementPage'
@@ -40,7 +39,7 @@ export default function App() {
               <Route path="/account" element={<ProfilePage />} />
               <Route path="/dashboard" element={<UserDashboard />} />
               <Route path="/admin" element={<AdminDashboard />} />
-              <Route path="/history" element={<HistoryPage />} />
+              <Route path="/history" element={<Navigate to="/dashboard" replace />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </BrowserRouter>

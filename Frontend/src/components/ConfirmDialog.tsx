@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { Modal } from './ui/Modal'
 import './ConfirmDialog.css'
 
 interface ConfirmDialogProps {
@@ -23,12 +24,14 @@ export function ConfirmDialog({
   extra,
 }: ConfirmDialogProps) {
   return (
-    <div className="confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="confirm-dialog-title">
-      <div className="confirm-dialog__card">
-        <h2 id="confirm-dialog-title">{title}</h2>
-        <p>{text}</p>
-        {extra}
-        <div className="confirm-dialog__actions">
+    <Modal
+      isOpen={true}
+      onClose={onCancel}
+      title={title}
+      size="sm"
+      ariaLabelledBy="confirm-dialog-title"
+      actions={
+        <>
           <button type="button" className="confirm-dialog__cancel" onClick={onCancel}>
             {cancelLabel}
           </button>
@@ -39,8 +42,11 @@ export function ConfirmDialog({
           >
             {confirmLabel}
           </button>
-        </div>
-      </div>
-    </div>
+        </>
+      }
+    >
+      <p style={{ margin: 0, color: 'var(--color-text-muted)' }}>{text}</p>
+      {extra}
+    </Modal>
   )
 }

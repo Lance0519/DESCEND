@@ -390,6 +390,8 @@ export const tl: TranslationDict = {
     maternalGrandfatherAgeAtDx: 'Ilang taon ang lolo sa nanay nang ma-diagnose?',
     maternalGrandmotherT2dm: 'May Type 2 diabetes ba ang lola sa nanay?',
     maternalGrandmotherAgeAtDx: 'Ilang taon ang lola sa nanay nang ma-diagnose?',
+    maternalAuntsUnclesT2dm:
+      'Mayroon bang Type 2 diabetes ang mga kapatid ng iyong nanay (tita o tito sa nanay)?',
     maternalUnclesWithT2dm: 'Ilang tiyuhin sa nanay ang may Type 2 diabetes?',
     maternalAuntsWithT2dm: 'Ilang tiya sa nanay ang may Type 2 diabetes?',
     maternalAuntsUnclesEarliestAgeAtDx:
@@ -398,6 +400,8 @@ export const tl: TranslationDict = {
     paternalGrandfatherAgeAtDx: 'Ilang taon ang lolo sa tatay nang ma-diagnose?',
     paternalGrandmotherT2dm: 'May Type 2 diabetes ba ang lola sa tatay?',
     paternalGrandmotherAgeAtDx: 'Ilang taon ang lola sa tatay nang ma-diagnose?',
+    paternalAuntsUnclesT2dm:
+      'Mayroon bang Type 2 diabetes ang mga kapatid ng iyong tatay (tita o tito sa tatay)?',
     paternalUnclesWithT2dm: 'Ilang tiyuhin sa tatay ang may Type 2 diabetes?',
     paternalAuntsWithT2dm: 'Ilang tiya sa tatay ang may Type 2 diabetes?',
     paternalAuntsUnclesEarliestAgeAtDx:
@@ -410,6 +414,7 @@ export const tl: TranslationDict = {
     no: 'Hindi',
     unknown: 'Hindi sigurado',
     no_siblings: 'Wala akong kapatid',
+    no_aunts_uncles: 'Wala akong tita o tito sa panig na ito',
     low: 'Mababa',
     moderate: 'Katamtaman',
     high: 'Mataas',
@@ -434,6 +439,50 @@ export const tl: TranslationDict = {
     '6_7': '6–7 oras',
     '7_8': '7–8 oras',
     over_8: 'Higit sa 8 oras',
+  },
+  tooltips: {
+    closeTooltip: 'Isara ang paliwanag',
+    whatDoesThisMean: 'Ano ang ibig sabihin nito?',
+    hba1cPercent: {
+      title: 'HbA1c (Katamtamang Asukal sa Dugo sa Nakaraang 2–3 Buwan)',
+      body: 'Ipinapakita nito ang karaniwang lebel ng asukal sa iyong dugo sa nakalipas na 2 hanggang 3 buwan. Hindi ito gaya ng mabilisang finger-prick test na nagbabago agad. Hanapin ang "HbA1c" o "Glycated Hemoglobin" sa inyong lab result slip (karaniwang porsyento gaya ng 5.7% o 6.5%).',
+    },
+    fastingGlucoseMgDl: {
+      title: 'Fasting Blood Sugar (FBS / Asukal Matapos Mag-ayuno)',
+      body: 'Ito ang lebel ng asukal sa iyong dugo na sinusukat sa umaga bago kumain, matapos ang hindi bababa sa 8 oras na walang pagkain o inumin maliban sa tubig. Hanapin ang "FBS" o "Fasting Blood Glucose" sa lab report (sinusukat sa mg/dL, hal. 95, 126).',
+    },
+    hypertension: {
+      title: 'Alta-presyon (High Blood Pressure / Hypertension)',
+      body: 'Nasabihan ka na ng doktor o nars na mataas ang iyong presyon ng dugo (karaniwang 140/90 mmHg pataas), o umiinom ka ng pang-araw-araw na maintenance na gamot para pababain ang iyong presyon.',
+    },
+    bmiConfirm: {
+      title: 'Body Mass Index (BMI / Timbang Ayon sa Taas)',
+      body: 'Isang standard na pagsusuri kung tugma ba ang iyong timbang sa iyong tangkad upang malaman kung nasa tamang timbang, kulang sa timbang, overweight, o obese. Awtomatikong kinalkula ito ng system gamit ang iyong taas at timbang.',
+    },
+    diagnosedT2dm: {
+      title: 'Type 2 Diabetes Mellitus (Diyabetis)',
+      body: 'Isang pangmatagalang kondisyon kung saan hirap ang katawan na gamitin ang asukal mula sa kinakain dahil sa kakulangan o resistensya sa insulin. Karaniwang nasusuri ito ng doktor sa pamamagitan ng blood test.',
+    },
+    fatherAgeAtDx: {
+      title: 'Edad Noong Unang Nalaman ang Sakit (Ama / Tatay)',
+      body: 'Tantyang edad ng iyong ama noong unang sinabi ng doktor na mayroon siyang diabetes. Pwede ang tansya kung hindi mo tiyak ang eksaktong taon.',
+    },
+    motherAgeAtDx: {
+      title: 'Edad Noong Unang Nalaman ang Sakit (Ina / Nanay)',
+      body: 'Tantyang edad ng iyong ina noong unang sinabi ng doktor na mayroon siyang diabetes. Pwede ang tansya kung hindi mo tiyak ang eksaktong taon.',
+    },
+    siblingAgeAtDx: {
+      title: 'Edad Noong Unang Nalaman ang Sakit (Kapatid)',
+      body: 'Tantyang edad ng iyong kapatid noong unang sinabi ng doktor na may diabetes siya. Pwede ang tantya.',
+    },
+    maternalAuntsUnclesT2dm: {
+      title: 'Panig ng Nanay (Maternal Lineage)',
+      body: 'Bilangin lamang ang mga kadugong kamag-anak sa panig ng iyong nanay (ang kanyang mga biological na kapatid). Huwag isama ang mga kamag-anak dahil lamang sa kasal (hal. asawa ng tito o tita).',
+    },
+    paternalAuntsUnclesT2dm: {
+      title: 'Panig ng Tatay (Paternal Lineage)',
+      body: 'Bilangin lamang ang mga kadugong kamag-anak sa panig ng iyong tatay (ang kanyang mga biological na kapatid). Huwag isama ang mga kamag-anak dahil lamang sa kasal (hal. asawa ng tito o tita).',
+    },
   },
   bands: {
     Low: 'Mas mababang saklaw',

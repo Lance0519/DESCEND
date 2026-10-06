@@ -2,8 +2,9 @@ import { motion } from 'framer-motion'
 import { Activity, Apple, HeartPulse, Moon } from 'lucide-react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { ContactSupport } from '../components/ContactSupport'
-import { LanguageToggle } from '../components/LanguageToggle'
 import { PageBackground } from '../components/PageBackground'
+import { TipCard } from '../components/ui/TipCard'
+import { AppNavBar } from '../components/ui/AppNavBar'
 import { useAssessment } from '../context/AssessmentContext'
 import { useLanguage } from '../context/LanguageContext'
 import './ManagementPage.css'
@@ -28,10 +29,13 @@ export function ManagementPage() {
   return (
     <PageBackground>
       <div className="mgmt">
-        <div className="mgmt__toolbar">
-          <LanguageToggle />
-          <Link to="/account">{t.accountNav}</Link>
-        </div>
+        <AppNavBar
+          right={
+            <Link to="/account" className="app-nav__link">
+              {t.accountNav}
+            </Link>
+          }
+        />
         <motion.main
           className="mgmt__card"
           initial={{ opacity: 0, y: 14 }}
@@ -48,14 +52,13 @@ export function ManagementPage() {
           ) : null}
 
           <ul className="mgmt__tips">
-            {tips.map(({ icon: Icon, title, text }) => (
-              <li key={title}>
-                <Icon size={22} aria-hidden className="mgmt__tip-icon" />
-                <div>
-                  <h2>{title}</h2>
-                  <p>{text}</p>
-                </div>
-              </li>
+            {tips.map(({ icon, title, text }) => (
+              <TipCard
+                key={title}
+                icon={icon}
+                title={title}
+                text={text}
+              />
             ))}
           </ul>
 

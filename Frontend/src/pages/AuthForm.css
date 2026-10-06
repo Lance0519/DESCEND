@@ -31,9 +31,9 @@
   border-radius: 8px;
   font-size: 13px;
   line-height: 1.45;
-  color: #7a4a00;
-  background: #fff8e8;
-  border: 1px solid #efd4a0;
+  color: var(--color-warning-dark);
+  background: var(--color-warning-light);
+  border: 1px solid var(--color-warning-border);
 }
 
 .auth-form-emergency strong {

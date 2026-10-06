@@ -21,6 +21,10 @@ export interface QuestionDef {
     | 'hereditaryMaternal'
     | 'hereditaryPaternal'
   questionKey: keyof import('../i18n/en').TranslationDict['questions']
+  tooltipKey?: Exclude<
+    keyof import('../i18n/en').TranslationDict['tooltips'],
+    'closeTooltip' | 'whatDoesThisMean'
+  >
   options?: QuestionOption[]
   min?: number
   max?: number
@@ -33,6 +37,13 @@ export interface QuestionDef {
 const yesNoUnknown = [
   { value: 'yes', labelKey: 'yes' },
   { value: 'no', labelKey: 'no' },
+  { value: 'unknown', labelKey: 'unknown' },
+]
+
+const auntsUnclesOptions = [
+  { value: 'yes', labelKey: 'yes' },
+  { value: 'no', labelKey: 'no' },
+  { value: 'no_aunts_uncles', labelKey: 'no_aunts_uncles' },
   { value: 'unknown', labelKey: 'unknown' },
 ]
 
@@ -93,12 +104,14 @@ export const QUESTIONS: QuestionDef[] = [
     type: 'bmiConfirm',
     section: 'anthropometric',
     questionKey: 'bmiConfirm',
+    tooltipKey: 'bmiConfirm',
   },
   {
     id: 'hypertension',
     type: 'choice',
     section: 'clinical',
     questionKey: 'hypertension',
+    tooltipKey: 'hypertension',
     options: yesNo,
   },
   {
@@ -106,6 +119,7 @@ export const QUESTIONS: QuestionDef[] = [
     type: 'optionalNumber',
     section: 'blood',
     questionKey: 'fastingGlucoseMgDl',
+    tooltipKey: 'fastingGlucoseMgDl',
     min: 50,
     max: 400,
     step: 1,
@@ -117,6 +131,7 @@ export const QUESTIONS: QuestionDef[] = [
     type: 'optionalNumber',
     section: 'blood',
     questionKey: 'hba1cPercent',
+    tooltipKey: 'hba1cPercent',
     min: 3,
     max: 15,
     step: 0.1,
@@ -218,6 +233,7 @@ export const QUESTIONS: QuestionDef[] = [
     type: 'number',
     section: 'hereditaryFirst',
     questionKey: 'fatherAgeAtDx',
+    tooltipKey: 'fatherAgeAtDx',
     min: 1,
     max: 100,
     showIf: (a) => a.fatherT2dm === 'yes',
@@ -234,6 +250,7 @@ export const QUESTIONS: QuestionDef[] = [
     type: 'number',
     section: 'hereditaryFirst',
     questionKey: 'motherAgeAtDx',
+    tooltipKey: 'motherAgeAtDx',
     min: 1,
     max: 100,
     showIf: (a) => a.motherT2dm === 'yes',
@@ -255,6 +272,7 @@ export const QUESTIONS: QuestionDef[] = [
     type: 'number',
     section: 'hereditaryFirst',
     questionKey: 'siblingAgeAtDx',
+    tooltipKey: 'siblingAgeAtDx',
     min: 1,
     max: 100,
     showIf: (a) => a.siblingT2dm === 'yes',
@@ -292,12 +310,21 @@ export const QUESTIONS: QuestionDef[] = [
     showIf: (a) => a.maternalGrandmotherT2dm === 'yes',
   },
   {
+    id: 'maternalAuntsUnclesT2dm',
+    type: 'choice',
+    section: 'hereditaryMaternal',
+    questionKey: 'maternalAuntsUnclesT2dm',
+    tooltipKey: 'maternalAuntsUnclesT2dm',
+    options: auntsUnclesOptions,
+  },
+  {
     id: 'maternalUnclesWithT2dm',
     type: 'number',
     section: 'hereditaryMaternal',
     questionKey: 'maternalUnclesWithT2dm',
     min: 0,
     max: 10,
+    showIf: (a) => a.maternalAuntsUnclesT2dm === 'yes',
   },
   {
     id: 'maternalAuntsWithT2dm',
@@ -306,6 +333,7 @@ export const QUESTIONS: QuestionDef[] = [
     questionKey: 'maternalAuntsWithT2dm',
     min: 0,
     max: 10,
+    showIf: (a) => a.maternalAuntsUnclesT2dm === 'yes',
   },
   {
     id: 'maternalAuntsUnclesEarliestAgeAtDx',
@@ -314,7 +342,9 @@ export const QUESTIONS: QuestionDef[] = [
     questionKey: 'maternalAuntsUnclesEarliestAgeAtDx',
     min: 1,
     max: 110,
-    showIf: (a) => (a.maternalUnclesWithT2dm ?? 0) + (a.maternalAuntsWithT2dm ?? 0) > 0,
+    showIf: (a) =>
+      a.maternalAuntsUnclesT2dm === 'yes' &&
+      (a.maternalUnclesWithT2dm ?? 0) + (a.maternalAuntsWithT2dm ?? 0) > 0,
   },
   {
     id: 'paternalGrandfatherT2dm',
@@ -349,12 +379,21 @@ export const QUESTIONS: QuestionDef[] = [
     showIf: (a) => a.paternalGrandmotherT2dm === 'yes',
   },
   {
+    id: 'paternalAuntsUnclesT2dm',
+    type: 'choice',
+    section: 'hereditaryPaternal',
+    questionKey: 'paternalAuntsUnclesT2dm',
+    tooltipKey: 'paternalAuntsUnclesT2dm',
+    options: auntsUnclesOptions,
+  },
+  {
     id: 'paternalUnclesWithT2dm',
     type: 'number',
     section: 'hereditaryPaternal',
     questionKey: 'paternalUnclesWithT2dm',
     min: 0,
     max: 10,
+    showIf: (a) => a.paternalAuntsUnclesT2dm === 'yes',
   },
   {
     id: 'paternalAuntsWithT2dm',
@@ -363,6 +402,7 @@ export const QUESTIONS: QuestionDef[] = [
     questionKey: 'paternalAuntsWithT2dm',
     min: 0,
     max: 10,
+    showIf: (a) => a.paternalAuntsUnclesT2dm === 'yes',
   },
   {
     id: 'paternalAuntsUnclesEarliestAgeAtDx',
@@ -371,7 +411,9 @@ export const QUESTIONS: QuestionDef[] = [
     questionKey: 'paternalAuntsUnclesEarliestAgeAtDx',
     min: 1,
     max: 110,
-    showIf: (a) => (a.paternalUnclesWithT2dm ?? 0) + (a.paternalAuntsWithT2dm ?? 0) > 0,
+    showIf: (a) =>
+      a.paternalAuntsUnclesT2dm === 'yes' &&
+      (a.paternalUnclesWithT2dm ?? 0) + (a.paternalAuntsWithT2dm ?? 0) > 0,
   },
 ]
 

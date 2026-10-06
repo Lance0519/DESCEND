@@ -15,14 +15,6 @@
   flex-wrap: wrap;
 }
 
-.profile-page__signout {
-  min-height: 40px;
-  padding: 0 0.85rem;
-  border-radius: 8px;
-  border: 1px solid var(--color-border);
-  background: var(--color-bg-card);
-}
-
 .profile-page__card {
   max-width: 560px;
   width: 100%;
@@ -122,11 +114,6 @@
   flex-wrap: wrap;
   gap: 0.75rem 1rem;
   margin-top: 1.25rem;
-}
-
-.profile-page__links a {
-  color: var(--color-primary-dark);
-  font-weight: 600;
 }
 
 .profile-page__contact {

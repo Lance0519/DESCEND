@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState } from 'react'
-import { Check, Copy, Mail, X } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { Check, Copy, Mail } from 'lucide-react'
 import { useLanguage } from '../context/LanguageContext'
+import { Modal } from './ui/Modal'
 import './ContactSupport.css'
 
 const SUPPORT_EMAIL =
@@ -36,17 +37,6 @@ export function ContactSupport() {
   const { t } = useLanguage()
   const [open, setOpen] = useState(false)
   const [copied, setCopied] = useState(false)
-  const closeRef = useRef<HTMLButtonElement>(null)
-
-  useEffect(() => {
-    if (!open) return
-    closeRef.current?.focus()
-    function onKey(e: KeyboardEvent) {
-      if (e.key === 'Escape') setOpen(false)
-    }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [open])
 
   useEffect(() => {
     if (!copied) return
@@ -75,47 +65,38 @@ export function ContactSupport() {
         </span>
       </p>
 
-      {open ? (
-        <div
-          className="contact-dialog"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="contact-dialog-title"
-          onClick={(e) => {
-            if (e.target === e.currentTarget) setOpen(false)
-          }}
-        >
-          <div className="contact-dialog__card">
+      <Modal
+        isOpen={open}
+        onClose={() => setOpen(false)}
+        size="sm"
+        showCloseButton={true}
+        closeLabel={t.contactSupportClose}
+        title={
+          <>
+            <Mail size={20} aria-hidden /> {t.contactSupportDialogTitle}
+          </>
+        }
+        ariaLabelledBy="contact-dialog-title"
+        actions={
+          <div className="contact-dialog__actions">
             <button
               type="button"
-              ref={closeRef}
-              className="contact-dialog__close"
-              aria-label={t.contactSupportClose}
-              onClick={() => setOpen(false)}
+              className="contact-dialog__copy"
+              onClick={() => void copyText(SUPPORT_EMAIL).then(setCopied)}
             >
-              <X size={18} aria-hidden />
+              {copied ? <Check size={16} aria-hidden /> : <Copy size={16} aria-hidden />}
+              {copied ? t.contactSupportCopied : t.contactSupportCopy}
             </button>
-            <h2 id="contact-dialog-title">
-              <Mail size={20} aria-hidden /> {t.contactSupportDialogTitle}
-            </h2>
-            <p className="contact-dialog__help">{t.contactSupportDialogHelp}</p>
-            <p className="contact-dialog__address">{SUPPORT_EMAIL}</p>
-            <div className="contact-dialog__actions">
-              <button
-                type="button"
-                className="contact-dialog__copy"
-                onClick={() => void copyText(SUPPORT_EMAIL).then(setCopied)}
-              >
-                {copied ? <Check size={16} aria-hidden /> : <Copy size={16} aria-hidden />}
-                {copied ? t.contactSupportCopied : t.contactSupportCopy}
-              </button>
-              <a className="contact-dialog__mail" href={mailHref}>
-                {t.contactSupportOpenMail}
-              </a>
-            </div>
+            <a className="contact-dialog__mail" href={mailHref}>
+              {t.contactSupportOpenMail}
+            </a>
           </div>
-        </div>
-      ) : null}
+        }
+      >
+        <p className="contact-dialog__help">{t.contactSupportDialogHelp}</p>
+        <p className="contact-dialog__address">{SUPPORT_EMAIL}</p>
+      </Modal>
     </>
   )
 }
+

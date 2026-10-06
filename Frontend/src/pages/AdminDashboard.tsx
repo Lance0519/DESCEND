@@ -12,8 +12,8 @@ import {
   ScrollText,
 } from 'lucide-react'
 import { ConfirmDialog } from '../components/ConfirmDialog'
-import { LanguageToggle } from '../components/LanguageToggle'
 import { PageBackground } from '../components/PageBackground'
+import { AppNavBar } from '../components/ui/AppNavBar'
 import { fetchAdminOverview, updateAdminUser, type AdminOverview, type AdminProfileRow } from '../api/admin'
 import {
   fetchAuditLogs,
@@ -255,17 +255,19 @@ export function AdminDashboard() {
   return (
     <PageBackground>
       <div className="admin-dash">
-        <div className="admin-dash__toolbar">
-          <LanguageToggle />
-          <div className="admin-dash__toolbar-actions">
-            <Link className="admin-dash__link" to="/dashboard">
-              <LayoutDashboard size={18} aria-hidden /> {t.dashboardTitle}
-            </Link>
-            <Link className="admin-dash__link" to="/account">
-              <UserRound size={18} aria-hidden /> {t.accountNav}
-            </Link>
-          </div>
-        </div>
+        <AppNavBar
+          maxWidth={1080}
+          right={
+            <div className="admin-dash__toolbar-actions">
+              <Link className="app-nav__link" to="/dashboard">
+                <LayoutDashboard size={16} aria-hidden /> {t.dashboardTitle}
+              </Link>
+              <Link className="app-nav__link" to="/account">
+                <UserRound size={16} aria-hidden /> {t.accountNav}
+              </Link>
+            </div>
+          }
+        />
 
         <main className="admin-dash__card">
           <header className="admin-dash__header">

@@ -5,11 +5,13 @@ import { ContactSupport } from '../components/ContactSupport'
 import { DisclaimerBox } from '../components/DisclaimerBox'
 import { LanguageToggle } from '../components/LanguageToggle'
 import { PageBackground } from '../components/PageBackground'
+import { useAuth } from '../context/AuthContext'
 import { useLanguage } from '../context/LanguageContext'
 import './LandingPage.css'
 
 export function LandingPage() {
   const { t } = useLanguage()
+  const { user } = useAuth()
   const navigate = useNavigate()
 
   return (
@@ -39,7 +41,11 @@ export function LandingPage() {
 
           <ContactSupport />
 
-          <button type="button" className="landing__cta" onClick={() => navigate('/access')}>
+          <button
+            type="button"
+            className="landing__cta"
+            onClick={() => navigate(user ? '/assessment' : '/access')}
+          >
             {t.startAssessment}
             <ArrowRight size={22} aria-hidden />
           </button>
@@ -48,3 +54,4 @@ export function LandingPage() {
     </PageBackground>
   )
 }
+

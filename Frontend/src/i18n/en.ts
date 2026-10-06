@@ -388,6 +388,8 @@ export const en = {
     maternalGrandfatherAgeAtDx: 'At what age was your maternal grandfather diagnosed?',
     maternalGrandmotherT2dm: 'Does your maternal grandmother have Type 2 diabetes?',
     maternalGrandmotherAgeAtDx: 'At what age was your maternal grandmother diagnosed?',
+    maternalAuntsUnclesT2dm:
+      'Do any of your maternal aunts or uncles (mother’s side) have Type 2 diabetes?',
     maternalUnclesWithT2dm: 'How many maternal uncles have Type 2 diabetes?',
     maternalAuntsWithT2dm: 'How many maternal aunts have Type 2 diabetes?',
     maternalAuntsUnclesEarliestAgeAtDx:
@@ -396,6 +398,8 @@ export const en = {
     paternalGrandfatherAgeAtDx: 'At what age was your paternal grandfather diagnosed?',
     paternalGrandmotherT2dm: 'Does your paternal grandmother have Type 2 diabetes?',
     paternalGrandmotherAgeAtDx: 'At what age was your paternal grandmother diagnosed?',
+    paternalAuntsUnclesT2dm:
+      'Do any of your paternal aunts or uncles (father’s side) have Type 2 diabetes?',
     paternalUnclesWithT2dm: 'How many paternal uncles have Type 2 diabetes?',
     paternalAuntsWithT2dm: 'How many paternal aunts have Type 2 diabetes?',
     paternalAuntsUnclesEarliestAgeAtDx:
@@ -408,6 +412,7 @@ export const en = {
     no: 'No',
     unknown: 'Not sure',
     no_siblings: 'I have no siblings',
+    no_aunts_uncles: 'I have no aunts or uncles on this side',
     low: 'Low',
     moderate: 'Moderate',
     high: 'High',
@@ -432,6 +437,50 @@ export const en = {
     '6_7': '6–7 hours',
     '7_8': '7–8 hours',
     over_8: 'More than 8 hours',
+  },
+  tooltips: {
+    closeTooltip: 'Close explanation',
+    whatDoesThisMean: 'What does this mean?',
+    hba1cPercent: {
+      title: 'HbA1c (3-Month Average Blood Sugar)',
+      body: 'Shows your average blood sugar over the past 2 to 3 months. Unlike a daily finger-prick test, it gives a long-term view. Look for "HbA1c" or "Glycated Hemoglobin" on your laboratory test slip (usually written as a percentage like 5.7% or 6.5%).',
+    },
+    fastingGlucoseMgDl: {
+      title: 'Fasting Blood Sugar (FBS)',
+      body: 'Your blood sugar level taken first thing in the morning after fasting (no food or drinks except plain water) for at least 8 hours. Look for "FBS" or "Fasting Blood Glucose" on your laboratory report (measured in mg/dL, e.g. 95, 126).',
+    },
+    hypertension: {
+      title: 'Hypertension (High Blood Pressure)',
+      body: 'A doctor or healthcare worker has informed you that your blood pressure is consistently high (typically 140/90 mmHg or higher), or you currently take daily maintenance medication to lower your blood pressure.',
+    },
+    bmiConfirm: {
+      title: 'Body Mass Index (BMI)',
+      body: 'A standard measurement comparing your body weight to your height to estimate if you are in an underweight, healthy, overweight, or obese range. Our system calculates this automatically from your entered height and weight.',
+    },
+    diagnosedT2dm: {
+      title: 'Type 2 Diabetes Mellitus',
+      body: 'A common chronic condition where the body cannot effectively process sugar from food because it resists insulin. Usually diagnosed by a doctor through fasting blood sugar or HbA1c tests.',
+    },
+    fatherAgeAtDx: {
+      title: 'Age at Diagnosis (Father)',
+      body: 'The approximate age when your father was first told by a physician that he had diabetes. An estimate is completely fine if you do not know the exact year.',
+    },
+    motherAgeAtDx: {
+      title: 'Age at Diagnosis (Mother)',
+      body: 'The approximate age when your mother was first told by a physician that she had diabetes. An estimate is completely fine if you do not know the exact year.',
+    },
+    siblingAgeAtDx: {
+      title: 'Age at Diagnosis (Sibling)',
+      body: 'The approximate age when your brother or sister was first diagnosed with diabetes. A close estimate is fine.',
+    },
+    maternalAuntsUnclesT2dm: {
+      title: 'Mother’s Side (Maternal Lineage)',
+      body: 'Only count biological relatives related by blood through your mother (her biological sisters and brothers). Do not count relatives related only through marriage (in-laws).',
+    },
+    paternalAuntsUnclesT2dm: {
+      title: 'Father’s Side (Paternal Lineage)',
+      body: 'Only count biological relatives related by blood through your father (his biological sisters and brothers). Do not count relatives related only through marriage (in-laws).',
+    },
   },
   bands: {
     Low: 'Lower awareness range',

@@ -3,6 +3,7 @@ export type Language = 'en' | 'tl';
 export type YesNo = 'yes' | 'no';
 export type FamilyStatus = 'yes' | 'no' | 'unknown';
 export type SiblingStatus = 'yes' | 'no' | 'unknown' | 'no_siblings';
+export type AuntsUnclesStatus = 'yes' | 'no' | 'unknown' | 'no_aunts_uncles';
 export type BiologicalSex = 'male' | 'female';
 
 export type ActivityLevel = 'low' | 'moderate' | 'high';
@@ -58,6 +59,7 @@ export interface AssessmentAnswers {
   maternalGrandfatherAgeAtDx?: number;
   maternalGrandmotherT2dm?: FamilyStatus;
   maternalGrandmotherAgeAtDx?: number;
+  maternalAuntsUnclesT2dm?: AuntsUnclesStatus;
   maternalUnclesWithT2dm?: number;
   maternalAuntsWithT2dm?: number;
   maternalAuntsUnclesEarliestAgeAtDx?: number;
@@ -67,6 +69,7 @@ export interface AssessmentAnswers {
   paternalGrandfatherAgeAtDx?: number;
   paternalGrandmotherT2dm?: FamilyStatus;
   paternalGrandmotherAgeAtDx?: number;
+  paternalAuntsUnclesT2dm?: AuntsUnclesStatus;
   paternalUnclesWithT2dm?: number;
   paternalAuntsWithT2dm?: number;
   paternalAuntsUnclesEarliestAgeAtDx?: number;

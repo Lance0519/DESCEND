@@ -39,40 +39,6 @@
   color: var(--color-primary);
 }
 
-.contact-dialog {
-  position: fixed;
-  inset: 0;
-  z-index: 60;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 1rem;
-  background: rgba(15, 32, 27, 0.45);
-  backdrop-filter: blur(2px);
-}
-
-.contact-dialog__card {
-  position: relative;
-  width: 100%;
-  max-width: 380px;
-  background: var(--color-bg-card, #fff);
-  border: 1px solid var(--surface-card-border);
-  border-radius: 16px;
-  padding: 1.5rem 1.25rem 1.25rem;
-  box-shadow: var(--surface-card-shadow);
-  text-align: center;
-}
-
-.contact-dialog__card h2 {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.45rem;
-  margin: 0 0 0.5rem;
-  font-size: 1.1rem;
-  color: var(--color-primary-dark);
-}
-
 .contact-dialog__help {
   margin: 0 0 1rem;
   color: var(--color-text-muted);
@@ -90,12 +56,14 @@
   font-size: 15px;
   word-break: break-all;
   color: var(--color-text-main);
+  text-align: center;
 }
 
 .contact-dialog__actions {
   display: flex;
   flex-direction: column;
   gap: 0.55rem;
+  width: 100%;
 }
 
 .contact-dialog__copy,
@@ -110,6 +78,7 @@
   font-weight: 700;
   text-decoration: none;
   cursor: pointer;
+  transition: opacity 0.15s ease, background 0.15s ease;
 }
 
 .contact-dialog__copy {
@@ -118,28 +87,17 @@
   color: #fff;
 }
 
+.contact-dialog__copy:hover {
+  opacity: 0.92;
+}
+
 .contact-dialog__mail {
   border: 1.5px solid var(--color-border);
   background: var(--color-bg-card, #fff);
   color: var(--color-primary-dark);
 }
 
-.contact-dialog__close {
-  position: absolute;
-  top: 0.5rem;
-  right: 0.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 36px;
-  height: 36px;
-  border: none;
-  border-radius: 50%;
-  background: transparent;
-  color: var(--color-text-muted);
-  cursor: pointer;
+.contact-dialog__mail:hover {
+  background: rgba(0, 0, 0, 0.03);
 }
 
-.contact-dialog__close:hover {
-  background: var(--color-bg-neutral);
-}
