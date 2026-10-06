@@ -5,7 +5,7 @@ import { Modal } from './ui/Modal'
 import './ContactSupport.css'
 
 const SUPPORT_EMAIL =
-  String(import.meta.env.VITE_SUPPORT_EMAIL ?? '').trim() || 'justinelance0067@gmail.com'
+  String(import.meta.env.VITE_SUPPORT_EMAIL ?? '').trim() || 'descend.thesis@gmail.com'
 
 /** Clipboard API needs a secure context, so fall back to a hidden selection copy. */
 async function copyText(value: string): Promise<boolean> {
