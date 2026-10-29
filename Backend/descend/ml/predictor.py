@@ -54,7 +54,8 @@ PEDIGREE_BAND_NOTE = (
     "the numeric probability is still the model output."
 )
 PREDICTION_SCOPE_NOTE = (
-    "The model estimates respondent-level T2DM risk from survey features (including sex via "
+    "The model provides a hereditary-lineage risk estimate for respondent-level T2DM susceptibility "
+    "from reported family lineage, lifestyle, and other survey features (including sex via "
     "user_is_male). The displayed respondent percentage blends that ML probability with an "
     "explicit structural susceptibility channel (lineage indices, hereditary load, BMI and "
     "metabolic stress) so pedigree-heavy profiles are not capped by conservatively calibrated "

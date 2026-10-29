@@ -6,10 +6,10 @@ from pathlib import Path
 
 from flask import Flask
 from sqlalchemy import create_engine
-from sqlalchemy.exc import OperationalError
+from sqlalchemy.exc import SQLAlchemyError
 
 from .bootstrap import ensure_database_schema
-from .config import Config
+from .config import Config, sqlite_fallback_uri
 from .extensions import cors, db
 
 logger = logging.getLogger(__name__)
@@ -17,6 +17,28 @@ logger = logging.getLogger(__name__)
 
 def _is_vercel() -> bool:
     return bool(os.getenv("VERCEL"))
+
+
+def _use_sqlite_failover(app: Flask) -> bool:
+    """Switch to local SQLite when a configured online database cannot connect."""
+    uri = str(app.config.get("SQLALCHEMY_DATABASE_URI", ""))
+    if _is_vercel() or not app.config.get("DATABASE_FAILOVER_TO_SQLITE") or uri.startswith(
+        "sqlite"
+    ):
+        return False
+
+    try:
+        test_engine = create_engine(uri)
+        with test_engine.connect():
+            pass
+        test_engine.dispose()
+        return False
+    except SQLAlchemyError:
+        logger.exception(
+            "Configured online database is unavailable; using local SQLite fallback."
+        )
+        app.config["SQLALCHEMY_DATABASE_URI"] = sqlite_fallback_uri()
+        return True
 
 
 def create_app() -> Flask:
@@ -35,20 +57,7 @@ def create_app() -> Flask:
         model_path.parent.mkdir(parents=True, exist_ok=True)
         dataset_path.parent.mkdir(parents=True, exist_ok=True)
 
-    # If a MySQL URI is configured, require a reachable MySQL server locally.
-    # On Vercel, skip hard-fail so mis-set MySQL env cannot crash the function.
-    _db_uri = app.config.get("SQLALCHEMY_DATABASE_URI", "")
-    if _db_uri and _db_uri.startswith("mysql") and not _is_vercel():
-        try:
-            test_engine = create_engine(_db_uri)
-            conn = test_engine.connect()
-            conn.close()
-        except OperationalError as exc:
-            raise RuntimeError(
-                "Unable to connect to configured MySQL server. "
-                "Ensure MYSQL_HOST, MYSQL_DB, MYSQL_USER and MYSQL_PASSWORD "
-                "are correctly set and the server is accessible."
-            ) from exc
+    _use_sqlite_failover(app)
 
     # Initialize extensions
     db.init_app(app)

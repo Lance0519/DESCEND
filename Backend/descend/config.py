@@ -68,6 +68,11 @@ def _sqlite_fallback() -> str:
     return f"sqlite:///{sqlite_path}"
 
 
+def sqlite_fallback_uri() -> str:
+    """Return the local SQLite URI used when the online database is unavailable."""
+    return _sqlite_fallback()
+
+
 def _build_database_uri() -> str:
     """Build SQLAlchemy database URI with explicit priority."""
     # Priority 0: Explicit SQLALCHEMY_DATABASE_URI (for testing/custom setups)
@@ -105,6 +110,10 @@ class Config:
     # ============== CORE SETTINGS ==============
     SECRET_KEY = os.getenv("SECRET_KEY") or secrets.token_urlsafe(48)
     SQLALCHEMY_DATABASE_URI = _build_database_uri()
+    DATABASE_FAILOVER_TO_SQLITE = (
+        os.getenv("DATABASE_FAILOVER_TO_SQLITE", "true").strip().lower()
+        in {"1", "true", "yes", "on"}
+    )
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     
     # ============== FRONTEND SETTINGS ==============

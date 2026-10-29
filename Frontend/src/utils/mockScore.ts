@@ -243,7 +243,7 @@ export function mockScore(answers: AssessmentAnswers): PredictionResult {
     },
     ...descendants,
     predictionScopeNote:
-      'Child percentages are illustrative projections from your awareness score, not a medical diagnosis.',
+      'Child percentages are illustrative projections from your hereditary-lineage risk estimate, not a medical diagnosis.',
     familyLineage: buildSimpleLineage(answers),
   }
 }
