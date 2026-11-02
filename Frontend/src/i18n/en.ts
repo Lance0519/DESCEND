@@ -484,9 +484,9 @@ export const en = {
     },
   },
   bands: {
-    Low: 'Lower awareness range',
-    Moderate: 'Moderate awareness range',
-    High: 'Higher awareness range',
+    Low: 'Lower risk range',
+    Moderate: 'Moderate risk range',
+    High: 'Higher risk range',
   },
   contrib: {
     bmi: 'Body mass index',
