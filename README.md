@@ -41,6 +41,7 @@ and fail fast instead. The fallback is disabled on Vercel.
 - [Risk scoring](docs/RISK_SCORING.md)
 - [Calculation README](docs/CALCULATION_README.md)
 - [Clinician factor percentages (endocrinology handout)](docs/CLINICIAN_FACTOR_PERCENTAGES.md)
+- [T1D vs. T2D clinical & system rationale](docs/T1D_VS_T2D_CLINICAL_RATIONALE.md)
 - [Deploy (GitHub → Netlify + Vercel + Supabase)](docs/DEPLOY.md)
 - [Custom domain descendt2dm.me (Namecheap)](docs/CUSTOM_DOMAIN.md)
 - [Resend email confirmation (Supabase SMTP)](docs/RESEND_EMAIL.md)

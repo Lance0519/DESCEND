@@ -36,10 +36,12 @@ export function AssessmentProvider({ children }: { children: ReactNode }) {
 
   const setAnswer = useCallback(<K extends AnswerKey>(key: K, value: AssessmentAnswers[K]) => {
     setAnswers((prev) => ({ ...prev, [key]: value }))
+    setHasDraft(true)
   }, [])
 
   const setAnswersBulk = useCallback((next: AssessmentAnswers) => {
     setAnswers(next)
+    setHasDraft(Object.keys(next).length > 0)
   }, [])
 
   const clearSavedDraft = useCallback(() => {
@@ -68,7 +70,6 @@ export function AssessmentProvider({ children }: { children: ReactNode }) {
     if (Object.keys(answers).length === 0) return
     const lang = (localStorage.getItem('descend-language-v1') as 'en' | 'tl') || 'tl'
     saveDraft({ answers, questionIndex, language: lang, updatedAt: Date.now() })
-    setHasDraft(true)
   }, [answers, questionIndex])
 
   const value = useMemo(
@@ -101,6 +102,7 @@ export function AssessmentProvider({ children }: { children: ReactNode }) {
   return <AssessmentContext.Provider value={value}>{children}</AssessmentContext.Provider>
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useAssessment() {
   const ctx = useContext(AssessmentContext)
   if (!ctx) throw new Error('useAssessment must be used within AssessmentProvider')

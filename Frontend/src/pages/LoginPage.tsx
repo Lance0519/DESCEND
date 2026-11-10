@@ -1,8 +1,9 @@
 import { useState, type FormEvent } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { LogIn } from 'lucide-react'
 import { AuthNavBar } from '../components/AuthNavBar'
-import { GoogleSignInButton, isGoogleSignInEnabled } from '../components/GoogleSignInButton'
+import { GoogleSignInButton } from '../components/GoogleSignInButton'
+import { isGoogleSignInEnabled } from '../utils/googleAuth'
 import { PageBackground } from '../components/PageBackground'
 import { useAuth } from '../context/AuthContext'
 import { useLanguage } from '../context/LanguageContext'
@@ -13,6 +14,9 @@ export function LoginPage() {
   const { t } = useLanguage()
   const { signIn, configured } = useAuth()
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const redirectTarget = searchParams.get('redirect') || '/dashboard'
+
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
@@ -26,13 +30,18 @@ export function LoginPage() {
     try {
       if (!configured) throw new Error('Supabase is not configured. You can continue as guest.')
       await signIn(email, password)
-      navigate('/dashboard')
+      navigate(redirectTarget)
     } catch (err) {
       setError(authErrorMessage(err, t))
     } finally {
       setBusy(false)
     }
   }
+
+  const registerLink =
+    redirectTarget !== '/dashboard'
+      ? `/register?redirect=${encodeURIComponent(redirectTarget)}`
+      : '/register'
 
   return (
     <PageBackground>
@@ -70,7 +79,7 @@ export function LoginPage() {
           ) : null}
           <p className="auth-form__links">
             <Link to="/forgot-password">{t.forgotPassword}</Link>
-            <Link to="/register">{t.accessRegister}</Link>
+            <Link to={registerLink}>{t.accessRegister}</Link>
           </p>
         </form>
       </div>

@@ -16,7 +16,7 @@ class TestPredictEndpoint:
         assert response.status_code == 200
         data = response.get_json()
         assert "predictions" in data
-        assert len(data["predictions"]) == 4
+        assert len(data["predictions"]) == 2
         assert "summary" in data
 
     def test_predict_as_authenticated(self, client, auth_token, sample_assessment_payload):

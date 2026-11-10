@@ -4,6 +4,7 @@ import { PageBackground } from '../components/PageBackground'
 import { useLanguage } from '../context/LanguageContext'
 import { consentFromUserMetadata, ensureUserProfile } from '../lib/ensureProfile'
 import { getSupabase } from '../lib/supabaseClient'
+import { getPendingGuestResult } from '../hooks/useCloudSave'
 import type { EmailOtpType, Session } from '@supabase/supabase-js'
 import './AuthCallbackPage.css'
 
@@ -118,7 +119,9 @@ export function AuthCallbackPage() {
         consent: consentFromUserMetadata(meta),
       })
       if (cancelled) return
-      navigate(otpType === 'recovery' ? '/reset-password' : '/dashboard', { replace: true })
+      const pending = getPendingGuestResult()
+      const target = otpType === 'recovery' ? '/reset-password' : pending ? '/results' : '/dashboard'
+      navigate(target, { replace: true })
     }
 
     void finish()

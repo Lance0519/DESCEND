@@ -30,6 +30,7 @@ export function ManagementPage() {
     <PageBackground>
       <div className="mgmt">
         <AppNavBar
+          showHome={true}
           right={
             <Link to="/account" className="app-nav__link">
               {t.accountNav}

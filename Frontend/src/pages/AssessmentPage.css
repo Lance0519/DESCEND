@@ -46,6 +46,20 @@
   flex-shrink: 0;
 }
 
+.assessment-page__edit-banner {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.85rem;
+  border-radius: 999px;
+  background: var(--color-primary-light);
+  color: var(--color-primary-dark);
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+  border: 1px solid var(--color-primary-border);
+}
+
 .assessment-page--resume {
   display: flex;
   align-items: center;

@@ -53,6 +53,15 @@
   color: var(--color-primary);
 }
 
+.app-nav__home {
+  font-weight: 600;
+  color: var(--color-primary-dark);
+}
+
+.app-nav__home:hover {
+  color: var(--color-primary);
+}
+
 .app-nav__btn {
   border: 1px solid var(--surface-card-border);
   background: rgba(255, 255, 255, 0.75);

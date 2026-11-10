@@ -1,5 +1,16 @@
-import { useCallback, useEffect, useRef } from 'react'
-import { Activity, Droplets, HeartPulse, Printer, Scale, Users } from 'lucide-react'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import {
+  Activity,
+  Droplets,
+  HeartPulse,
+  Home,
+  LogIn,
+  Printer,
+  Scale,
+  ShieldCheck,
+  UserPlus,
+  Users,
+} from 'lucide-react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { ConfirmDialog } from '../components/ConfirmDialog'
 import { ContactSupport } from '../components/ContactSupport'
@@ -11,43 +22,88 @@ import { DescendantProjection } from '../features/results/DescendantProjection'
 import { PreventionPanel } from '../features/results/PreventionPanel'
 import { FamilyPedigreePanel } from '../features/results/FamilyPedigreePanel'
 import { preventionBmi } from '../data/preventionTips'
-import { useCloudSave } from '../hooks/useCloudSave'
+import {
+  cachePendingGuestResult,
+  clearPendingGuestResult,
+  getPendingGuestResult,
+  useCloudSave,
+} from '../hooks/useCloudSave'
 import { clearDraft } from '../lib/draftStorage'
+import { setCloudSaveConsent } from '../lib/cloudSaveConsent'
 import { RiskBadge } from '../components/ui/RiskBadge'
+import { resolveRiskLevel } from '../utils/risk'
 import { AppNavBar } from '../components/ui/AppNavBar'
 import './ResultsPage.css'
 
 export function ResultsPage() {
   const { t, language } = useLanguage()
-  const { result, answers, resetAssessment } = useAssessment()
+  const { result, answers, setResult, setAnswersBulk, resetAssessment } = useAssessment()
   const { user, loading: authLoading } = useAuth()
   const navigate = useNavigate()
   const { status, save, begin, accept, decline } = useCloudSave()
   const saveStarted = useRef(false)
 
+  const [cachedPending] = useState(() => getPendingGuestResult())
+
+  useEffect(() => {
+    if (!result && cachedPending) {
+      setResult(cachedPending.result)
+      setAnswersBulk(cachedPending.answers)
+    }
+  }, [result, cachedPending, setResult, setAnswersBulk])
+
+  const activeResult = result ?? cachedPending?.result
+  const activeAnswers =
+    answers && Object.keys(answers).length > 0
+      ? answers
+      : (cachedPending?.answers ?? answers)
+
+  // Cache results for guest so they can sign in or register without losing data
+  useEffect(() => {
+    if (activeResult && !user) {
+      cachePendingGuestResult(
+        activeAnswers,
+        activeResult,
+        activeResult.percentage,
+        activeResult.riskBand,
+      )
+    }
+  }, [activeResult, activeAnswers, user])
+
   const persist = useCallback(async () => {
-    if (!user || !result) return
+    if (!user || !activeResult) return
     await save({
       userId: user.id,
-      riskScore: result.percentage,
-      riskTier: result.riskBand,
+      riskScore: activeResult.percentage,
+      riskTier: activeResult.riskBand,
       preDiagnosed: false,
-      answers,
-      result,
+      answers: activeAnswers,
+      result: activeResult,
     })
-  }, [user, result, answers, save])
+    clearPendingGuestResult()
+  }, [user, activeResult, activeAnswers, save])
 
   useEffect(() => {
     if (authLoading) return
-    if (!result || answers.diagnosedT2dm === 'yes') return
+    if (!activeResult || activeAnswers.diagnosedT2dm === 'yes') return
     if (saveStarted.current) return
     saveStarted.current = true
     const mode = begin(Boolean(user))
     if (mode === 'ready') void persist()
-  }, [authLoading, result, answers.diagnosedT2dm, user, begin, persist])
+  }, [authLoading, activeResult, activeAnswers.diagnosedT2dm, user, begin, persist])
 
-  if (answers.diagnosedT2dm === 'yes') return <Navigate to="/management" replace />
-  if (!result) return <Navigate to="/assessment" replace />
+  if (activeAnswers.diagnosedT2dm === 'yes') return <Navigate to="/management" replace />
+  if (!activeResult) return <Navigate to="/assessment" replace />
+
+  const resolvedRiskLevel = resolveRiskLevel(activeResult.riskBand)
+  const riskLevel =
+    resolvedRiskLevel !== 'neutral'
+      ? resolvedRiskLevel
+      : activeResult.percentage < 34
+        ? 'low'
+        : activeResult.percentage < 67
+          ? 'moderate'
+          : 'high'
 
   const contribLabel = (key: string) => (t.contrib as Record<string, string>)[key] ?? key
 
@@ -68,6 +124,7 @@ export function ResultsPage() {
       <div className="results">
         <AppNavBar
           className="results__no-print"
+          showHome={true}
           right={
             user ? (
               <>
@@ -88,16 +145,16 @@ export function ResultsPage() {
           </p>
           <p
             className={`results__source results__no-print ${
-              result.source === 'api' ? 'results__source--api' : 'results__source--mock'
+              activeResult.source === 'api' ? 'results__source--api' : 'results__source--mock'
             }`}
           >
-            {result.source === 'api' ? t.resultsModelBadge : t.resultsMockBadge}
+            {activeResult.source === 'api' ? t.resultsModelBadge : t.resultsMockBadge}
           </p>
           <p className="results__percent-label">{t.resultsPercent}</p>
-          <p className="results__percent">{result.percentage}%</p>
+          <p className={`results__percent results__percent--${riskLevel}`}>{activeResult.percentage}%</p>
           <div style={{ marginBottom: '1.25rem' }}>
-            <RiskBadge band={result.riskBand} size="lg">
-              {t.resultsBand}: {t.bands[result.riskBand]}
+            <RiskBadge band={activeResult.riskBand} size="lg">
+              {t.resultsBand}: {t.bands[activeResult.riskBand]}
             </RiskBadge>
           </div>
 
@@ -114,25 +171,25 @@ export function ResultsPage() {
             <span>
               <Scale size={22} />
             </span>
-            {(result.softAdjustment.blood !== 0 ||
-              result.softAdjustment.contributions.some((c) => c.group === 'blood')) && (
+            {(activeResult.softAdjustment.blood !== 0 ||
+              activeResult.softAdjustment.contributions.some((c) => c.group === 'blood')) && (
               <span>
                 <Droplets size={22} />
               </span>
             )}
           </div>
 
-          {result.bmi != null ? (
+          {activeResult.bmi != null ? (
             <p className="results__bmi">
-              {t.bmiLabel}: {result.bmi.toFixed(1)}
+              {t.bmiLabel}: {activeResult.bmi.toFixed(1)}
             </p>
           ) : null}
 
           <div className="results__no-print">
-            <FamilyPedigreePanel result={result} title={t.pedigreeTitle} />
+            <FamilyPedigreePanel result={activeResult} title={t.pedigreeTitle} />
 
             <DescendantProjection
-              result={result}
+              result={activeResult}
               title={t.descendantsTitle}
               childrenTitle={t.childrenTitle}
               disclaimer={t.descendantsDisclaimer}
@@ -142,7 +199,7 @@ export function ResultsPage() {
 
           <h2 className="results__factors-title">{t.resultsFactors}</h2>
           <ul className="results__factors">
-            {result.softAdjustment.contributions
+            {activeResult.softAdjustment.contributions
               .filter((c) => c.id !== 'base')
               .map((c) => (
                 <li key={`${c.id}-${c.delta}`}>
@@ -155,12 +212,12 @@ export function ResultsPage() {
               ))}
           </ul>
 
-          <PreventionPanel answers={answers} bmi={preventionBmi(answers, result.bmi)} />
+          <PreventionPanel answers={activeAnswers} bmi={preventionBmi(activeAnswers, activeResult.bmi)} />
 
-          {result.predictionScopeNote ? (
+          {activeResult.predictionScopeNote ? (
             <section className="results__scope-block results__no-print">
               <h2 className="results__scope-heading">{t.resultsScopeHeading}</h2>
-              <p className="results__scope">{result.predictionScopeNote}</p>
+              <p className="results__scope">{activeResult.predictionScopeNote}</p>
             </section>
           ) : null}
 
@@ -176,7 +233,7 @@ export function ResultsPage() {
           ) : null}
           {status === 'saved' ? (
             <p className="results__save results__save--ok results__no-print" role="status">
-              {t.saveSuccess}
+              {t.guestSaveSuccess || t.saveSuccess}
             </p>
           ) : null}
           {status === 'failed' ? (
@@ -188,9 +245,49 @@ export function ResultsPage() {
             </div>
           ) : null}
           {status === 'guest' ? (
-            <p className="results__save results__no-print">
-              <Link to="/register">{t.saveGuestCta}</Link>
-            </p>
+            <div className="results__guest-card results__no-print">
+              <div className="results__guest-icon" aria-hidden>
+                <ShieldCheck size={28} />
+              </div>
+              <div className="results__guest-info">
+                <h3>{t.guestSaveTitle}</h3>
+                <p>{t.guestSaveDesc}</p>
+              </div>
+              <div className="results__guest-actions">
+                <Link
+                  to="/login?redirect=/results"
+                  className="results__guest-btn results__guest-btn--primary"
+                  onClick={() => {
+                    setCloudSaveConsent('yes')
+                    cachePendingGuestResult(
+                      activeAnswers,
+                      activeResult,
+                      activeResult.percentage,
+                      activeResult.riskBand,
+                    )
+                  }}
+                >
+                  <LogIn size={18} aria-hidden />
+                  {t.guestSaveLogin}
+                </Link>
+                <Link
+                  to="/register?redirect=/results"
+                  className="results__guest-btn results__guest-btn--secondary"
+                  onClick={() => {
+                    setCloudSaveConsent('yes')
+                    cachePendingGuestResult(
+                      activeAnswers,
+                      activeResult,
+                      activeResult.percentage,
+                      activeResult.riskBand,
+                    )
+                  }}
+                >
+                  <UserPlus size={18} aria-hidden />
+                  {t.guestSaveRegister}
+                </Link>
+              </div>
+            </div>
           ) : null}
 
           <div className="results__actions results__no-print">
@@ -221,6 +318,10 @@ export function ResultsPage() {
             >
               {t.retake}
             </button>
+            <Link to="/" className="results__secondary">
+              <Home size={18} aria-hidden />
+              {t.navHome}
+            </Link>
           </div>
         </main>
       </div>

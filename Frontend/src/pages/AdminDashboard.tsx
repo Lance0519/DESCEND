@@ -72,6 +72,7 @@ export function AdminDashboard() {
   }, [t.adminForbidden])
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (isAdmin) void load()
   }, [isAdmin, load])
 
@@ -257,6 +258,7 @@ export function AdminDashboard() {
       <div className="admin-dash">
         <AppNavBar
           maxWidth={1080}
+          showHome={true}
           right={
             <div className="admin-dash__toolbar-actions">
               <Link className="app-nav__link" to="/dashboard">

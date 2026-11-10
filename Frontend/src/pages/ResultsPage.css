@@ -101,6 +101,20 @@
   font-weight: 700;
   color: var(--color-primary-dark);
   margin: 0.25rem 0 0.5rem;
+  transition: color 0.2s ease;
+}
+
+.results__percent--low {
+  color: var(--risk-low, #2e7d32);
+}
+
+.results__percent--moderate,
+.results__percent--medium {
+  color: var(--risk-moderate, #e65100);
+}
+
+.results__percent--high {
+  color: var(--risk-high, #c62828);
 }
 
 .results__band {
@@ -240,6 +254,81 @@
   font-weight: 700;
 }
 
+.results__guest-card {
+  margin-top: 1.5rem;
+  padding: 1.25rem;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(232, 245, 233, 0.7), rgba(232, 244, 252, 0.7));
+  border: 1.5px solid var(--surface-card-border);
+  box-shadow: 0 4px 16px rgba(27, 94, 32, 0.06);
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.results__guest-icon {
+  color: var(--color-primary);
+  display: inline-flex;
+}
+
+.results__guest-info h3 {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--color-primary-dark);
+  margin: 0 0 0.35rem;
+}
+
+.results__guest-info p {
+  font-size: 14px;
+  color: var(--color-text-muted);
+  margin: 0;
+  line-height: 1.45;
+}
+
+.results__guest-actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.results__guest-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  padding: 0.65rem 1.15rem;
+  font-size: 14px;
+  font-weight: 700;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: all 0.15s ease;
+  min-height: 44px;
+  box-sizing: border-box;
+}
+
+.results__guest-btn--primary {
+  background: var(--color-primary);
+  color: #fff;
+  border: 1px solid var(--color-primary-dark);
+}
+
+.results__guest-btn--primary:hover {
+  background: var(--color-primary-dark);
+  color: #fff;
+}
+
+.results__guest-btn--secondary {
+  background: #fff;
+  color: var(--color-text-main);
+  border: 1px solid var(--color-border);
+}
+
+.results__guest-btn--secondary:hover {
+  background: var(--color-bg-neutral);
+  border-color: var(--color-border-hover);
+}
+
 .results__text-btn {
   margin-top: 0.4rem;
   border: none;
@@ -325,6 +414,8 @@
 
   .results__percent {
     font-size: 2rem;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
   }
 
   .prevent__tip,

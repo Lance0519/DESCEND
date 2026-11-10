@@ -1,8 +1,9 @@
 import type { ReactNode } from 'react'
 import type { RiskBand } from '../../types/prediction'
+import { resolveRiskLevel, type RiskLevel } from '../../utils/risk'
 import './RiskBadge.css'
 
-export type RiskLevel = 'low' | 'moderate' | 'high' | 'neutral'
+export type { RiskLevel }
 
 export interface RiskBadgeProps {
   band?: RiskBand | string | null
@@ -10,15 +11,6 @@ export interface RiskBadgeProps {
   size?: 'sm' | 'md' | 'lg'
   children?: ReactNode
   className?: string
-}
-
-function resolveRiskLevel(input?: string | null): RiskLevel {
-  if (!input) return 'neutral'
-  const normalized = input.toLowerCase()
-  if (normalized.includes('low')) return 'low'
-  if (normalized.includes('high')) return 'high'
-  if (normalized.includes('mod')) return 'moderate'
-  return 'neutral'
 }
 
 export function RiskBadge({

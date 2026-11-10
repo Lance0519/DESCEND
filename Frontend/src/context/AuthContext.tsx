@@ -95,7 +95,7 @@ async function enrichFromProfile(base: AuthUser): Promise<AuthUser> {
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null)
   const [isGuest, setIsGuest] = useState(false)
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(() => Boolean(getSupabase()))
   const configured = isSupabaseConfigured()
 
   const applySessionUser = useCallback(async (sessionUser: Parameters<typeof mapUser>[0]) => {
@@ -120,10 +120,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const syncToken = useCallback(async () => {
     const sb = getSupabase()
-    if (!sb) {
-      setLoading(false)
-      return
-    }
+    if (!sb) return
     const { data } = await sb.auth.getSession()
     const session = data.session
     if (session?.access_token) {
@@ -141,10 +138,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [applySessionUser])
 
   useEffect(() => {
-    void syncToken()
+    let active = true
     const sb = getSupabase()
     if (!sb) return
+
+    void sb.auth.getSession().then(({ data }) => {
+      if (!active) return
+      if (data.session?.access_token) {
+        sessionStorage.setItem('descend-supabase-access-token', data.session.access_token)
+        void applySessionUser(data.session.user).catch(() => {
+          if (active) setUser(null)
+        })
+      } else {
+        sessionStorage.removeItem('descend-supabase-access-token')
+        setUser(null)
+      }
+      setLoading(false)
+    })
+
     const { data: sub } = sb.auth.onAuthStateChange((_event, session) => {
+      if (!active) return
       if (session?.access_token) {
         sessionStorage.setItem('descend-supabase-access-token', session.access_token)
         void applySessionUser(session.user).catch(() => setUser(null))
@@ -153,8 +166,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(null)
       }
     })
-    return () => sub.subscription.unsubscribe()
-  }, [syncToken, applySessionUser])
+
+    return () => {
+      active = false
+      sub.subscription.unsubscribe()
+    }
+  }, [applySessionUser])
 
   const continueAsGuest = useCallback(() => {
     setIsGuest(true)
@@ -301,6 +318,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useAuth() {
   const ctx = useContext(AuthContext)
   if (!ctx) throw new Error('useAuth must be used within AuthProvider')

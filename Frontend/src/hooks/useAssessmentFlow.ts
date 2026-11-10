@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { getVisibleQuestions, type QuestionDef } from '../data/questions'
 import type { AnswerKey, AssessmentAnswers } from '../types/assessment'
 
@@ -8,21 +8,16 @@ export function useAssessmentFlow(
   onIndexChange?: (i: number) => void,
 ) {
   const visible = useMemo(() => getVisibleQuestions(answers), [answers])
-  const [index, setIndex] = useState(externalIndex ?? 0)
+  const [internalIndex, setInternalIndex] = useState(0)
 
-  useEffect(() => {
-    if (externalIndex != null && externalIndex !== index) {
-      setIndex(externalIndex)
-    }
-  }, [externalIndex])
-
+  const index = externalIndex != null ? externalIndex : internalIndex
   const safeIndex = Math.min(index, Math.max(visible.length - 1, 0))
   const current: QuestionDef | undefined = visible[safeIndex]
   const isFirst = safeIndex <= 0
   const isLast = safeIndex >= visible.length - 1
 
   function setBoth(next: number) {
-    setIndex(next)
+    setInternalIndex(next)
     onIndexChange?.(next)
   }
 

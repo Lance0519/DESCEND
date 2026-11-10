@@ -1,16 +1,8 @@
 import { useState } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { useLanguage } from '../context/LanguageContext'
+import { isGoogleSignInEnabled } from '../utils/googleAuth'
 import './GoogleSignInButton.css'
-
-const HIDE_VALUES = new Set(['false', '0', 'no', 'off'])
-
-export function isGoogleSignInEnabled() {
-  const flag = String(import.meta.env.VITE_ENABLE_GOOGLE_SIGNIN ?? '')
-    .trim()
-    .toLowerCase()
-  return !HIDE_VALUES.has(flag)
-}
 
 function GoogleMark() {
   return (
@@ -48,8 +40,10 @@ export function GoogleSignInButton() {
     setError('')
     try {
       await signInWithGoogle()
-    } catch {
-      setError(t.googleSignInFailed)
+    } catch (err) {
+      const message = err instanceof Error ? err.message : t.googleSignInFailed
+      setError(message)
+    } finally {
       setBusy(false)
     }
   }
@@ -59,11 +53,11 @@ export function GoogleSignInButton() {
       <button
         type="button"
         className="google-signin__btn"
-        onClick={() => void onClick()}
         disabled={busy}
+        onClick={() => void onClick()}
       >
         <GoogleMark />
-        {t.accessGoogle}
+        <span>{busy ? (t.signingIn ?? t.accessGoogle) : t.accessGoogle}</span>
       </button>
       {error ? <p className="google-signin__error">{error}</p> : null}
     </div>

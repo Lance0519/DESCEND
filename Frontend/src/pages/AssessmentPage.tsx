@@ -1,7 +1,9 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
+import { Check } from 'lucide-react'
 import { ChoiceButtons } from '../components/ChoiceButtons'
+import { ConfirmDialog } from '../components/ConfirmDialog'
 import { NumberInput } from '../components/NumberInput'
 import { PageBackground } from '../components/PageBackground'
 import { ProgressBar } from '../components/ProgressBar'
@@ -26,9 +28,17 @@ import {
 } from '../lib/assessmentValidation'
 import { computeBmi, type AnswerKey, type AssessmentAnswers } from '../types/assessment'
 import { persistAssessmentRecord } from '../api/assessmentRecords'
-import { PredictApiError, estimateAssessment, mapDiagnosedPayload, predictAssessment } from '../api/client'
+import {
+  PredictApiError,
+  estimateAssessment,
+  mapDiagnosedPayload,
+  predictAssessment,
+} from '../api/client'
 import { mapPayload } from '../api/mapPayload'
 import { mockScore } from '../utils/mockScore'
+import { DiagnosisGate } from '../features/assessment/DiagnosisGate'
+import { OnsetGate } from '../features/assessment/OnsetGate'
+import { ResumeModal } from '../features/assessment/ResumeModal'
 import './AssessmentPage.css'
 
 type DiagnosisGate = 'diagnosis' | 'onset' | 'survey' | 'review'
@@ -39,12 +49,14 @@ function initialGate(answers: AssessmentAnswers): DiagnosisGate {
   return 'diagnosis'
 }
 
-function AssessmentToolbar() {
+function AssessmentToolbar({ onHomeClick }: { onHomeClick: () => void }) {
   const { t } = useLanguage()
   const { user } = useAuth()
 
   return (
     <AppNavBar
+      showHome={true}
+      onHomeClick={onHomeClick}
       right={
         user ? (
           <>
@@ -80,8 +92,9 @@ export function AssessmentPage() {
   const flow = useAssessmentFlow(answers, questionIndex, setQuestionIndex)
   const { speak, cancel, speaking } = useSpeech(language)
   const navigate = useNavigate()
+
   const [submitting, setSubmitting] = useState(false)
-  const [draftNumber, setDraftNumber] = useState<number | ''>('')
+  const [draftNumbers, setDraftNumbers] = useState<Record<string, number | ''>>({})
   const [showResume, setShowResume] = useState(hasDraft && Object.keys(answers).length > 0)
   const [predictError, setPredictError] = useState<string | null>(null)
   const [fieldError, setFieldError] = useState<string | null>(null)
@@ -90,12 +103,14 @@ export function AssessmentPage() {
   const [onsetAge, setOnsetAge] = useState<number | ''>(
     typeof answers.ageAtDiagnosis === 'number' ? answers.ageAtDiagnosis : '',
   )
-  const [onsetError, setOnsetError] = useState<string | null>(null)
   const [gateSubmitting, setGateSubmitting] = useState(false)
   const [returnToReview, setReturnToReview] = useState(false)
+  const [showLeaveConfirm, setShowLeaveConfirm] = useState(false)
 
+  const appliedUserPrefs = useRef(false)
   useEffect(() => {
-    if (!user) return
+    if (!user || appliedUserPrefs.current) return
+    appliedUserPrefs.current = true
     if (answers.age == null && user.preferredAge != null) {
       setAnswer('age', user.preferredAge)
     }
@@ -106,18 +121,14 @@ export function AssessmentPage() {
 
   const current = flow.current
 
-  useEffect(() => {
-    setFieldError(null)
-    setAttemptedNext(false)
-    if (!current) return
-    if (current.type === 'number' || current.type === 'optionalNumber') {
-      const key = current.id as AnswerKey
-      const existing = answers[key]
-      setDraftNumber(typeof existing === 'number' ? existing : '')
-    } else {
-      setDraftNumber('')
-    }
-  }, [current?.id])
+  const currentDraft =
+    current && (current.type === 'number' || current.type === 'optionalNumber')
+      ? draftNumbers[current.id] !== undefined
+        ? draftNumbers[current.id]
+        : typeof answers[current.id as AnswerKey] === 'number'
+          ? (answers[current.id as AnswerKey] as number)
+          : ''
+      : ''
 
   const optionLabel = (key: string) => (t.options as Record<string, string>)[key] ?? key
   const questionText = current ? t.questions[current.questionKey] : ''
@@ -127,7 +138,7 @@ export function AssessmentPage() {
     if (!current) return ''
     const opts = current.options?.map((o) => optionLabel(String(o.labelKey))).join('. ') ?? ''
     return `${questionText}. ${opts}`
-  }, [current, questionText, language])
+  }, [current, questionText, language]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const reviewGroups = useMemo(
     () => buildReviewGroups(flow.visible, answers, t),
@@ -160,167 +171,84 @@ export function AssessmentPage() {
     return t.predictErrorText
   }
 
+  function onHomeRequest() {
+    if (Object.keys(answers).length > 0) {
+      setShowLeaveConfirm(true)
+    } else {
+      navigate('/')
+    }
+  }
+
   if (showResume) {
     return (
-      <PageBackground>
-        <div className="assessment-page assessment-page--resume">
-          <div className="resume-card">
-            <AssessmentToolbar />
-            <h2>{t.resumeTitle}</h2>
-            <p>{t.resumeText}</p>
-            <button
-              type="button"
-              className="btn btn--primary"
-              onClick={() => {
-                setShowResume(false)
-                if (answers.diagnosedT2dm === 'yes' && answers.ageAtDiagnosis != null) {
-                  navigate('/management', { replace: true })
-                  return
-                }
-                setGate(initialGate(answers))
-              }}
-            >
-              {t.resumeContinue}
-            </button>
-            <button
-              type="button"
-              className="btn btn--ghost"
-              onClick={() => {
-                resetAssessment()
-                setGate('diagnosis')
-                setOnsetAge('')
-                setShowResume(false)
-              }}
-            >
-              {t.resumeStartOver}
-            </button>
-          </div>
-        </div>
-      </PageBackground>
+      <ResumeModal
+        toolbar={<AssessmentToolbar onHomeClick={onHomeRequest} />}
+        onResume={() => {
+          setShowResume(false)
+          if (answers.diagnosedT2dm === 'yes' && answers.ageAtDiagnosis != null) {
+            navigate('/management', { replace: true })
+            return
+          }
+          setGate(initialGate(answers))
+        }}
+        onStartOver={() => {
+          resetAssessment()
+          setGate('diagnosis')
+          setOnsetAge('')
+          setShowResume(false)
+        }}
+      />
     )
   }
 
   if (gate === 'diagnosis') {
     return (
-      <PageBackground>
-        <div className="assessment-page assessment-page--resume">
-          <div className="resume-card" style={{ textAlign: 'left', maxWidth: 480 }}>
-            <AssessmentToolbar />
-            <h2>{t.diagnosisGateTitle}</h2>
-            <p style={{ margin: '0.75rem 0 1rem', color: 'var(--color-text-muted)' }}>
-              {t.diagnosisGateQuestion}
-            </p>
-            <button
-              type="button"
-              className="btn btn--primary"
-              onClick={() => {
-                setAnswer('diagnosedT2dm', 'yes')
-                setGate('onset')
-              }}
-            >
-              {t.diagnosisGateYes}
-            </button>
-            <button
-              type="button"
-              className="btn btn--ghost"
-              onClick={() => {
-                setAnswer('diagnosedT2dm', 'no')
-                setAnswer('ageAtDiagnosis', undefined as never)
-                setQuestionIndex(0)
-                setGate('survey')
-              }}
-            >
-              {t.diagnosisGateNo}
-            </button>
-          </div>
-        </div>
-      </PageBackground>
+      <DiagnosisGate
+        toolbar={<AssessmentToolbar onHomeClick={onHomeRequest} />}
+        onYes={() => {
+          setAnswer('diagnosedT2dm', 'yes')
+          setGate('onset')
+        }}
+        onNo={() => {
+          setAnswer('diagnosedT2dm', 'no')
+          setAnswer('ageAtDiagnosis', undefined as never)
+          setQuestionIndex(0)
+          setGate('survey')
+        }}
+      />
     )
   }
 
   if (gate === 'onset') {
     return (
-      <PageBackground>
-        <div className="assessment-page assessment-page--resume">
-          <div className="resume-card" style={{ textAlign: 'left', maxWidth: 480 }}>
-            <AssessmentToolbar />
-            <h2>{t.diagnosisOnsetTitle}</h2>
-            <p style={{ margin: '0.75rem 0 1rem', color: 'var(--color-text-muted)' }}>
-              {t.diagnosisOnsetHelp}
-            </p>
-            <NumberInput
-              id="ageOfOnset"
-              value={onsetAge}
-              min={1}
-              max={90}
-              step={1}
-              error={onsetError}
-              onChange={(v) => {
-                setOnsetAge(v)
-                if (v === '') {
-                  setOnsetError(t.fieldRequired)
-                  return
-                }
-                if (v < 1 || v > 90) {
-                  setOnsetError(t.fieldOutOfRange.replace('{min}', '1').replace('{max}', '90'))
-                  return
-                }
-                setOnsetError(null)
-              }}
-            />
-            <button
-              type="button"
-              className="btn btn--primary"
-              disabled={gateSubmitting}
-              onClick={() => {
-                void (async () => {
-                  if (onsetAge === '' || onsetAge < 1 || onsetAge > 90) {
-                    setOnsetError(
-                      onsetAge === ''
-                        ? t.fieldRequired
-                        : t.fieldOutOfRange.replace('{min}', '1').replace('{max}', '90'),
-                    )
-                    return
-                  }
-                  setGateSubmitting(true)
-                  setOnsetError(null)
-                  setAnswer('diagnosedT2dm', 'yes')
-                  setAnswer('ageAtDiagnosis', onsetAge)
-                  try {
-                    await estimateAssessment(mapDiagnosedPayload(onsetAge))
-                  } catch {
-                    // Local management path still proceeds if the save/estimate call fails.
-                  }
-                  if (user) {
-                    void persistAssessmentRecord({
-                      userId: user.id,
-                      riskScore: null,
-                      riskTier: null,
-                      preDiagnosed: true,
-                    })
-                  }
-                  clearDraft()
-                  navigate('/management', { replace: true })
-                  setGateSubmitting(false)
-                })()
-              }}
-            >
-              {gateSubmitting ? t.loading : t.diagnosisOnsetContinue}
-            </button>
-            <button
-              type="button"
-              className="btn btn--ghost"
-              disabled={gateSubmitting}
-              onClick={() => {
-                setGate('diagnosis')
-                setOnsetError(null)
-              }}
-            >
-              {t.back}
-            </button>
-          </div>
-        </div>
-      </PageBackground>
+      <OnsetGate
+        toolbar={<AssessmentToolbar onHomeClick={onHomeRequest} />}
+        initialAge={onsetAge}
+        submitting={gateSubmitting}
+        onBack={() => setGate('diagnosis')}
+        onSubmit={async (age) => {
+          setGateSubmitting(true)
+          setOnsetAge(age)
+          setAnswer('diagnosedT2dm', 'yes')
+          setAnswer('ageAtDiagnosis', age)
+          try {
+            await estimateAssessment(mapDiagnosedPayload(age))
+          } catch {
+            // Local management path proceeds even if remote save fails
+          }
+          if (user) {
+            void persistAssessmentRecord({
+              userId: user.id,
+              riskScore: null,
+              riskTier: null,
+              preDiagnosed: true,
+            })
+          }
+          clearDraft()
+          navigate('/management', { replace: true })
+          setGateSubmitting(false)
+        }}
+      />
     )
   }
 
@@ -329,7 +257,7 @@ export function AssessmentPage() {
       <PageBackground>
         <div className="assessment-page">
           <ProgressBar current={flow.total - 1} total={flow.total} label={t.progress} />
-          <AssessmentToolbar />
+          <AssessmentToolbar onHomeClick={onHomeRequest} />
           <div className="assessment-page__content">
             <motion.div
               initial={{ opacity: 0, y: 10 }}
@@ -382,6 +310,19 @@ export function AssessmentPage() {
             ) : null}
           </div>
         </div>
+        {showLeaveConfirm ? (
+          <ConfirmDialog
+            title={t.confirmLeaveTitle}
+            text={t.confirmLeaveText}
+            confirmLabel={t.confirmLeaveYes}
+            cancelLabel={t.confirmLeaveNo}
+            onCancel={() => setShowLeaveConfirm(false)}
+            onConfirm={() => {
+              setShowLeaveConfirm(false)
+              navigate('/')
+            }}
+          />
+        ) : null}
       </PageBackground>
     )
   }
@@ -420,15 +361,15 @@ export function AssessmentPage() {
   const optionalAnswered =
     current.id === 'fastingGlucoseMgDl'
       ? answers.fastingGlucoseSkipped === true ||
-        draftNumber !== '' ||
+        currentDraft !== '' ||
         answers.fastingGlucoseMgDl != null
       : current.id === 'hba1cPercent'
-        ? answers.hba1cSkipped === true || draftNumber !== '' || answers.hba1cPercent != null
+        ? answers.hba1cSkipped === true || currentDraft !== '' || answers.hba1cPercent != null
         : false
 
   const numberErrorCode =
     current.type === 'number' && isStrictNumberField(String(current.id))
-      ? validateNumberField(current, draftNumber)
+      ? validateNumberField(current, currentDraft)
       : null
 
   const canProceed =
@@ -439,7 +380,7 @@ export function AssessmentPage() {
         : current.type === 'optionalNumber'
           ? optionalAnswered
           : current.type === 'number'
-            ? draftNumber !== '' && numberErrorCode === null
+            ? currentDraft !== '' && numberErrorCode === null
             : false
 
   function commitNumber(value: number | '', into?: AssessmentAnswers): AssessmentAnswers {
@@ -457,38 +398,27 @@ export function AssessmentPage() {
 
   function handleSkip() {
     cancel()
-    let latest = { ...answers }
     if (current!.id === 'fastingGlucoseMgDl') {
       setAnswer('fastingGlucoseMgDl', null)
       setAnswer('fastingGlucoseSkipped', true)
-      latest = { ...latest, fastingGlucoseMgDl: null, fastingGlucoseSkipped: true }
     }
     if (current!.id === 'hba1cPercent') {
       setAnswer('hba1cPercent', null)
       setAnswer('hba1cSkipped', true)
-      latest = { ...latest, hba1cPercent: null, hba1cSkipped: true }
     }
-    setDraftNumber('')
+    setDraftNumbers((prev) => ({ ...prev, [current!.id]: '' }))
     setFieldError(null)
     setAttemptedNext(false)
 
-    if (flow.isLast) {
+    if (returnToReview) {
       setReturnToReview(false)
       setGate('review')
       return
     }
 
-    if (returnToReview) {
-      const missing = firstMissingIndex(buildReviewGroups(getVisibleQuestions(latest), latest, t))
-      if (missing == null) {
-        setReturnToReview(false)
-        setGate('review')
-        return
-      }
-      if (missing !== flow.index) {
-        setQuestionIndex(missing)
-        return
-      }
+    if (flow.isLast) {
+      setGate('review')
+      return
     }
 
     flow.goNext()
@@ -499,7 +429,7 @@ export function AssessmentPage() {
     setPredictError(null)
 
     if (current!.type === 'number' && isStrictNumberField(String(current!.id))) {
-      const code = validateNumberField(current!, draftNumber)
+      const code = validateNumberField(current!, currentDraft)
       if (code) {
         setFieldError(messageForFieldError(code, current!.min, current!.max))
         return
@@ -512,30 +442,27 @@ export function AssessmentPage() {
       const skipped =
         (current!.id === 'fastingGlucoseMgDl' && answers.fastingGlucoseSkipped) ||
         (current!.id === 'hba1cPercent' && answers.hba1cSkipped)
-      if (draftNumber !== '' && !skipped) latest = commitNumber(draftNumber)
+      if (currentDraft !== '' && !skipped) latest = commitNumber(currentDraft)
     }
 
     cancel()
+    setFieldError(null)
+    setAttemptedNext(false)
 
-    if (flow.isLast) {
-      setReturnToReview(false)
-      setGate('review')
-      return
-    }
-
-    // After editing from the review, skip straight back to it unless the edit
-    // revealed a question that still needs an answer.
     if (returnToReview) {
       const missing = firstMissingIndex(buildReviewGroups(getVisibleQuestions(latest), latest, t))
-      if (missing == null) {
+      if (missing == null || missing === flow.index) {
         setReturnToReview(false)
         setGate('review')
         return
       }
-      if (missing !== flow.index) {
-        setQuestionIndex(missing)
-        return
-      }
+      setQuestionIndex(missing)
+      return
+    }
+
+    if (flow.isLast) {
+      setGate('review')
+      return
     }
 
     flow.goNext()
@@ -611,7 +538,7 @@ export function AssessmentPage() {
     <PageBackground>
       <div className="assessment-page">
         <ProgressBar current={flow.index} total={flow.total} label={t.progress} />
-        <AssessmentToolbar />
+        <AssessmentToolbar onHomeClick={onHomeRequest} />
         <div className="assessment-page__content">
           <motion.div
             key={current.id}
@@ -619,6 +546,13 @@ export function AssessmentPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.25 }}
           >
+            {returnToReview ? (
+              <div className="assessment-page__edit-banner">
+                <Check size={16} aria-hidden />
+                <span>{t.reviewEditingNotice}</span>
+              </div>
+            ) : null}
+
             <QuestionCard
               sectionLabel={sectionLabel}
               title={questionText}
@@ -626,7 +560,7 @@ export function AssessmentPage() {
               headerAction={
                 <SpeakButton
                   speaking={speaking}
-                  onSpeak={() => void speak(speakText)}
+                  onSpeak={() => speak(speakText)}
                   onStop={cancel}
                   speakLabel={t.speak}
                   stopLabel={t.stopSpeak}
@@ -648,14 +582,14 @@ export function AssessmentPage() {
               {(current.type === 'number' || current.type === 'optionalNumber') && (
                 <NumberInput
                   id={current.id}
-                  value={draftNumber}
+                  value={currentDraft}
                   min={current.min}
                   max={current.max}
                   step={current.step}
                   unit={current.unit}
                   error={shownFieldError}
                   onChange={(v) => {
-                    setDraftNumber(v)
+                    setDraftNumbers((prev) => ({ ...prev, [current.id]: v }))
                     if (isStrictNumberField(String(current.id))) {
                       const code = validateNumberField(current, v)
                       setFieldError(messageForFieldError(code, current.min, current.max))
@@ -710,7 +644,13 @@ export function AssessmentPage() {
               disabled={submitting || !canProceed}
               onClick={() => void handleNext()}
             >
-              {submitting ? t.loading : flow.isLast ? t.reviewTitle : t.next}
+              {submitting
+                ? t.loading
+                : returnToReview
+                  ? t.reviewSaveAndReturn
+                  : flow.isLast
+                    ? t.reviewTitle
+                    : t.next}
             </button>
           </div>
 
@@ -730,6 +670,19 @@ export function AssessmentPage() {
           ) : null}
         </div>
       </div>
+      {showLeaveConfirm ? (
+        <ConfirmDialog
+          title={t.confirmLeaveTitle}
+          text={t.confirmLeaveText}
+          confirmLabel={t.confirmLeaveYes}
+          cancelLabel={t.confirmLeaveNo}
+          onCancel={() => setShowLeaveConfirm(false)}
+          onConfirm={() => {
+            setShowLeaveConfirm(false)
+            navigate('/')
+          }}
+        />
+      ) : null}
     </PageBackground>
   )
 }

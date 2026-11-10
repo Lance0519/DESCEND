@@ -59,7 +59,7 @@ export function UserDashboard() {
   const { user, signOut, loading: authLoading, isAdmin } = useAuth()
   const navigate = useNavigate()
   const [records, setRecords] = useState<AssessmentRecord[]>([])
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(() => Boolean(user))
   const [error, setError] = useState('')
   const [actionError, setActionError] = useState('')
   const [editingId, setEditingId] = useState<string | null>(null)
@@ -85,8 +85,29 @@ export function UserDashboard() {
   }, [user, t.dashboardError])
 
   useEffect(() => {
-    void loadRecords()
-  }, [loadRecords])
+    let active = true
+    if (!user) return
+
+    void fetchAssessmentRecords(user.id)
+      .then((rows) => {
+        if (!active) return
+        setRecords(rows)
+        setError('')
+      })
+      .catch(() => {
+        if (!active) return
+        setRecords([])
+        setError(t.dashboardError)
+      })
+      .finally(() => {
+        if (!active) return
+        setLoading(false)
+      })
+
+    return () => {
+      active = false
+    }
+  }, [user, t.dashboardError])
 
   async function onSignOut() {
     await signOut()
@@ -160,6 +181,7 @@ export function UserDashboard() {
     <PageBackground>
       <div className="user-dash">
         <AppNavBar
+          showHome={true}
           right={
             <div className="user-dash__toolbar-actions">
               <Link className="app-nav__link" to="/account">

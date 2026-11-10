@@ -53,16 +53,45 @@
 }
 
 .desc-card--low {
-  border-color: var(--color-primary-border);
-  background: var(--color-primary-light);
+  border-color: var(--risk-low-border, #c8e6c9);
+  background: var(--risk-low-bg, #e8f5e9);
+}
+
+.desc-card--low .desc-card__pct {
+  color: var(--risk-low, #2e7d32);
+}
+
+.desc-card--low .desc-card__band {
+  color: var(--risk-low, #2e7d32);
+  font-weight: 600;
 }
 
 .desc-card--moderate {
-  background: var(--color-bg-neutral);
+  border-color: var(--risk-moderate-border, #ffe0b2);
+  background: var(--risk-moderate-bg, #fff3e0);
+}
+
+.desc-card--moderate .desc-card__pct {
+  color: var(--risk-moderate, #e65100);
+}
+
+.desc-card--moderate .desc-card__band {
+  color: var(--risk-moderate, #e65100);
+  font-weight: 600;
 }
 
 .desc-card--high {
-  background: #e5e7eb;
+  border-color: var(--risk-high-border, #ffcdd2);
+  background: var(--risk-high-bg, #ffebee);
+}
+
+.desc-card--high .desc-card__pct {
+  color: var(--risk-high, #c62828);
+}
+
+.desc-card--high .desc-card__band {
+  color: var(--risk-high, #c62828);
+  font-weight: 600;
 }
 
 .desc-card__label {

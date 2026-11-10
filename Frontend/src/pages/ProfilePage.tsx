@@ -77,6 +77,7 @@ export function ProfilePage() {
     <PageBackground>
       <div className="profile-page">
         <AppNavBar
+          showHome={true}
           right={
             <button
               type="button"

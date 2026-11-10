@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { UserPlus } from 'lucide-react'
 import { AuthNavBar } from '../components/AuthNavBar'
 import { PageBackground } from '../components/PageBackground'
@@ -12,6 +12,8 @@ export function RegisterPage() {
   const { t } = useLanguage()
   const { signUp, configured } = useAuth()
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const redirectTarget = searchParams.get('redirect') || '/dashboard'
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirm, setConfirm] = useState('')
@@ -50,7 +52,7 @@ export function RegisterPage() {
         setInfo(`${t.checkEmailTitle}. ${t.checkEmailText} ${t.checkEmailNext}`)
         return
       }
-      navigate('/dashboard')
+      navigate(redirectTarget)
     } catch (err) {
       setError(authErrorMessage(err, t))
     } finally {
@@ -157,7 +159,9 @@ export function RegisterPage() {
               </>
             )}
             <p className="auth-form__links">
-              <Link to="/login">{t.accessSignIn}</Link>
+              <Link to={redirectTarget !== '/dashboard' ? `/login?redirect=${encodeURIComponent(redirectTarget)}` : '/login'}>
+                {t.accessSignIn}
+              </Link>
               <Link to="/access">{t.accessGuest}</Link>
             </p>
           </form>
